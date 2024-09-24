@@ -1,1 +1,46 @@
-s07102624.github.io
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리디렉션 페이지</title>
+
+    <!-- Meta tags for preview -->
+    <meta property="og:title" content="https://kokokukuk.tistory.com/">
+    <meta property="og:description" content="https://kokokukuk.tistory.com/.">
+    <meta property="og:image" content="https://blog.kakaocdn.net/dn/bOSlM3/btsJI0JcmUR/Cl6OyVlWhi7qfgjyhRby1K/img.jpg">
+    <meta property="og:url" content="https://newstime.neocities.org/">
+
+    <!-- For Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Welcome to Newstime">
+    <meta name="twitter:description" content="Your go-to source for daily news updates.">
+    <meta name="twitter:image" content="https://example.com/preview-image.jpg">
+
+    <script>
+        // 방문 횟수 체크
+        let visitCount = localStorage.getItem('visitCount') || 0;
+        visitCount++;
+        localStorage.setItem('visitCount', visitCount);
+
+        // 모바일 여부 확인
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // 리디렉션 로직
+        if (visitCount > 3) {
+            // 방문 횟수가 3회를 초과하면 랜덤 페이지로 리디렉션
+            const randomPage = Math.random() < 0.5 ? 'https://071026241.tistory.com/?page=2' : 'https://071026241.tistory.com/?page=3';
+            window.location.href = randomPage;
+        } else if (isMobile) {
+            // 모바일 접속 시 특정 블로그로 리디렉션
+            window.location.href = 'https://tip-moa.blogspot.com/2024/09/blog-post_60.html';
+        } else {
+            // PC 접속 시 newstime으로 리디렉션
+            window.location.href = 'https://newstime.neocities.org/';
+        }
+    </script>
+</head>
+<body>
+    <p>If you are not redirected automatically, follow this <a href="https://newstime.neocities.org/">link</a>.</p>
+</body>
+</html>
