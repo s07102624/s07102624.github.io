@@ -5,10 +5,15 @@ body {
     padding: 0;
     font-family: Arial, sans-serif;
     line-height: 1.6;
+    background-color: #f4f4f4; /* 배경색 추가 */
 }
 .content {
     width: 60%;
     margin: 0 auto;
+    padding: 20px;
+    background-color: #fff; /* 배경색 추가 */
+    border-radius: 8px; /* 모서리 둥글게 */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
 }
 .ad-left, .ad-right {
     width: 20%;
@@ -26,9 +31,18 @@ body {
     border: 1px solid #ccc;
     padding: 10px;
     margin: 10px 0;
+    background-color: #fafafa; /* 배경색 추가 */
 }
 h1, h2 {
     color: #333;
+}
+h1 {
+    font-size: 2em; /* 글자 크기 조정 */
+    margin-bottom: 20px; /* 아래 여백 추가 */
+}
+h2 {
+    font-size: 1.5em; /* 글자 크기 조정 */
+    margin-bottom: 10px; /* 아래 여백 추가 */
 }
 .highlight {
     background-color: #ff0;
@@ -36,4 +50,8 @@ h1, h2 {
 .link {
     color: blue;
     text-decoration: underline;
+}
+.emoji {
+    font-size: 1.2em; /* 이모티콘 크기 조정 */
+    margin-right: 5px; /* 오른쪽 여백 추가 */
 }
