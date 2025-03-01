@@ -1,0 +1,39 @@
+body {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+.content {
+    width: 60%;
+    margin: 0 auto;
+}
+.ad-left, .ad-right {
+    width: 20%;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+}
+.ad-left {
+    left: 0;
+}
+.ad-right {
+    right: 0;
+}
+.preview {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+}
+h1, h2 {
+    color: #333;
+}
+.highlight {
+    background-color: #ff0;
+}
+.link {
+    color: blue;
+    text-decoration: underline;
+}
