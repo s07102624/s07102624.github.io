@@ -97,15 +97,15 @@
         <button class="confirm-btn" id="confirmBtn">확인</button>
     </div>
 
-    <!-- Ad Popup with specific size -->
+    <!-- Ad Popup -->
     <div class="ad-popup" id="adPopup" style="display: none;">
         <div class="timer" id="timer">7</div>
         <button class="close-btn" id="closeBtn" disabled>X</button>
-        <!-- 팝업 광고 -->
+        <!-- 보험 팝업 -->
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-9374368296307755"
-             data-ad-slot="4994254497"
+             data-ad-slot="8384240134"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
     </div>
@@ -477,16 +477,18 @@
                 }, 1000);
             }
 
-            // 광고 로드 함수
+            // 광고 로드 함수 수정
             function loadAds() {
-                const ads = document.querySelectorAll('.adsbygoogle');
-                ads.forEach(ad => {
-                    try {
+                try {
+                    // 팝업 광고 특별 처리
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                    // 다른 광고들 처리
+                    document.querySelectorAll('.adsbygoogle:not([data-ad-slot="8384240134"])').forEach(ad => {
                         (adsbygoogle = window.adsbygoogle || []).push({});
-                    } catch (e) {
-                        console.error('광고 로드 실패:', e);
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.error('광고 로드 실패:', e);
+                }
             }
 
             // 초기 광고 로드
