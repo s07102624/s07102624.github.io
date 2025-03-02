@@ -8,7 +8,8 @@ body {
     background-color: #f4f4f4; /* 배경색 추가 */
 }
 .content {
-    width: 60%;
+    width: 50%; /* 60%에서 50%로 줄임 */
+    max-width: 800px; /* 최대 너비 제한 추가 */
     margin: 0 auto;
     padding: 20px;
     background-color: #fff; /* 배경색 추가 */
@@ -16,10 +17,13 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
 }
 .ad-left, .ad-right {
-    width: 20%;
+    width: 160px; /* 고정 폭으로 변경 */
     position: fixed;
     top: 0;
     bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .ad-left {
     left: 0;
@@ -54,4 +58,11 @@ h2 {
 .emoji {
     font-size: 1.2em; /* 이모티콘 크기 조정 */
     margin-right: 5px; /* 오른쪽 여백 추가 */
+}
+.top-ad {
+    width: 100%;
+    max-width: 468px; /* 728px에서 468px로 줄임 */
+    height: 60px; /* 90px에서 60px로 줄임 */
+    margin: 20px auto;
+    background: #f5f5f5;
 }
