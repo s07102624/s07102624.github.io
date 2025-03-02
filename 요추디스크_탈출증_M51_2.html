@@ -422,87 +422,80 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
         crossorigin="anonymous"></script>
     <script>
-        // 스크롤 제어
-        function disableScroll() {
-            document.body.style.overflow = 'hidden';
-        }
-        function enableScroll() {
-            document.body.style.overflow = 'auto';
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // 스크롤 제어
+            function disableScroll() {
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function enableScroll() {
+                document.body.style.overflow = 'auto';
+            }
 
-        // 페이지 로드 시
-        window.addEventListener('load', function() {
+            // 초기화
             disableScroll();
-            loadAds(); // 모든 광고 로드
             
-            // 확인 버튼 클릭 이벤트
-            document.getElementById('confirmBtn').addEventListener('click', function() {
-                document.getElementById('loadingPopup').style.display = 'none';
-                showAdPopup();
-            });
-        });
-
-        // 광고 팝업 표시
-        function showAdPopup() {
-            document.getElementById('adPopup').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-            startTimer();
-            loadAds(); // 팝업 광고 다시 로드
-        }
-
-        // 타이머 기능
-        function startTimer() {
-            let timeLeft = 7;
-            const timerElement = document.getElementById('timer');
-            const closeBtn = document.getElementById('closeBtn');
-            
-            const timer = setInterval(function() {
-                timeLeft--;
-                timerElement.textContent = timeLeft;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    closeBtn.disabled = false;
-                    timerElement.style.display = 'none';
-                }
-            }, 1000);
-
-            // 닫기 버튼 클릭 이벤트
-            closeBtn.addEventListener('click', function() {
-                if (!this.disabled) {
-                    document.getElementById('adPopup').style.display = 'none';
-                    document.getElementById('overlay').style.display = 'none';
-                    enableScroll();
-                }
-            });
-        }
-
-        // 목차 링크 자동 스크롤
-        document.querySelectorAll('.table-of-contents a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
+            // 확인 버튼 이벤트 리스너 추가
+            const confirmBtn = document.getElementById('confirmBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    document.getElementById('loadingPopup').style.display = 'none';
+                    showAdPopup();
                 });
-            });
-        });
+            }
 
-        // 새로운 기능 추가
-        window.addEventListener('load', function() {
-            // 외부 링크 자동으로 새 창에서 열기
-            document.querySelectorAll('a[href^="http"]').forEach(link => {
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer');
-            });
-        });
+            // 광고 팝업 표시
+            function showAdPopup() {
+                const adPopup = document.getElementById('adPopup');
+                const overlay = document.getElementById('overlay');
+                if (adPopup && overlay) {
+                    adPopup.style.display = 'block';
+                    overlay.style.display = 'block';
+                    startTimer();
+                    loadAds();
+                }
+            }
 
-        // 광고 로드 함수
-        function loadAds() {
-            // 모든 광고 요소에 대해 광고 로드
-            document.querySelectorAll('.adsbygoogle').forEach(ad => {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            });
-        }
+            // 타이머 기능
+            function startTimer() {
+                let timeLeft = 7;
+                const timerElement = document.getElementById('timer');
+                const closeBtn = document.getElementById('closeBtn');
+                
+                const timer = setInterval(function() {
+                    timeLeft--;
+                    if (timerElement) timerElement.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        if (closeBtn) {
+                            closeBtn.disabled = false;
+                            closeBtn.addEventListener('click', function() {
+                                document.getElementById('adPopup').style.display = 'none';
+                                document.getElementById('overlay').style.display = 'none';
+                                enableScroll();
+                            });
+                        }
+                        if (timerElement) timerElement.style.display = 'none';
+                    }
+                }, 1000);
+            }
+
+            // 광고 로드 함수
+            function loadAds() {
+                const ads = document.querySelectorAll('.adsbygoogle');
+                ads.forEach(ad => {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch (e) {
+                        console.error('광고 로드 실패:', e);
+                    }
+                });
+            }
+
+            // 초기 광고 로드
+            loadAds();
+        });
     </script>
 </body>
 </html>
