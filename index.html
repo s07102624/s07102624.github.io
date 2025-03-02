@@ -7,6 +7,32 @@
     <link rel="stylesheet" href="styles.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
         crossorigin="anonymous"></script>
+    <style>
+        .preview {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            text-decoration: none;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            margin: 0 4px;
+            color: #333;
+        }
+        .pagination a.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
 </head>
 <body>
     <div class="ad-left">
@@ -23,30 +49,13 @@
     </div>
     <div class="content">
         <h1>실비 보험 정보</h1>
-        <div class="preview">
-            <h2><a href="요추디스크_탈출증_M51_2.html">요추디스크 탈출증(M51.2) 실비보험 청구 후기</a></h2>
-            <p>요추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 6개월간의 경험을 공유합니다. MRI 검사 비용, 물리치료, 약물치료 등 상세한 비용 정보와 보험 청구 과정을 확인하세요.</p>
-            <div class="meta">
-                <span class="tags">📌 #실비보험 #요추디스크 #보험청구</span>
-            </div>
+        <div id="preview-container">
+            <!-- 자바스크립트로 동적 삽입됨 -->
         </div>
-        <div class="preview">
-            <h2>글 제목 1</h2>
-            <p>글 내용 미리 보기...</p>
+        <div class="pagination">
+            <a href="?page=1" id="page1">1</a>
+            <a href="?page=2" id="page2">2</a>
         </div>
-        <div class="preview">
-            <h2>글 제목 2</h2>
-            <p>글 내용 미리 보기...</p>
-        </div>
-        <div class="preview">
-            <h2><a href="경추디스크_탈출증_M50_2.html">경추디스크 탈출증(M50.2) 실비보험 청구 후기</a></h2>
-            <p>경추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 4개월간의 경험을 공유합니다. 사무직 직장인의 목 디스크 완치 스토리와 보험 청구 노하우를 확인하세요.</p>
-            <div class="meta">
-                <span class="date">작성일: 2024년 1월 5일</span>
-                <span class="tags">📌 #실비보험 #경추디스크 #보험청구</span>
-            </div>
-        </div>
-        <!-- 추가 글 목록 -->
     </div>
     <div class="ad-right">
         <!-- 우측 광고 내용 -->
@@ -60,5 +69,51 @@
             (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
     </div>
+
+    <script>
+        const posts = [
+            {
+                title: "요추디스크 탈출증(M51.2) 실비보험 청구 후기",
+                url: "요추디스크_탈출증_M51_2.html",
+                description: "요추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 6개월간의 경험을 공유합니다. MRI 검사 비용, 물리치료, 약물치료 등 상세한 비용 정보와 보험 청구 과정을 확인하세요.",
+                tags: "#실비보험 #요추디스크 #보험청구",
+                date: "2024년 1월 1일"
+            },
+            {
+                title: "경추디스크 탈출증(M50.2) 실비보험 청구 후기",
+                url: "경추디스크_탈출증_M50_2.html",
+                description: "경추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 4개월간의 경험을 공유합니다. 사무직 직장인의 목 디스크 완치 스토리와 보험 청구 노하우를 확인하세요.",
+                tags: "#실비보험 #경추디스크 #보험청구",
+                date: "2024년 1월 5일"
+            }
+        ];
+
+        function showPost(pageNum) {
+            const container = document.getElementById('preview-container');
+            const post = posts[pageNum - 1];
+            const html = `
+                <div class="preview">
+                    <h2><a href="${post.url}">${post.title}</a></h2>
+                    <p>${post.description}</p>
+                    <div class="meta">
+                        <span class="date">작성일: ${post.date}</span>
+                        <span class="tags">📌 ${post.tags}</span>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            
+            // 페이지네이션 활성화 표시
+            document.querySelectorAll('.pagination a').forEach(a => {
+                a.classList.remove('active');
+            });
+            document.getElementById(`page${pageNum}`).classList.add('active');
+        }
+
+        // URL 매개변수에서 페이지 번호 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPage = parseInt(urlParams.get('page')) || 1;
+        showPost(currentPage);
+    </script>
 </body>
 </html>
