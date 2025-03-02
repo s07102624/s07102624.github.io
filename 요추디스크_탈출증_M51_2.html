@@ -33,6 +33,9 @@
             z-index: 999;
             width: 500px;
             height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .close-btn {
             position: absolute;
@@ -78,6 +81,13 @@
         .confirm-btn:hover {
             background-color: #45a049;
         }
+        .top-ad {
+            width: 100%;
+            max-width: 728px;
+            height: 90px;
+            margin: 20px auto;
+            background: #f5f5f5;
+        }
     </style>
 </head>
 <body>
@@ -87,21 +97,31 @@
         <button class="confirm-btn" id="confirmBtn">확인</button>
     </div>
 
-    <!-- Ad Popup -->
+    <!-- Ad Popup with specific size -->
     <div class="ad-popup" id="adPopup" style="display: none;">
         <div class="timer" id="timer">7</div>
         <button class="close-btn" id="closeBtn" disabled>X</button>
-        <!-- 광고 내용 -->
+        <!-- 팝업 광고 -->
         <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-9374368296307755"
-            data-ad-slot="4994254497"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
+             style="display:block"
+             data-ad-client="ca-pub-9374368296307755"
+             data-ad-slot="4994254497"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
     </div>
     <div class="overlay" id="overlay" style="display: none;"></div>
 
     <div class="content">
+        <!-- 상단 광고 추가 -->
+        <div class="top-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9374368296307755"
+                 data-ad-slot="4994254497"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+
         <h1>요추디스크 탈출증 실비보험 치료 후기 <span class="emoji">📝</span></h1>
         
         <div class="author-info">
@@ -413,6 +433,7 @@
         // 페이지 로드 시
         window.addEventListener('load', function() {
             disableScroll();
+            loadAds(); // 모든 광고 로드
             
             // 확인 버튼 클릭 이벤트
             document.getElementById('confirmBtn').addEventListener('click', function() {
@@ -426,9 +447,7 @@
             document.getElementById('adPopup').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
             startTimer();
-            
-            // 광고 로드
-            (adsbygoogle = window.adsbygoogle || []).push({});
+            loadAds(); // 팝업 광고 다시 로드
         }
 
         // 타이머 기능
@@ -476,6 +495,14 @@
                 link.setAttribute('rel', 'noopener noreferrer');
             });
         });
+
+        // 광고 로드 함수
+        function loadAds() {
+            // 모든 광고 요소에 대해 광고 로드
+            document.querySelectorAll('.adsbygoogle').forEach(ad => {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            });
+        }
     </script>
 </body>
 </html>
