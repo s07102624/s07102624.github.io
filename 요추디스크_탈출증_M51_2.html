@@ -8,21 +8,6 @@
     <meta name="keywords" content="요추디스크 탈출증, M51.2, 허리 통증, 디스크, 건강, 치료, 실비 보험, 보험 수령 방법">
     <link rel="stylesheet" href="styles.css">
     <style>
-        .loading-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            color: white;
-            font-size: 24px;
-        }
         .ad-popup {
             position: fixed;
             top: 50%;
@@ -91,12 +76,6 @@
     </style>
 </head>
 <body>
-    <!-- Loading Popup -->
-    <div class="loading-popup" id="loadingPopup">
-        <div>페이지 로딩중입니다...</div>
-        <button class="confirm-btn" id="confirmBtn">확인</button>
-    </div>
-
     <!-- Ad Popup -->
     <div class="ad-popup" id="adPopup" style="display: none;">
         <div class="timer" id="timer">7</div>
@@ -428,17 +407,9 @@
                 document.body.style.overflow = 'auto';
             }
 
-            // 초기화
+            // 초기화 시 바로 광고 팝업 표시
             disableScroll();
-            
-            // 확인 버튼 이벤트 리스너 추가
-            const confirmBtn = document.getElementById('confirmBtn');
-            if (confirmBtn) {
-                confirmBtn.addEventListener('click', function() {
-                    document.getElementById('loadingPopup').style.display = 'none';
-                    showAdPopup();
-                });
-            }
+            showAdPopup();
 
             // 광고 팝업 표시
             function showAdPopup() {
