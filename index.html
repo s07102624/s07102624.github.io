@@ -32,22 +32,35 @@
             color: white;
             border-color: #007bff;
         }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .top-ad {
+            width: 100%;
+            max-width: 728px;
+            height: 90px;
+            margin: 20px auto;
+            background: #f5f5f5;
+        }
     </style>
 </head>
 <body>
-    <div class="ad-left">
-        <!-- 좌측 광고 내용 -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-9374368296307755"
-            data-ad-slot="4994254497"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
     <div class="content">
+        <!-- 상단 광고 추가 -->
+        <div class="top-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9374368296307755"
+                 data-ad-slot="4994254497"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
         <h1>실비 보험 정보</h1>
         <div id="preview-container">
             <!-- 자바스크립트로 동적 삽입됨 -->
@@ -56,18 +69,6 @@
             <a href="?page=1" id="page1">1</a>
             <a href="?page=2" id="page2">2</a>
         </div>
-    </div>
-    <div class="ad-right">
-        <!-- 우측 광고 내용 -->
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-9374368296307755"
-            data-ad-slot="4994254497"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
     </div>
 
     <script>
