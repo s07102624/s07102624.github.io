@@ -112,6 +112,16 @@ h2 {
     border-color: #007bff;
 }
 
+.preview-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.preview-link:hover {
+    text-decoration: none;
+}
+
 /* 모바일 최적화를 위한 미디어 쿼리 */
 @media screen and (max-width: 768px) {
     body {
