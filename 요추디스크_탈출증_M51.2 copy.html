@@ -21,7 +21,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 0 15px rgba(0,0,0,0.3);
         }
         .close-btn {
             position: absolute;
@@ -472,33 +471,10 @@
                 }, 1000);
             }
 
-            // 모바일 최적화를 위한 광고 크기 조정
-            function adjustAdSize() {
-                const adPopup = document.getElementById('adPopup');
-                const popupAdContainer = document.getElementById('popupAdContainer');
-                
-                if (window.innerWidth <= 768) {
-                    // 모바일 크기에 맞게 광고 컨테이너 조정
-                    if (popupAdContainer) {
-                        popupAdContainer.style.width = '100%';
-                        popupAdContainer.style.height = '250px';
-                    }
-                }
-            }
-
-            // 초기화에 크기 조정 함수 추가
-            function initialize() {
-                disableScroll();
-                initializeAds();
-                adjustAdSize();
-                showAdPopup();
-            }
-
-            // 리사이즈 이벤트에 대응
-            window.addEventListener('resize', adjustAdSize);
-
-            // 초기화 실행
-            initialize();
+            // 초기화
+            disableScroll();
+            initializeAds();  // 페이지 로드 시 광고 미리 로드
+            showAdPopup();    // 광고 팝업 표시
         });
     </script>
 </body>
