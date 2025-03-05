@@ -7,89 +7,9 @@
     <meta name="description" content="경추디스크 탈출증(M50.2)에 대한 상세 정보와 증상, 치료 방법, 실비 보험 수령 방법을 제공합니다.">
     <meta name="keywords" content="경추디스크 탈출증, M50.2, 목 통증, 디스크, 건강, 치료, 실비 보험, 보험 수령 방법">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .ad-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            z-index: 999;
-            width: 400px; /* 500px에서 400px로 줄임 */
-            height: 300px; /* 400px에서 300px로 줄임 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .close-btn {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: red;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            z-index: 1000;
-        }
-        .timer {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: red;
-            font-weight: bold;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 998;
-        }
-        .confirm-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .confirm-btn:hover {
-            background-color: #45a049;
-        }
-        .top-ad {
-            width: 100%;
-            max-width: 728px;
-            min-height: 90px;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .adsbygoogle {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .ad-container {
-            display: none;  /* 광고 컨테이너 숨김 */
-        }
-        .ad-popup .adsbygoogle {
-            width: 100%;
-            height: 100%;
-            margin: auto;
-        }
-    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
+        crossorigin="anonymous"></script>
+    <script src="js/ads.js"></script>
 </head>
 <body>
     <!-- 광고 사전 로드를 위한 숨겨진 컨테이너 -->
@@ -112,13 +32,13 @@
     <div class="overlay" id="overlay" style="display: none;"></div>
 
     <div class="content">
-        <!-- 상단 광고 수정 -->
+        <!-- 상단 광고 추가 -->
         <div class="top-ad">
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="ca-pub-9374368296307755"
                  data-ad-slot="4994254497"
-                 data-ad-format="horizontal"
+                 data-ad-format="auto"
                  data-full-width-responsive="true"></ins>
         </div>
 
@@ -271,16 +191,6 @@
             <li>경도 유산소 운동</li>
         </ul>
 
-        <!-- 중간 광고 수정 -->
-        <div class="ad-section top-ad">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-9374368296307755"
-                 data-ad-slot="4994254497"
-                 data-ad-format="horizontal"
-                 data-full-width-responsive="true"></ins>
-        </div>
-
         <div class="ad-section">
             <!-- 보험 -->
             <ins class="adsbygoogle"
@@ -424,78 +334,5 @@
 
         <!-- Continue with more detailed sections... -->
     </div>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
-        crossorigin="anonymous"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 광고 초기화
-            function initializeAds() {
-                try {
-                    const ads = document.querySelectorAll('.adsbygoogle');
-                    ads.forEach(ad => {
-                        (adsbygoogle = window.adsbygoogle || []).push({});
-                    });
-                } catch (e) {
-                    console.error('광고 초기화 실패:', e);
-                }
-            }
-
-            // 스크롤 제어 함수들
-            function disableScroll() {
-                document.body.style.overflow = 'hidden';
-            }
-            
-            function enableScroll() {
-                document.body.style.overflow = 'auto';
-            }
-
-            // 광고 팝업 표시
-            function showAdPopup() {
-                const adPopup = document.getElementById('adPopup');
-                const overlay = document.getElementById('overlay');
-                const popupAdContainer = document.getElementById('popupAdContainer');
-                const preloadedAd = document.querySelector('.popup-ad');
-
-                if (adPopup && overlay && preloadedAd && popupAdContainer) {
-                    // 미리 로드된 광고를 팝업으로 이동
-                    popupAdContainer.appendChild(preloadedAd);
-                    adPopup.style.display = 'block';
-                    overlay.style.display = 'block';
-                    startTimer();
-                }
-            }
-
-            // 타이머 기능
-            function startTimer() {
-                let timeLeft = 7;
-                const timerElement = document.getElementById('timer');
-                const closeBtn = document.getElementById('closeBtn');
-                
-                const timer = setInterval(function() {
-                    timeLeft--;
-                    if (timerElement) timerElement.textContent = timeLeft;
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        if (closeBtn) {
-                            closeBtn.disabled = false;
-                            closeBtn.addEventListener('click', function() {
-                                document.getElementById('adPopup').style.display = 'none';
-                                document.getElementById('overlay').style.display = 'none';
-                                enableScroll();
-                            });
-                        }
-                        if (timerElement) timerElement.style.display = 'none';
-                    }
-                }, 1000);
-            }
-
-            // 초기화
-            disableScroll();
-            initializeAds();  // 페이지 로드 시 광고 미리 로드
-            showAdPopup();    // 광고 팝업 표시
-        });
-    </script>
 </body>
 </html>
