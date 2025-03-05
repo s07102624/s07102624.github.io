@@ -32,7 +32,7 @@ body {
     right: 0;
 }
 .preview {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd; /* 기존 #ccc에서 변경 */
     padding: 20px;
     margin: 20px 0;
     background-color: #fafafa; /* 배경색 추가 */
@@ -83,8 +83,39 @@ h2 {
 }
 .top-ad {
     width: 100%;
-    max-width: 468px; /* 728px에서 468px로 줄임 */
-    height: 60px; /* 90px에서 60px로 줄임 */
+    max-width: 728px; /* 기존 468px에서 변경 */
+    min-height: 90px; /* 기존 60px에서 변경 */
     margin: 20px auto;
-    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 인덱스 페이지 스타일 */
+.pagination {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pagination button {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+    color: #333;
+}
+
+.pagination button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.adsbygoogle {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
