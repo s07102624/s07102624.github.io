@@ -16,7 +16,7 @@
             margin: 20px 0;
             text-align: center;
         }
-        .pagination a {
+        .pagination button {
             display: inline-block;
             padding: 8px 16px;
             text-decoration: none;
@@ -25,7 +25,7 @@
             margin: 0 4px;
             color: #333;
         }
-        .pagination a.active {
+        .pagination button.active {
             background-color: #007bff;
             color: white;
             border-color: #007bff;
@@ -56,7 +56,6 @@
     <div class="content">
         <!-- 상단 광고 수정 -->
         <div class="top-ad">
-            <!-- 수평형 광고 -->
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="ca-pub-9374368296307755"
@@ -66,12 +65,10 @@
         </div>
 
         <h1>실비 보험 정보</h1>
-        <div id="preview-container">
-            <!-- 자바스크립트로 동적 삽입됨 -->
-        </div>
+        <div id="preview-container"></div>
         <div class="pagination">
-            <a href="?page=1" id="page1">1</a>
-            <a href="?page=2" id="page2">2</a>
+            <button onclick="showPost(1)" id="page1">1</button>
+            <button onclick="showPost(2)" id="page2">2</button>
         </div>
     </div>
 
@@ -97,12 +94,13 @@
         function showPost(pageNum) {
             const container = document.getElementById('preview-container');
             const post = posts[pageNum - 1];
+            
+            // date 속성이 없는 경우 처리
             const html = `
                 <div class="preview">
                     <h2><a href="${post.url}">${post.title}</a></h2>
                     <p>${post.description}</p>
                     <div class="meta">
-                        <span class="date">작성일: ${post.date}</span>
                         <span class="tags">📌 ${post.tags}</span>
                     </div>
                 </div>
@@ -110,18 +108,19 @@
             container.innerHTML = html;
             
             // 페이지네이션 활성화 표시
-            document.querySelectorAll('.pagination a').forEach(a => {
-                a.classList.remove('active');
+            document.querySelectorAll('.pagination button').forEach(btn => {
+                btn.classList.remove('active');
             });
             document.getElementById(`page${pageNum}`).classList.add('active');
         }
 
-        // URL 매개변수에서 페이지 번호 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentPage = parseInt(urlParams.get('page')) || 1;
-        showPost(currentPage);
+        // 초기 페이지 로드
+        window.addEventListener('DOMContentLoaded', function() {
+            showPost(1);
+            initializeAds();
+        });
 
-        // 광고 초기화 코드를 별도 함수로 분리
+        // 광고 초기화
         function initializeAds() {
             try {
                 (adsbygoogle = window.adsbygoogle || []).push({});
@@ -129,9 +128,6 @@
                 console.error('광고 초기화 실패:', e);
             }
         }
-
-        // 페이지 로드 완료 후 광고 초기화
-        window.addEventListener('load', initializeAds);
     </script>
 </body>
 </html>
