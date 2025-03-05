@@ -5,19 +5,19 @@ body {
     padding: 0;
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    background-color: #f4f4f4; /* 배경색 추가 */
+    background-color: #f4f4f4;
 }
 .content {
-    width: 50%; /* 60%에서 50%로 줄임 */
-    max-width: 800px; /* 최대 너비 제한 추가 */
+    width: 50%;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #fff; /* 배경색 추가 */
-    border-radius: 8px; /* 모서리 둥글게 */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .ad-left, .ad-right {
-    width: 160px; /* 고정 폭으로 변경 */
+    width: 160px;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -32,10 +32,10 @@ body {
     right: 0;
 }
 .preview {
-    border: 1px solid #ddd; /* 기존 #ccc에서 변경 */
+    border: 1px solid #ddd;
     padding: 20px;
     margin: 20px 0;
-    background-color: #fafafa; /* 배경색 추가 */
+    background-color: #fafafa;
     border-radius: 5px;
     transition: transform 0.2s;
 }
@@ -63,12 +63,12 @@ h1, h2 {
     color: #333;
 }
 h1 {
-    font-size: 2em; /* 글자 크기 조정 */
-    margin-bottom: 20px; /* 아래 여백 추가 */
+    font-size: 2em;
+    margin-bottom: 20px;
 }
 h2 {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    margin-bottom: 10px; /* 아래 여백 추가 */
+    font-size: 1.5em;
+    margin-bottom: 10px;
 }
 .highlight {
     background-color: #ff0;
@@ -78,13 +78,13 @@ h2 {
     text-decoration: underline;
 }
 .emoji {
-    font-size: 1.2em; /* 이모티콘 크기 조정 */
-    margin-right: 5px; /* 오른쪽 여백 추가 */
+    font-size: 1.2em;
+    margin-right: 5px;
 }
 .top-ad {
     width: 100%;
-    max-width: 728px; /* 기존 468px에서 변경 */
-    min-height: 90px; /* 기존 60px에서 변경 */
+    max-width: 728px;
+    min-height: 90px;
     margin: 20px auto;
     display: flex;
     justify-content: center;
@@ -97,7 +97,6 @@ h2 {
     margin: 20px 0;
     text-align: center;
 }
-
 .pagination button {
     display: inline-block;
     padding: 8px 16px;
@@ -107,79 +106,41 @@ h2 {
     margin: 0 4px;
     color: #333;
 }
-
 .pagination button.active {
     background-color: #007bff;
     color: white;
     border-color: #007bff;
 }
 
-.adsbygoogle {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* 모바일 최적화를 위한 미디어 쿼리 추가 */
+/* 모바일 최적화를 위한 미디어 쿼리 */
 @media screen and (max-width: 768px) {
     body {
-        display: block; /* flex에서 block으로 변경 */
+        display: block;
     }
-    
     .content {
-        width: 100%; /* 전체 너비 사용 */
+        width: 100%;
         max-width: none;
         margin: 0;
         padding: 10px;
         border-radius: 0;
     }
-    
     .ad-left, .ad-right {
-        display: none; /* 사이드 광고 숨김 */
+        display: none;
     }
-
     .top-ad {
-        max-width: 100%; /* 모바일에서 전체 너비 사용 */
+        max-width: 100%;
         height: auto;
         margin: 10px 0;
     }
-
     h1 {
-        font-size: 1.5em; /* 모바일에서 글자 크기 축소 */
+        font-size: 1.5em;
     }
-
     h2 {
         font-size: 1.2em;
     }
-
     .preview {
         padding: 15px;
         margin: 10px 0;
-    }
-
-    .ad-popup {
-        width: 90% !important; /* 화면 너비의 90% */
-        height: auto !important; /* 높이 자동 조정 */
-        max-width: 400px; /* 최대 너비 제한 */
-        min-height: 250px; /* 최소 높이 설정 */
-        padding: 15px !important;
-    }
-
-    .close-btn {
-        width: 25px !important;
-        height: 25px !important;
-        font-size: 14px !important;
-    }
-
-    .timer {
-        font-size: 14px !important;
-        top: 5px !important;
-        right: 5px !important;
-    }
-
-    .ad-popup .adsbygoogle {
-        width: 100% !important;
-        height: 250px !important; /* 모바일 광고 높이 */
     }
 }
 
@@ -188,8 +149,7 @@ h2 {
     .content {
         width: 70%;
     }
-    
     .ad-left, .ad-right {
-        width: 120px; /* 사이드 광고 폭 축소 */
+        width: 120px;
     }
 }
