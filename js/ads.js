@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     // 광고 초기 로드
     function initializeAds() {
@@ -61,12 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 초기화
-    function initialize() {
-        disableScroll();
-        initializeAds();
-        showAdPopup();
-    }
-
-    // 페이지 로드시 초기화 실행
-    initialize();
+    disableScroll();
+    initializeAds();  // 페이지 로드 시 광고 미리 로드
+    showAdPopup();    // 광고 팝업 표시
 });
