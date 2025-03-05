@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>실비 보험 정보</title>
     <link rel="stylesheet" href="styles.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
-        crossorigin="anonymous"></script>
     <style>
         .preview {
             border: 1px solid #ddd;
@@ -40,25 +38,31 @@
         .top-ad {
             width: 100%;
             max-width: 728px;
-            height: 90px;
+            min-height: 90px;
             margin: 20px auto;
-            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .adsbygoogle {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
     <div class="content">
-        <!-- 상단 광고 추가 -->
+        <!-- 상단 광고 수정 -->
         <div class="top-ad">
+            <!-- 수평형 광고 -->
             <ins class="adsbygoogle"
                  style="display:block"
                  data-ad-client="ca-pub-9374368296307755"
                  data-ad-slot="4994254497"
-                 data-ad-format="auto"
+                 data-ad-format="horizontal"
                  data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
         </div>
 
         <h1>실비 보험 정보</h1>
@@ -71,17 +75,20 @@
         </div>
     </div>
 
+    <!-- Google AdSense 스크립트를 body 끝부분으로 이동 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
+        crossorigin="anonymous"></script>
     <script>
         const posts = [
             {
                 title: "요추디스크 탈출증(M51.2) 실비보험 청구 후기",
-                url: "요추디스크 탈출증_M51.2.html",
+                url: "https://insurance.testpro.site/요추디스크_탈출증_M51.2.html",
                 description: "요추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 6개월간의 경험을 공유합니다. MRI 검사 비용, 물리치료, 약물치료 등 상세한 비용 정보와 보험 청구 과정을 확인하세요.",
                 tags: "#실비보험 #요추디스크 #보험청구"
             },
             {
                 title: "경추디스크 탈출증(M50.2) 실비보험 청구 후기",
-                url: "경추디스크 탈출증_M50.2.html",
+                url: "https://insurance.testpro.site/경추디스크_탈출증_M50.2.html",
                 description: "경추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 4개월간의 경험을 공유합니다. 사무직 직장인의 목 디스크 완치 스토리와 보험 청구 노하우를 확인하세요.",
                 tags: "#실비보험 #경추디스크 #보험청구"
             }
@@ -113,6 +120,18 @@
         const urlParams = new URLSearchParams(window.location.search);
         const currentPage = parseInt(urlParams.get('page')) || 1;
         showPost(currentPage);
+
+        // 광고 초기화 코드를 별도 함수로 분리
+        function initializeAds() {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                console.error('광고 초기화 실패:', e);
+            }
+        }
+
+        // 페이지 로드 완료 후 광고 초기화
+        window.addEventListener('load', initializeAds);
     </script>
 </body>
 </html>
