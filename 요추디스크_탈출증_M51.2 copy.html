@@ -21,6 +21,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
         }
         .close-btn {
             position: absolute;
@@ -82,6 +83,9 @@
             margin: auto;
         }
     </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
+        crossorigin="anonymous"></script>
+    <script src="js/ads.js"></script>
 </head>
 <body>
     <!-- 광고 사전 로드를 위한 숨겨진 컨테이너 -->
@@ -176,9 +180,6 @@
         <p>MRI 결과 L4-5 디스크 탈출증 진단을 받았습니다. 수술까지는 필요 없다고 하셔서 보존적 치료를 시작했어요.</p>
 
         <!-- Continue with detailed treatment process, costs, and insurance claims... -->
-
-        <h2>4. 실비보험 청구 과정 <span class="emoji">💰</span></h2>
-        <p>실비보험 청구는 <a href="https://www.samsungfire.com/">삼성화재</a> 앱을 통해 진행했습니다. 청구 과정에서 필요했던 서류들은 다음과 같아요:</p>
 
         <h2 id="diagnosis">진단과 초기 증상 상세 설명 <span class="emoji">🏥</span></h2>
         <h3>증상이 처음 나타났을 때</h3>
@@ -471,10 +472,33 @@
                 }, 1000);
             }
 
-            // 초기화
-            disableScroll();
-            initializeAds();  // 페이지 로드 시 광고 미리 로드
-            showAdPopup();    // 광고 팝업 표시
+            // 모바일 최적화를 위한 광고 크기 조정
+            function adjustAdSize() {
+                const adPopup = document.getElementById('adPopup');
+                const popupAdContainer = document.getElementById('popupAdContainer');
+                
+                if (window.innerWidth <= 768) {
+                    // 모바일 크기에 맞게 광고 컨테이너 조정
+                    if (popupAdContainer) {
+                        popupAdContainer.style.width = '100%';
+                        popupAdContainer.style.height = '250px';
+                    }
+                }
+            }
+
+            // 초기화에 크기 조정 함수 추가
+            function initialize() {
+                disableScroll();
+                initializeAds();
+                adjustAdSize();
+                showAdPopup();
+            }
+
+            // 리사이즈 이벤트에 대응
+            window.addEventListener('resize', adjustAdSize);
+
+            // 초기화 실행
+            initialize();
         });
     </script>
 </body>
