@@ -208,5 +208,15 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
         crossorigin="anonymous"></script>
     <script src="js/ads.js"></script>
+    <script>
+        // 페이지 내 모든 광고 슬롯 초기화
+        document.querySelectorAll('.adsbygoogle').forEach(function(ad) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                console.error('광고 초기화 실패:', e);
+            }
+        });
+    </script>
 </body>
 </html>
