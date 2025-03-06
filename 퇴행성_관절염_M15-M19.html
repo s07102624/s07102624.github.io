@@ -209,12 +209,23 @@
         crossorigin="anonymous"></script>
     <script src="js/ads.js"></script>
     <script>
-        // 페이지 내 모든 광고 슬롯 초기화
-        document.querySelectorAll('.adsbygoogle').forEach(function(ad) {
-            try {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {
-                console.error('광고 초기화 실패:', e);
+        window.addEventListener('DOMContentLoaded', function() {
+            // 페이지 내 모든 광고 슬롯 개별 초기화
+            document.querySelectorAll('.adsbygoogle').forEach(function(ad) {
+                try {
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.error('광고 초기화 실패:', e);
+                }
+            });
+
+            // 팝업 광고 초기화 및 표시
+            const adPopup = document.getElementById('adPopup');
+            const overlay = document.getElementById('overlay');
+            if (adPopup && overlay) {
+                adPopup.style.display = 'block';
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
             }
         });
     </script>
