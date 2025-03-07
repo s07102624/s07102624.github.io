@@ -4,45 +4,137 @@
     <head>
         <meta charset="UTF-8">
         <title>테스트프로 1페이지</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
             body {
                 font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
                 line-height: 1.6;
                 margin: 0;
-                padding: 20px;
+                padding: 10px;
                 background: #f0f2f5;
             }
             .content {
-                max-width: 1200px;
+                width: 100%;
+                max-width: 800px;
                 margin: 0 auto;
                 background: #fff;
-                padding: 20px;
+                padding: 15px;
                 border-radius: 8px;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                box-sizing: border-box;
             }
             .preview {
                 border-bottom: 1px solid #eee;
-                padding: 20px 0;
+                padding: 15px 0;
             }
             .preview h2 {
                 margin: 0 0 10px 0;
-                font-size: 1.5em;
+                font-size: 1.2em;
+                color: #333;
+                word-break: break-all;
             }
-            .preview img, .preview video {
+            .preview .content {
+                margin: 10px 0;
+                color: #666;
+                padding: 0;
+                box-shadow: none;
+                font-size: 0.95em;
+                word-break: break-all;
+            }
+            .preview img {
+                display: block;
+                width: 100%;
                 max-width: 100%;
                 height: auto;
-                margin: 10px 0;
+                margin: 10px auto;
+                border-radius: 4px;
+            }
+            .preview video {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                margin: 10px auto;
                 border-radius: 4px;
             }
             .ad-container {
-                margin: 20px 0;
+                margin: 15px 0;
                 text-align: center;
+                overflow: hidden;
+            }
+            @media screen and (max-width: 600px) {
+                body {
+                    padding: 5px;
+                }
+                .content {
+                    padding: 10px;
+                }
+                .preview h2 {
+                    font-size: 1.1em;
+                }
+                .preview .content {
+                    font-size: 0.9em;
+                }
+            }
+            .popup {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                z-index: 1000;
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+            #timer {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            #closeBtn {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                margin-top: 10px;
+                border: none;
+                border-radius: 4px;
+                background: #007bff;
+                color: white;
+                cursor: pointer;
+            }
+            #closeBtn:disabled {
+                background: #ccc;
             }
         </style>
     </head>
     <body>
+        <div id="overlay" class="overlay"></div>
+        <div id="adPopup" class="popup">
+            <div id="timer">7</div>
+            <div id="popupAdContainer">
+                <!-- 보험 팝업 광고 -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-9374368296307755"
+                     data-ad-slot="8384240134"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+            </div>
+            <button id="closeBtn" disabled>닫기 (<span id="timerText">7</span>초)</button>
+        </div>
+
         <div class="content">
             <h1>테스트프로 - 페이지 1</h1>
 
@@ -58,37 +150,71 @@
             </div>
     
             <div class="preview">
+                <h2>중국 호텔에서 뷰가 마음에 안 든다고 항의하면 겪게되는 일</h2>
+                <div class="content">어?</div>
+        <img src="../../downloaded_media/images/Untitled-1_01-679.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_02-677.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_03-663.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_04-636.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_05-609.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_06-588.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_07-563.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_08-542.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-1_09-520.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_01-339.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_02-336.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_03-319.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_04-280.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_05-260.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_06-241.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_07-230.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_08-217.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_09-196.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_10-185.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_01-372.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_02-370.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_03-349.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_04-315.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_05-300.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_06-280.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_07-256.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_08-250.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_09-224.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_10-210.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_11-192.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_12-175.jpg" alt="이미지">
+<video controls src="../../downloaded_media/videos/media_12142e00b8.jpg"></video>
+<video controls src="../../downloaded_media/videos/media_c3a363fbaf.jpg"></video>
+</div>
+
+            <div class="preview">
                 <h2>과외하다가 학생과 눈 맞았을 때 자기도 모르게 한 일 대참사</h2>
                 <div class="content">ㄷㄷㄷ</div>
-        <img src="downloaded_media\images\836f91de7cdcf66010244b85defb5a4a.webp" alt="이미지">
-<img src="downloaded_media\images\80084b7b2331ec96d3f22b99ac8c18fd.png" alt="이미지">
-<img src="downloaded_media\images\6a908edfc958baa0198f5841a3982399.png" alt="이미지">
-<img src="downloaded_media\images\d7994fbe8ed2a0544c228e3a7fe59f52.png" alt="이미지">
-<img src="downloaded_media\images\c5c63db51ae3d83246f616b75cf601ce.png" alt="이미지">
-<video controls src="downloaded_media\videos\bb8ccc06ea47d0ea11fdc855e33a7bd5.&ifi=3&uci=a!3&btvi=1&fsb=1&dtd=349"></video>
-<video controls src="downloaded_media\videos\2a0224011c53634e01f960348d7843b8.&ifi=4&uci=a!4&btvi=2&fsb=1&dtd=394"></video>
+        <img src="../../downloaded_media/images/1-184.png" alt="이미지">
+<img src="../../downloaded_media/images/2-164.png" alt="이미지">
+<img src="../../downloaded_media/images/3-137.png" alt="이미지">
+<img src="../../downloaded_media/images/4-121.png" alt="이미지">
 </div>
 
             <div class="preview">
                 <h2>한국인 스윗영포티 유튜버에게 일본 네티즌들이 개빡친 이유</h2>
                 <div class="content">ㅠㅠ</div>
-        <img src="downloaded_media\images\40473d5a32dc58dfcf2ffa89dcbce1ee.jpg" alt="이미지">
-<img src="downloaded_media\images\8643f1ffcf25eb508d26ff7623c36376.jpg" alt="이미지">
-<img src="downloaded_media\images\ce7b73d72e0b8b31a4975ec3996d91fd.jpg" alt="이미지">
-<img src="downloaded_media\images\415fddd94fa3278e977afae2784d79aa.jpg" alt="이미지">
-<img src="downloaded_media\images\5516c62665da2b6b85fafbfe1077476e.jpg" alt="이미지">
-<img src="downloaded_media\images\77dbe9e6c5bc30758447b432e3d3eb97.jpg" alt="이미지">
-<img src="downloaded_media\images\5c187dc8741d41671c6bcd3a711f9afd.jpg" alt="이미지">
-<img src="downloaded_media\images\f919ca8741fe47949ab7f46fc91a32de.jpg" alt="이미지">
-<img src="downloaded_media\images\26b1d8f4300783eec15717ae97286c23.jpg" alt="이미지">
-<img src="downloaded_media\images\baba7f7f0d960db5e782fff3d259a572.webp" alt="이미지">
-<img src="downloaded_media\images\5ab43941aad402320467d3adbe418313.jpg" alt="이미지">
-<img src="downloaded_media\images\8bb3acb7b69b356a2763592dd107d52c.jpg" alt="이미지">
-<img src="downloaded_media\images\d2e8f3bd9f6eefe5bed19037e7a91a74.jpg" alt="이미지">
-<img src="downloaded_media\images\deb7d65616dc47cd4eb05b1288fee9e0.jpg" alt="이미지">
-<img src="downloaded_media\images\eab17923c5f482ca58e6053d38ebf7ee.jpg" alt="이미지">
-<img src="downloaded_media\images\814b57218f94aa7259f39db9070de4e7.jpg" alt="이미지">
-<img src="downloaded_media\images\a725f46d4353325cf2d7f3cb3e1cd63d.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/Untitled-6_01-264.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_02-263.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_03-240.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_04-210.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_05-193.jpg" alt="이미지">
+<img src="../../downloaded_media/images/xUntitled-6_06-175.jpg.pagespeed.ic.X94ioEaRN_.webp" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_07-163.jpg" alt="이미지">
+<img src="../../downloaded_media/images/xUntitled-6_08-152.jpg.pagespeed.ic.qTWl40Kx5D.webp" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_09-138.jpg" alt="이미지">
+<img src="../../downloaded_media/images/xUntitled-6_10-132.jpg.pagespeed.ic.xzFL9bUSMy.webp" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_11-112.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_12-94.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_13-85.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_14-76.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_15-69.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-6_16-65.jpg" alt="이미지">
 </div>
 
             <div class="preview">
@@ -101,82 +227,82 @@ https://www.testpro.net/wp-content/uploads/pic_027.mp4
 
 
 ???</div>
-        <img src="downloaded_media\images\833264780801572b479a9b9d90fae866.jpg" alt="이미지">
-<img src="downloaded_media\images\e1ef77736af3ff181d5ec16a1f2895fa.jpg" alt="이미지">
-<img src="downloaded_media\images\d0bc2dcfad3c656f8d006ee84d016b74.jpg" alt="이미지">
-<img src="downloaded_media\images\5cb4c5ecb9f2a918566520add14600ac.jpg" alt="이미지">
-<img src="downloaded_media\images\1f1e613ffa228602b1a757c538f378a8.jpg" alt="이미지">
-<img src="downloaded_media\images\9288679a011d91823475a77ba76be462.jpg" alt="이미지">
-<img src="downloaded_media\images\9760572dd6e83be1162f8199deb5f329.jpg" alt="이미지">
-<img src="downloaded_media\images\8e333d2dce7383ffb49245751a5733ff.jpg" alt="이미지">
-<img src="downloaded_media\images\9fc364329a5425168218d6438518fc59.jpg" alt="이미지">
-<img src="downloaded_media\images\fad7aaf1f33d316c8e70591e48ff85ba.jpg" alt="이미지">
-<img src="downloaded_media\images\6bc56e0ef57660bb2f65a8351e69dc7c.jpg" alt="이미지">
-<img src="downloaded_media\images\936f71822d78cbedefb27aaa9b6e866b.jpg" alt="이미지">
-<img src="downloaded_media\images\893e0a6beee2f73cbe098b0d6c9e88e4.jpg" alt="이미지">
-<img src="downloaded_media\images\0eebe4db3f8512bda59c959661028d44.jpg" alt="이미지">
-<img src="downloaded_media\images\229bf8e474dc89c41821b6180126c91e.jpg" alt="이미지">
-<img src="downloaded_media\images\62e828e9abcd7ba17cb9f2c79b7da45d.jpg" alt="이미지">
-<img src="downloaded_media\images\ec3ab06cb3b4d1398746fa2f1c85853a.jpg" alt="이미지">
-<img src="downloaded_media\images\0ce599d763013f44788ce0868528a5ba.jpg" alt="이미지">
-<img src="downloaded_media\images\3db80098c07e4547ba9b4990b243c790.jpg" alt="이미지">
-<img src="downloaded_media\images\0f1de54dcc73e851a0b33e9f85d176cb.jpg" alt="이미지">
-<img src="downloaded_media\images\edfd65fdfb85d5dafb84d2ee48838a7a.webp" alt="이미지">
-<img src="downloaded_media\images\f8aaef0c4ad150b95973c565cf3bf5c8.jpg" alt="이미지">
-<img src="downloaded_media\images\5cda1fe024bc69da10b7e3557e0c1098.jpg" alt="이미지">
-<img src="downloaded_media\images\2fa65c3fdbfff6f604a5f53deb5082ec.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/pic_001-339.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_002-347.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_003-339.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_004-347.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_005-346.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_006-331.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_007-319.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_008-306.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_009-284.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_010-258.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_011-248.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_012-221.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_013-207.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_014-185.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_015-169.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_016-157.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_017-150.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_018-136.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_019-133.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_020-126.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_021-119.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_022-107.jpg" alt="이미지">
+<img src="../../downloaded_media/images/1956d14d8f43176b.webp" alt="이미지">
+<img src="../../downloaded_media/images/pic_024-100.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_025-99.jpg" alt="이미지">
+<img src="../../downloaded_media/images/pic_026-94.jpg" alt="이미지">
+<video controls src="../../downloaded_media/videos/pic_027.mp4"></video>
 </div>
 
             <div class="preview">
                 <h2>진실만 말 했는데 아무도 믿어주질 않음.jpg</h2>
                 <div class="content">ㅋㅋㅋ</div>
-        <img src="downloaded_media\images\c3d553cbae16326c73ce3580c8113f70.jpg" alt="이미지">
-<img src="downloaded_media\images\818573e5f2586705b08bf9a1b57ca023.jpg" alt="이미지">
-<img src="downloaded_media\images\3624506a5d4903b94f5f4d524edd9a1f.jpg" alt="이미지">
-<img src="downloaded_media\images\f396de6a398294314db1106878f82c26.jpg" alt="이미지">
-<img src="downloaded_media\images\75f96ee41c0513f7227700b9c25e2541.jpg" alt="이미지">
-<img src="downloaded_media\images\a3ed8fced0e63fbab601e75ffedff422.jpg" alt="이미지">
-<img src="downloaded_media\images\aecc7a75c6e7bf80d57d200393581ee4.jpg" alt="이미지">
-<img src="downloaded_media\images\2d2870df19b4ded41dd1a8027ec77a0a.jpg" alt="이미지">
-<img src="downloaded_media\images\42b22311553dea185cf60bb21b62f98b.jpg" alt="이미지">
-<img src="downloaded_media\images\8083cb091d8b5ebfbf8b8622f08086c9.jpg" alt="이미지">
-<img src="downloaded_media\images\c7d015531a6d7166fe33001f564677fa.jpg" alt="이미지">
-<img src="downloaded_media\images\3f50e84ea684fa8ce8fb1467e9329157.jpg" alt="이미지">
-<img src="downloaded_media\images\ed584417b893bb0380e1269b07867934.jpg" alt="이미지">
-<img src="downloaded_media\images\03e1f70fa10e4ec32f8215813b4cd4dd.jpg" alt="이미지">
-<img src="downloaded_media\images\9278cea5dde9ad6ae6814ebd17f07361.jpg" alt="이미지">
-<img src="downloaded_media\images\1d2cef743ddee3743a95ea58db102502.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/Untitled-2_01-338.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_02-335.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_03-318.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_04-279.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_05-259.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_06-240.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_07-229.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_08-216.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_09-195.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_10-184.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_11-165.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_12-153.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_13-149.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_14-133.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_15-126.jpg" alt="이미지">
 </div>
 
             <div class="preview">
                 <h2>김어준 칭찬했다가 좌파 소리 들어 억울한 나문희</h2>
                 <div class="content">???</div>
-        <img src="downloaded_media\images\9475f86d5cd69f943c12ee4695333664.jpg" alt="이미지">
-<img src="downloaded_media\images\b2a53d0f73e39866f783e6ab2bc52ace.png" alt="이미지">
-<img src="downloaded_media\images\316bb555ea6bd72e63315a42e98df371.png" alt="이미지">
-<img src="downloaded_media\images\349a99efe1ce0f6ce8998d9085618a3f.png" alt="이미지">
-<img src="downloaded_media\images\7893dd2984d01b87ecd66e74b11979c7.png" alt="이미지">
-<img src="downloaded_media\images\9159fd030d315836e923ed19a2b96a0e.png" alt="이미지">
-<img src="downloaded_media\images\1228befc648480f8901a02a9b91c31e6.png" alt="이미지">
-<img src="downloaded_media\images\4cb7cef4f82082848c448facf44c6833.png" alt="이미지">
-<img src="downloaded_media\images\2cd4f578a97716eb9995b02f270032d0.png" alt="이미지">
-<img src="downloaded_media\images\c40880a389fcd8bec245c6b6b3840dd2.png" alt="이미지">
-<img src="downloaded_media\images\97d9ddffd384962c26988254d30afaac.png" alt="이미지">
-<img src="downloaded_media\images\4b333cbcc1518890850a01b9659f4cbb.png" alt="이미지">
-<img src="downloaded_media\images\a476d1d3073d2f065f6cf47b0a48bb59.png" alt="이미지">
-<img src="downloaded_media\images\c92f4dcc098d17231c30d0d3e0330ba7.png" alt="이미지">
-<img src="downloaded_media\images\c73b4b3f4256f6cedea6cb63187e4c4c.png" alt="이미지">
+        <img src="../../downloaded_media/images/pic_001-187.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_002-169.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_003-177.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_004-172.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_005-165.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_006-160.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_007-151.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_008-147.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_009-142.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_010-143.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_011-128.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_012-120.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_013-99.png" alt="이미지">
+<img src="../../downloaded_media/images/pic_014-96.png" alt="이미지">
 </div>
 
             <div class="preview">
                 <h2>징역 n년 살고 느낀점</h2>
                 <div class="content">ㄷㄷㄷ</div>
-        <img src="downloaded_media\images\14cf4a687f62a273a341d0bc1074e8e6.jpg" alt="이미지">
-<img src="downloaded_media\images\a185bddd72211af997082c434a923cee.jpg" alt="이미지">
-<img src="downloaded_media\images\d8fb52cd2b933f82daea125dc32d3b43.jpg" alt="이미지">
-<img src="downloaded_media\images\cfcc60fbc25e5a60bfa186d72d5ddac3.jpg" alt="이미지">
-<img src="downloaded_media\images\bf36079df741175e1c7ab1c67e989199.jpg" alt="이미지">
-<img src="downloaded_media\images\acb38220d8723ae0ae4860a2c385a1b8.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/1-1865.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-1411.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_01-278.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_02-276.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_03-196.jpg" alt="이미지">
 </div>
 
             <div class="preview">
@@ -195,32 +321,30 @@ https://www.testpro.net/wp-content/uploads/pic_027.mp4
 
 
 ㄷㄷㄷ</div>
-        <img src="downloaded_media\images\900a45c87c324f7ed9743a4c7bb899b1.jpg" alt="이미지">
-<img src="downloaded_media\images\20494a62e9ae20bf91726f0d7db69fdc.jpg" alt="이미지">
-<img src="downloaded_media\images\4531a8b6c9186a96d2e10a13364fb109.jpg" alt="이미지">
-<img src="downloaded_media\images\f017a64429f428b7db87eb16240163a1.jpg" alt="이미지">
-<img src="downloaded_media\images\04192c3dcd542aece2f41e2791d152ef.jpg" alt="이미지">
-<img src="downloaded_media\images\594c30644adaf04bd6ebac5a1303d939.jpg" alt="이미지">
-<img src="downloaded_media\images\b3d7dd0dd5ade52cfce14d381d20f0ea.jpg" alt="이미지">
-<img src="downloaded_media\images\8cff6dd3f40bde7ab133bdd521afff82.jpg" alt="이미지">
-<img src="downloaded_media\images\1f983cb4a3597478c8dd6154d5f3430d.jpg" alt="이미지">
-<img src="downloaded_media\images\5498e58add6b4ae68c52bfc26462b8e8.jpg" alt="이미지">
-<img src="downloaded_media\images\95e6ee73aaba38ae16ea7bdb0a094a70.jpg" alt="이미지">
-<img src="downloaded_media\images\6bc54c2d9ccc92e3c39f979caf070511.jpg" alt="이미지">
-<img src="downloaded_media\images\55da6fb469159cdc4b0b3297f118f34d.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/1-1864.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-1-91.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-2-87.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-3-76.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-4-69.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-5-58.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-6-48.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-7-44.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-8-38.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-9-37.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-10-33.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-11-30.jpg" alt="이미지">
 </div>
 
             <div class="preview">
                 <h2>4.5 시간은 4시간 30분이다 vs 4시간 50분이다</h2>
                 <div class="content">???</div>
-        <img src="downloaded_media\images\7780ead20278e63949ae243e5435976c.jpg" alt="이미지">
-<img src="downloaded_media\images\7357be1e0983de77f2de09fa99b5e11a.jpg" alt="이미지">
-<img src="downloaded_media\images\7481baf38d3306a873475b64619f406a.jpg" alt="이미지">
-<img src="downloaded_media\images\cdca6f666c19b0fc3672fdf63ec6aaff.jpg" alt="이미지">
-<img src="downloaded_media\images\7deb9e766f1900f7b3bbf12a13607958.jpg" alt="이미지">
-<img src="downloaded_media\images\2dfbe18314d61bfd50c6845eecfbf2b5.jpg" alt="이미지">
-<img src="downloaded_media\images\8f57aeb86c49d3bb56fd3327580f397b.jpg" alt="이미지">
-<img src="downloaded_media\images\c2717efa9163d9ef03b8993ae1203c7e.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/1-1863.jpg" alt="이미지">
+<img src="../../downloaded_media/images/2-1410.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_01-277.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_02-275.jpg" alt="이미지">
+<img src="../../downloaded_media/images/3_03-195.jpg" alt="이미지">
+<img src="../../downloaded_media/images/4_01-232.jpg" alt="이미지">
+<img src="../../downloaded_media/images/4_02-232.jpg" alt="이미지">
 </div>
 
             <div class="preview">
@@ -253,66 +377,27 @@ https://www.testpro.net/wp-content/uploads/pic_027.mp4
 
 
 인간이면 돈까스를 좋아할 수 밖에 없음.</div>
-        <img src="downloaded_media\images\f20c057ec76c99fc834e559f6f498f3e.jpg" alt="이미지">
-<img src="downloaded_media\images\3a6a1d07a1849f7f6ce31bf93cac94ce.jpg" alt="이미지">
-<img src="downloaded_media\images\3c9a5e91c550155855bdf243d4a71dda.jpg" alt="이미지">
-<img src="downloaded_media\images\4539dcb7eb9d6ce86d82b456262b57e4.jpg" alt="이미지">
-<img src="downloaded_media\images\8144ed49bf8582543f2ab05fb5ef7d9d.jpg" alt="이미지">
-<img src="downloaded_media\images\8e528f7261349b1cb21d071f0611fc1e.jpg" alt="이미지">
-<img src="downloaded_media\images\cc9817145765385d2b36edfc26931571.jpg" alt="이미지">
-<img src="downloaded_media\images\d92ac06a084165053c0448141104aaf4.jpg" alt="이미지">
-<img src="downloaded_media\images\9231e213f0769a9ee44a57ea4ae377e4.jpg" alt="이미지">
-<img src="downloaded_media\images\a3fdadc311a75f9e2d5ff4621a6ce8ab.jpg" alt="이미지">
-<img src="downloaded_media\images\64a006218d7ae61c6b5ff9a06cbc6711.jpg" alt="이미지">
-<img src="downloaded_media\images\1b7cbda3fbe3f18cea70b8e97946b6a5.jpg" alt="이미지">
-<img src="downloaded_media\images\43f0857f5a1a44dbd847871c4fd1d917.jpg" alt="이미지">
-<img src="downloaded_media\images\4f5707bc79a5d12964e724b4b5e9fd64.jpg" alt="이미지">
-<img src="downloaded_media\images\93f47de49a2707906d396b9e4e0882e0.jpg" alt="이미지">
-<img src="downloaded_media\images\f6eeed153c154a10f01982bd9f248c39.jpg" alt="이미지">
-<img src="downloaded_media\images\4f1d22dc05fd1e54c649d9ae93a0b5c3.png" alt="이미지">
-<img src="downloaded_media\images\c67b44a6c8bcd1e3c9de7e75dfd55875.jpg" alt="이미지">
-<img src="downloaded_media\images\6d1a4054d78acd4c9488db23649bad81.jpg" alt="이미지">
-<img src="downloaded_media\images\9a4bf32c4d77894ac3f7efd54a8ecfff.jpg" alt="이미지">
-<img src="downloaded_media\images\bf1298f9780d9127ef742af64b6661c0.jpg" alt="이미지">
-<img src="downloaded_media\images\6e919db95ab10e5bf835abd0bb6f24b1.jpg" alt="이미지">
-</div>
-
-            <div class="preview">
-                <h2>봄만 되면 생겨난다는 도둑</h2>
-                <div class="content">ㄷㄷㄷ</div>
-        <img src="downloaded_media\images\e39b21b8b1c620374c1a7730c5c3ab96.jpg" alt="이미지">
-<img src="downloaded_media\images\d876ed946682d22877581f5219d4d986.jpg" alt="이미지">
-<img src="downloaded_media\images\c86208beff3098a5325a436830eba54c.jpg" alt="이미지">
-<img src="downloaded_media\images\8c15a5d98830f0b71ce06c3ad944ebf9.jpg" alt="이미지">
-<img src="downloaded_media\images\7d3585a374d705cb4c91716c2e851cee.jpg" alt="이미지">
-<img src="downloaded_media\images\a1719fcbac7402366071b4171f016f04.jpg" alt="이미지">
-<img src="downloaded_media\images\53e21c629fe20d55ba6f461dda60fe02.jpg" alt="이미지">
-<img src="downloaded_media\images\dd7951436814f8beeb592e9591eb8212.jpg" alt="이미지">
-<img src="downloaded_media\images\466a419e32b2ef724161b97666abb5ed.jpg" alt="이미지">
-<img src="downloaded_media\images\8f444a89f5c88447ee231cd688a6c569.jpg" alt="이미지">
-<img src="downloaded_media\images\8ece4fb7ec1614ebbf50815eb04a207c.jpg" alt="이미지">
-<img src="downloaded_media\images\5dc42dc48e3bddf658097607e9d7b78b.jpg" alt="이미지">
-<img src="downloaded_media\images\07f37b8ee4ad928879f79ab924ba8820.jpg" alt="이미지">
-<img src="downloaded_media\images\1b8eec7e655f70a5b28822fd63f5166a.jpg" alt="이미지">
-<img src="downloaded_media\images\a4fbe0c89c346ad41d8839a1eb36576f.jpg" alt="이미지">
-<img src="downloaded_media\images\9080d3fb4e5d30519c2f90f532862a0b.jpg" alt="이미지">
-<img src="downloaded_media\images\2283b8a4a52d6a90d26e33f2558e5cfc.jpg" alt="이미지">
-<img src="downloaded_media\images\ba4bc2d019d6481f2d4899089d45e635.jpg" alt="이미지">
-<img src="downloaded_media\images\0241b35b7136291285a096bc1837ac0a.jpg" alt="이미지">
-<img src="downloaded_media\images\4ab9a8310930069a61c6e49542534bc7.jpg" alt="이미지">
-<img src="downloaded_media\images\71a6943b4dcac22bab350e658134c0ae.jpg" alt="이미지">
-<img src="downloaded_media\images\702d33f2a291393d9d0811f2d2929f66.jpg" alt="이미지">
-<img src="downloaded_media\images\3e2df060faef5b07ad4870a452578191.jpg" alt="이미지">
-<img src="downloaded_media\images\89bd8ccf85611ae529988e02a01714c8.jpg" alt="이미지">
-<img src="downloaded_media\images\5f4b5cc01cd6891c84b1b249ec18b280.jpg" alt="이미지">
-<img src="downloaded_media\images\01c10ebb2d2e437fe114c6b4b5aa0e8e.jpg" alt="이미지">
-<img src="downloaded_media\images\9938e3cc20381b229f70da7590e6c4c4.jpg" alt="이미지">
-<img src="downloaded_media\images\72eeffc2127d0bf70dbab999c033b9ee.jpg" alt="이미지">
-<img src="downloaded_media\images\f979d0ef60d2825dad8c63a2910f5e1a.jpg" alt="이미지">
-<img src="downloaded_media\images\37f642551955fcc6c53feac48c64fc5e.jpg" alt="이미지">
-<img src="downloaded_media\images\684c21fa59fff3383200f296642743c5.jpg" alt="이미지">
-<img src="downloaded_media\images\cb4e023a207c559f35c6df7ba5c71e27.jpg" alt="이미지">
-<img src="downloaded_media\images\99a648d63fdc2459ee21f0cb37ded845.jpg" alt="이미지">
+        <img src="../../downloaded_media/images/Untitled-2_01-337.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_02-334.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_03-317.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_04-278.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-2_05-258.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_01-52.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_02-52.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_03-47.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_04-37.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_05-29.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_06-27.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_07-27.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_08-27.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_09-25.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-5_10-23.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Screenshot_53-21.png" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_01-72.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_02-71.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_05-54.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_08-41.jpg" alt="이미지">
+<img src="../../downloaded_media/images/Untitled-3_07-44.jpg" alt="이미지">
 </div>
 
             <!-- 하단 광고 -->
@@ -326,6 +411,51 @@ https://www.testpro.net/wp-content/uploads/pic_027.mp4
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </div>
+
+        <script>
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            function setCookie(name, value, days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+            }
+
+            function showPopup() {
+                if (!getCookie('popupShown')) {
+                    document.getElementById('overlay').style.display = 'block';
+                    document.getElementById('adPopup').style.display = 'block';
+                    
+                    let timeLeft = 7;
+                    const timer = setInterval(() => {
+                        timeLeft--;
+                        document.getElementById('timer').textContent = timeLeft;
+                        document.getElementById('timerText').textContent = timeLeft;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            document.getElementById('closeBtn').disabled = false;
+                            document.getElementById('closeBtn').textContent = '닫기';
+                        }
+                    }, 1000);
+
+                    setCookie('popupShown', 'true', 1);
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                }
+            }
+
+            document.getElementById('closeBtn').onclick = function() {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('adPopup').style.display = 'none';
+            };
+
+            window.addEventListener('load', showPopup);
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </body>
     </html>
     

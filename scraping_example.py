@@ -105,28 +105,42 @@ def save_post_to_db(post_data):
         logging.error(f"게시글 저장 중 오류: {str(e)}")
         return False
 
+import os
+import requests
+from urllib.parse import urlparse
+
 def download_media(url, folder):
     try:
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-            
-        # 파일명 생성
-        filename = os.path.join(folder, hashlib.md5(url.encode()).hexdigest() + os.path.splitext(url)[1])
+        os.makedirs(folder, exist_ok=True)
         
-        # 이미 다운로드된 파일이면 스킵
-        if os.path.exists(filename):
-            return filename
+        # URL에서 파일명 추출하고 특수문자 제거
+        filename = os.path.basename(urlparse(url).path)
+        if not filename or len(filename) < 5:
+            filename = f"media_{hashlib.md5(url.encode()).hexdigest()[:10]}.jpg"
+
+        # 파일명에서 쿼리 파라미터 제거
+        filename = filename.split('?')[0]
+        
+        # 저장 경로 생성
+        save_path = os.path.join(folder, filename)
+        
+        # 파일이 이미 존재하는지 확인
+        if not os.path.exists(save_path):
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
             
-        # 파일 다운로드
-        response = requests.get(url, stream=True)
-        if response.status_code == 200:
-            with open(filename, 'wb') as f:
+            with open(save_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            return filename
+                    if chunk:
+                        f.write(chunk)
+        
+        # HTML에서 사용할 상대 경로 계산
+        relative_path = f"../../downloaded_media/{os.path.basename(folder)}/{filename}"
+        return relative_path.replace('\\', '/')
+    
     except Exception as e:
-        print(f"미디어 다운로드 실패: {url} - {str(e)}")
-    return None
+        logging.error(f"미디어 다운로드 실패 ({url}): {str(e)}")
+        return None
 
 def save_to_html(posts_data, page_number):
     output_dir = os.path.join("output", datetime.now().strftime("%Y%m%d"))

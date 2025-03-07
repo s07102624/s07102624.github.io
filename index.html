@@ -1,228 +1,171 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실비 보험 정보</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="content">
-        <!-- 상단 광고 수정 -->
-        <div class="top-ad">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-9374368296307755"
-                 data-ad-slot="4994254497"
-                 data-ad-format="horizontal"
-                 data-full-width-responsive="true"></ins>
-        </div>
-
-        <h1>실비 보험 정보</h1>
-        <div id="preview-container"></div>
-        <div class="pagination">
-            <button onclick="showPost(0)" id="page1" class="active">1</button>
-            <button onclick="showPost(1)" id="page2">2</button>
-            <button onclick="showPost(2)" id="page3">3</button>
-            <button onclick="showPost(3)" id="page4">4</button>
-            <button onclick="showPost(4)" id="page5">5</button>
-        </div>
-    </div>
-
-    <!-- Google AdSense 스크립트를 body 끝부분으로 이동 -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
-        crossorigin="anonymous"></script>
-    <script>
-        const posts = [
-            {
-                title: "요추디스크 탈출증(M51.2) 실비보험 청구 후기",
-                url: "/요추디스크_탈출증_M51.2.html",
-                description: "요추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 6개월간의 경험을 공유합니다. MRI 검사 비용, 물리치료, 약물치료 등 상세한 비용 정보와 보험 청구 과정을 확인하세요.",
-                tags: "#실비보험 #요추디스크 #보험청구"
-            },
-            {
-                title: "경추디스크 탈출증(M50.2) 실비보험 청구 후기",
-                url: "/경추디스크_탈출증_M50.2.html",
-                description: "경추디스크 탈출증 진단부터 치료, 실비보험 청구까지의 4개월간의 경험을 공유합니다. 사무직 직장인의 목 디스크 완치 스토리와 보험 청구 노하우를 확인하세요.",
-                tags: "#실비보험 #경추디스크 #보험청구"
-            },
-            {
-                title: "퇴행성 관절염(M15-M19) 실비보험 청구 후기",
-                url: "/퇴행성_관절염_M15-M19.html",
-                description: "55세 주부의 1년간의 퇴행성 관절염 치료와 실비보험 청구 과정 상세 공유",
-                tags: "#실비보험 #퇴행성관절염 #보험청구"
-            },
-            {
-                title: "골다공증(M80-M81) 실비보험 청구 후기",
-                url: "/골다공증_M80-M81.html",
-                description: "60대 주부의 골다공증 치료와 실비보험 청구까지, 1년간의 치료 비용 358만원 전액 실비보험으로 해결한 경험담",
-                tags: "#실비보험 #골다공증 #보험청구"
-            },
-            {
-                title: "발목 골절(S82.5) 실비보험 청구 후기",
-                url: "/골절_S00-S99.html",
-                description: "40대 직장인의 3개월간의 발목 골절 치료기. 수술부터 재활까지, 총 의료비 520만원 중 480만원 수령 성공 사례.",
-                tags: "#실비보험 #골절 #산재보험"
-            }
-        ];
-
-        function showPost(pageNum) {
-            const container = document.getElementById('preview-container');
-            const post = posts[pageNum];
-            
-            const html = `
-                <a href="${post.url}" class="preview-link">
-                    <div class="preview">
-                        <h2>${post.title}</h2>
-                        <p>${post.description}</p>
-                        <div class="meta">
-                            <span class="tags">📌 ${post.tags}</span>
-                        </div>
-                    </div>
-                </a>
-            `;
-            container.innerHTML = html;
-            
-            // 페이지네이션 활성화 표시
-            document.querySelectorAll('.pagination button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`page${pageNum + 1}`).classList.add('active');
-        }
-
-        // 초기 페이지 로드
-        window.addEventListener('DOMContentLoaded', function() {
-            showPost(0);
-            initializeAds();
-        });
-
-        // 광고 초기화
-        function initializeAds() {
-            try {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {
-                console.error('광고 초기화 실패:', e);
-            }
-        }
-    </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
     <title>테스트프로 인덱스</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .page-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .page-list a {
+            display: block;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            text-align: center;
+        }
+        .page-list a:hover {
+            background: #e9ecef;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination button:hover {
+            background: #e9ecef;
+        }
+        .pagination button.active {
+            background: #007bff;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <div class="content">
+    <div class="container">
         <h1>테스트프로 페이지 목록</h1>
-        <div class="page-links">
-            <ul>
-                <li><a href="output/20250307/1.html">페이지 1</a></li>
-                <li><a href="output/20250307/2.html">페이지 2</a></li>
-                <li><a href="output/20250307/3.html">페이지 3</a></li>
-                <li><a href="output/20250307/4.html">페이지 4</a></li>
-                <li><a href="output/20250307/5.html">페이지 5</a></li>
-                <li><a href="output/20250307/6.html">페이지 6</a></li>
-                <li><a href="output/20250307/7.html">페이지 7</a></li>
-                <li><a href="output/20250307/8.html">페이지 8</a></li>
-                <li><a href="output/20250307/9.html">페이지 9</a></li>
-                <li><a href="output/20250307/10.html">페이지 10</a></li>
-                <li><a href="output/20250307/11.html">페이지 11</a></li>
-                <li><a href="output/20250307/12.html">페이지 12</a></li>
-                <li><a href="output/20250307/13.html">페이지 13</a></li>
-                <li><a href="output/20250307/14.html">페이지 14</a></li>
-                <li><a href="output/20250307/15.html">페이지 15</a></li>
-                <li><a href="output/20250307/16.html">페이지 16</a></li>
-                <li><a href="output/20250307/17.html">페이지 17</a></li>
-                <li><a href="output/20250307/18.html">페이지 18</a></li>
-                <li><a href="output/20250307/19.html">페이지 19</a></li>
-                <li><a href="output/20250307/20.html">페이지 20</a></li>
-                <li><a href="output/20250307/21.html">페이지 21</a></li>
-                <li><a href="output/20250307/22.html">페이지 22</a></li>
-                <li><a href="output/20250307/23.html">페이지 23</a></li>
-                <li><a href="output/20250307/24.html">페이지 24</a></li>
-                <li><a href="output/20250307/25.html">페이지 25</a></li>
-                <li><a href="output/20250307/26.html">페이지 26</a></li>
-                <li><a href="output/20250307/27.html">페이지 27</a></li>
-                <li><a href="output/20250307/28.html">페이지 28</a></li>
-                <li><a href="output/20250307/29.html">페이지 29</a></li>
-                <li><a href="output/20250307/30.html">페이지 30</a></li>
-                <li><a href="output/20250307/31.html">페이지 31</a></li>
-                <li><a href="output/20250307/32.html">페이지 32</a></li>
-                <li><a href="output/20250307/33.html">페이지 33</a></li>
-                <li><a href="output/20250307/34.html">페이지 34</a></li>
-                <li><a href="output/20250307/35.html">페이지 35</a></li>
-                <li><a href="output/20250307/36.html">페이지 36</a></li>
-                <li><a href="output/20250307/37.html">페이지 37</a></li>
-                <li><a href="output/20250307/38.html">페이지 38</a></li>
-                <li><a href="output/20250307/39.html">페이지 39</a></li>
-                <li><a href="output/20250307/40.html">페이지 40</a></li>
-                <li><a href="output/20250307/41.html">페이지 41</a></li>
-                <li><a href="output/20250307/42.html">페이지 42</a></li>
-                <li><a href="output/20250307/43.html">페이지 43</a></li>
-                <li><a href="output/20250307/44.html">페이지 44</a></li>
-                <li><a href="output/20250307/45.html">페이지 45</a></li>
-                <li><a href="output/20250307/46.html">페이지 46</a></li>
-                <li><a href="output/20250307/47.html">페이지 47</a></li>
-                <li><a href="output/20250307/48.html">페이지 48</a></li>
-                <li><a href="output/20250307/49.html">페이지 49</a></li>
-                <li><a href="output/20250307/50.html">페이지 50</a></li>
-                <li><a href="output/20250307/51.html">페이지 51</a></li>
-                <li><a href="output/20250307/52.html">페이지 52</a></li>
-                <li><a href="output/20250307/53.html">페이지 53</a></li>
-                <li><a href="output/20250307/54.html">페이지 54</a></li>
-                <li><a href="output/20250307/55.html">페이지 55</a></li>
-                <li><a href="output/20250307/56.html">페이지 56</a></li>
-                <li><a href="output/20250307/57.html">페이지 57</a></li>
-                <li><a href="output/20250307/58.html">페이지 58</a></li>
-                <li><a href="output/20250307/59.html">페이지 59</a></li>
-                <li><a href="output/20250307/60.html">페이지 60</a></li>
-                <li><a href="output/20250307/61.html">페이지 61</a></li>
-                <li><a href="output/20250307/62.html">페이지 62</a></li>
-                <li><a href="output/20250307/63.html">페이지 63</a></li>
-                <li><a href="output/20250307/64.html">페이지 64</a></li>
-                <li><a href="output/20250307/65.html">페이지 65</a></li>
-                <li><a href="output/20250307/66.html">페이지 66</a></li>
-                <li><a href="output/20250307/67.html">페이지 67</a></li>
-                <li><a href="output/20250307/68.html">페이지 68</a></li>
-                <li><a href="output/20250307/69.html">페이지 69</a></li>
-                <li><a href="output/20250307/70.html">페이지 70</a></li>
-                <li><a href="output/20250307/71.html">페이지 71</a></li>
-                <li><a href="output/20250307/72.html">페이지 72</a></li>
-                <li><a href="output/20250307/73.html">페이지 73</a></li>
-                <li><a href="output/20250307/74.html">페이지 74</a></li>
-                <li><a href="output/20250307/75.html">페이지 75</a></li>
-                <li><a href="output/20250307/76.html">페이지 76</a></li>
-                <li><a href="output/20250307/77.html">페이지 77</a></li>
-                <li><a href="output/20250307/78.html">페이지 78</a></li>
-                <li><a href="output/20250307/79.html">페이지 79</a></li>
-                <li><a href="output/20250307/80.html">페이지 80</a></li>
-                <li><a href="output/20250307/81.html">페이지 81</a></li>
-                <li><a href="output/20250307/82.html">페이지 82</a></li>
-                <li><a href="output/20250307/83.html">페이지 83</a></li>
-                <li><a href="output/20250307/84.html">페이지 84</a></li>
-                <li><a href="output/20250307/85.html">페이지 85</a></li>
-                <li><a href="output/20250307/86.html">페이지 86</a></li>
-                <li><a href="output/20250307/87.html">페이지 87</a></li>
-                <li><a href="output/20250307/88.html">페이지 88</a></li>
-                <li><a href="output/20250307/89.html">페이지 89</a></li>
-                <li><a href="output/20250307/90.html">페이지 90</a></li>
-                <li><a href="output/20250307/91.html">페이지 91</a></li>
-                <li><a href="output/20250307/92.html">페이지 92</a></li>
-                <li><a href="output/20250307/93.html">페이지 93</a></li>
-                <li><a href="output/20250307/94.html">페이지 94</a></li>
-                <li><a href="output/20250307/95.html">페이지 95</a></li>
-                <li><a href="output/20250307/96.html">페이지 96</a></li>
-                <li><a href="output/20250307/97.html">페이지 97</a></li>
-                <li><a href="output/20250307/98.html">페이지 98</a></li>
-                <li><a href="output/20250307/99.html">페이지 99</a></li>
-                <li><a href="output/20250307/100.html">페이지 100</a></li>
-            </ul>
+        <div class="page-list" id="pageList">
+            <a href="output/20250307/1.html">페이지 1</a>
+            <a href="output/20250307/2.html">페이지 2</a>
+            <a href="output/20250307/3.html">페이지 3</a>
+            <a href="output/20250307/4.html">페이지 4</a>
+            <a href="output/20250307/5.html">페이지 5</a>
+            <a href="output/20250307/6.html">페이지 6</a>
+            <a href="output/20250307/7.html">페이지 7</a>
+            <a href="output/20250307/8.html">페이지 8</a>
+            <a href="output/20250307/9.html">페이지 9</a>
+            <a href="output/20250307/10.html">페이지 10</a>
+            <a href="output/20250307/11.html">페이지 11</a>
+            <a href="output/20250307/12.html">페이지 12</a>
+            <a href="output/20250307/13.html">페이지 13</a>
+            <a href="output/20250307/14.html">페이지 14</a>
+            <a href="output/20250307/15.html">페이지 15</a>
+            <a href="output/20250307/16.html">페이지 16</a>
+            <a href="output/20250307/17.html">페이지 17</a>
+            <a href="output/20250307/18.html">페이지 18</a>
+            <a href="output/20250307/19.html">페이지 19</a>
+            <a href="output/20250307/20.html">페이지 20</a>
+            <a href="output/20250307/21.html">페이지 21</a>
+            <a href="output/20250307/22.html">페이지 22</a>
+            <a href="output/20250307/23.html">페이지 23</a>
+            <a href="output/20250307/24.html">페이지 24</a>
+            <a href="output/20250307/25.html">페이지 25</a>
+            <a href="output/20250307/26.html">페이지 26</a>
+            <a href="output/20250307/27.html">페이지 27</a>
+            <a href="output/20250307/28.html">페이지 28</a>
+            <a href="output/20250307/29.html">페이지 29</a>
+            <a href="output/20250307/30.html">페이지 30</a>
+            <a href="output/20250307/31.html">페이지 31</a>
+            <a href="output/20250307/32.html">페이지 32</a>
+            <a href="output/20250307/33.html">페이지 33</a>
+            <a href="output/20250307/34.html">페이지 34</a>
+            <a href="output/20250307/35.html">페이지 35</a>
+            <a href="output/20250307/36.html">페이지 36</a>
+            <a href="output/20250307/37.html">페이지 37</a>
+            <a href="output/20250307/38.html">페이지 38</a>
+            <a href="output/20250307/39.html">페이지 39</a>
+            <a href="output/20250307/40.html">페이지 40</a>
+            <a href="output/20250307/41.html">페이지 41</a>
+            <a href="output/20250307/42.html">페이지 42</a>
+            <a href="output/20250307/43.html">페이지 43</a>
+            <a href="output/20250307/44.html">페이지 44</a>
+            <a href="output/20250307/45.html">페이지 45</a>
+            <a href="output/20250307/46.html">페이지 46</a>
+            <a href="output/20250307/47.html">페이지 47</a>
+            <a href="output/20250307/48.html">페이지 48</a>
+            <a href="output/20250307/49.html">페이지 49</a>
+            <a href="output/20250307/50.html">페이지 50</a>
+            <a href="output/20250307/51.html">페이지 51</a>
+            <a href="output/20250307/52.html">페이지 52</a>
+            <a href="output/20250307/53.html">페이지 53</a>
+            <a href="output/20250307/54.html">페이지 54</a>
+
         </div>
+        <div class="pagination" id="pagination"></div>
     </div>
+    <script>
+        const itemsPerPage = 1; // 한 페이지당 1개씩 표시
+        const pageList = document.getElementById('pageList');
+        const pagination = document.getElementById('pagination');
+        const links = pageList.getElementsByTagName('a');
+        
+        function showPage(pageNum) {
+            // 모든 링크 숨기기
+            for (let i = 0; i < links.length; i++) {
+                links[i].style.display = 'none';
+            }
+            
+            // 현재 페이지 링크만 표시
+            const current = pageNum - 1;
+            if (links[current]) {
+                links[current].style.display = 'block';
+            }
+            
+            updatePagination(pageNum);
+        }
+        
+        function updatePagination(currentPage) {
+            const totalPages = links.length;
+            let html = '';
+            
+            // 이전 버튼
+            if (currentPage > 1) {
+                html += `<button onclick="showPage(${currentPage - 1})">이전</button>`;
+            }
+            
+            // 현재 페이지
+            html += `<button class="active">${currentPage} / ${totalPages}</button>`;
+            
+            // 다음 버튼
+            if (currentPage < totalPages) {
+                html += `<button onclick="showPage(${currentPage + 1})">다음</button>`;
+            }
+            
+            pagination.innerHTML = html;
+        }
+        
+        // 초기 페이지 표시
+        showPage(1);
+    </script>
 </body>
 </html>
