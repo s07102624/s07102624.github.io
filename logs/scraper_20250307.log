@@ -1,0 +1,45 @@
+2025-03-07 13:10:25,997 - INFO - 스크래퍼 초기화
+2025-03-07 13:10:25,999 - INFO - 스케줄러 시작 - 매일 저녁 9시 실행
+2025-03-07 13:12:09,962 - INFO - 스크래퍼 종료
+2025-03-07 13:12:11,439 - INFO - 스크래퍼 초기화
+2025-03-07 13:12:11,440 - INFO - 스케줄러 시작 - 매일 저녁 9시 실행
+2025-03-07 13:13:49,648 - INFO - 스크래퍼 초기화
+2025-03-07 13:13:49,648 - INFO - 수동 실행 모드
+2025-03-07 13:13:49,648 - INFO - 스크래핑 작업 시작
+2025-03-07 13:13:49,648 - INFO - ====== WebDriver manager ======
+2025-03-07 13:13:51,111 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:13:51,176 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:13:51,211 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 13:14:22,869 - INFO - 페이지 1: 새로운 게시글 10개 저장
+2025-03-07 13:14:56,842 - INFO - 페이지 2: 새로운 게시글 10개 저장
+2025-03-07 13:15:28,732 - INFO - 페이지 3: 새로운 게시글 10개 저장
+2025-03-07 13:15:54,017 - INFO - 스크래핑 작업 완료
+2025-03-07 13:24:16,821 - INFO - ====== WebDriver manager ======
+2025-03-07 13:24:40,973 - INFO - 스크래퍼 초기화
+2025-03-07 13:24:40,973 - INFO - 스케줄러 시작 - 매일 저녁 9시 실행
+2025-03-07 13:25:04,077 - INFO - ====== WebDriver manager ======
+2025-03-07 13:26:04,079 - INFO - ====== WebDriver manager ======
+2025-03-07 13:26:29,347 - INFO - ====== WebDriver manager ======
+2025-03-07 13:26:30,691 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:26:30,729 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:26:30,768 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 13:33:50,733 - INFO - ====== WebDriver manager ======
+2025-03-07 13:33:52,154 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:33:52,344 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:33:52,379 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 13:33:56,192 - INFO - ====== WebDriver manager ======
+2025-03-07 13:33:57,527 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:33:57,567 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:33:57,606 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 13:40:41,077 - INFO - ====== WebDriver manager ======
+2025-03-07 13:40:42,452 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:40:42,491 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:40:42,533 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 13:43:49,889 - INFO - ====== WebDriver manager ======
+2025-03-07 13:43:52,393 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:43:52,435 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 13:43:52,793 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 17:57:35,574 - INFO - ====== WebDriver manager ======
+2025-03-07 17:57:36,883 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 17:57:36,934 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 17:57:36,994 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache

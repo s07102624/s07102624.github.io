@@ -1,19 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 광고 초기화 순서 변경
+    // 광고 초기 로드
     function initializeAds() {
         try {
-            // 상단 광고를 먼저 초기화
-            const topAd = document.querySelector('.top-ad .adsbygoogle');
-            if (topAd && !topAd.hasAttribute('data-adsbygoogle-initialized')) {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                topAd.setAttribute('data-adsbygoogle-initialized', 'true');
-            }
-
-            // 나머지 광고들 초기화
-            document.querySelectorAll('.adsbygoogle:not([data-adsbygoogle-initialized])').forEach(function(ad) {
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                ad.setAttribute('data-adsbygoogle-initialized', 'true');
-            });
+            (adsbygoogle = window.adsbygoogle || []).push({});
         } catch (e) {
             console.error('광고 초기화 실패:', e);
         }
@@ -30,18 +19,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 광고 팝업 표시
     function showAdPopup() {
-        const adPopup = document.getElementById('adPopup');
-        const overlay = document.getElementById('overlay');
-        const popupAdContainer = document.getElementById('popupAdContainer');
-        const preloadedAd = document.querySelector('.popup-ad');
-
-        if (adPopup && overlay && preloadedAd && popupAdContainer) {
-            // 미리 로드된 광고를 팝업으로 이동
-            popupAdContainer.appendChild(preloadedAd);
-            adPopup.style.display = 'block';
-            overlay.style.display = 'block';
-            startTimer();
-        }
+        fetch('check_ip.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.hasVisited) {
+                    const adPopup = document.getElementById('adPopup');
+                    const overlay = document.getElementById('overlay');
+                    if (adPopup && overlay) {
+                        adPopup.style.display = 'block';
+                        overlay.style.display = 'block';
+                        disableScroll();
+                        startTimer();
+                    }
+                }
+            })
+            .catch(error => console.error('IP 체크 오류:', error));
     }
 
     // 타이머 기능
@@ -70,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 초기화
-    disableScroll();
-    initializeAds();  // 모든 광고 초기화
-    showAdPopup();    // 팝업 광고 표시
+    initializeAds();  // 광고 초기화
+    showAdPopup();    // 팝업 표시
 });
