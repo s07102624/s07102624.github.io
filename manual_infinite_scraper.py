@@ -37,8 +37,8 @@ def save_to_html(posts_data, page_num):
         <meta charset="UTF-8">
         <title>테스트프로 {page_num}페이지</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
-            /* 유머월드 스타일 복사 */
             body {{
                 font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
                 line-height: 1.6;
@@ -70,10 +70,9 @@ def save_to_html(posts_data, page_num):
             }}
             .ad-container {{
                 margin: 20px 0;
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
-    </head> }}
-    <body>style>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
+                text-align: center;
+            }}
+        </style>
     </head>
     <body>
         <div class="content">
