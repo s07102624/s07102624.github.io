@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 광고 초기 로드
+    // 광고 초기화 순서 변경
     function initializeAds() {
         try {
-            // 모든 광고 슬롯 초기화
-            document.querySelectorAll('.adsbygoogle').forEach(function(ad) {
+            // 상단 광고를 먼저 초기화
+            const topAd = document.querySelector('.top-ad .adsbygoogle');
+            if (topAd && !topAd.hasAttribute('data-adsbygoogle-initialized')) {
                 (adsbygoogle = window.adsbygoogle || []).push({});
+                topAd.setAttribute('data-adsbygoogle-initialized', 'true');
+            }
+
+            // 나머지 광고들 초기화
+            document.querySelectorAll('.adsbygoogle:not([data-adsbygoogle-initialized])').forEach(function(ad) {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                ad.setAttribute('data-adsbygoogle-initialized', 'true');
             });
         } catch (e) {
             console.error('광고 초기화 실패:', e);
@@ -63,6 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 초기화
     disableScroll();
-    initializeAds();  // 페이지 로드 시 광고 미리 로드
-    showAdPopup();    // 광고 팝업 표시
+    initializeAds();  // 모든 광고 초기화
+    showAdPopup();    // 팝업 광고 표시
 });
