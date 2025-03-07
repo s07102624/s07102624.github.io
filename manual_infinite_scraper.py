@@ -6,8 +6,125 @@ from scraping_example import (
     Service, ChromeDriverManager, By, logging, time, os
 )
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+# UTF-8 인코딩 설정
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr = open(sys.stderr.fileno(), mode='w', encoding='utf-8', buffering=1)
+
+def replace_text_content(html_content):
+    # HTML 내용에서 "유머월드" 텍스트를 "테스트프로"로 변경
+    html_content = html_content.replace('유머월드', '테스트프로')
+    html_content = html_content.replace('humorworld', 'testpro')
+    return html_content
+
+def save_html_file(page_num, html_content):
+    output_dir = os.path.join('output', '20250307')
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # HTML 내용 변경
+    html_content = replace_text_content(html_content)
+    
+    file_path = os.path.join(output_dir, f'{page_num}.html')
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+def save_to_html(posts_data, page_num):
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <title>테스트프로 {page_num}페이지</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            /* 유머월드 스타일 복사 */
+            body {{
+                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 20px;
+                background: #f0f2f5;
+            }}
+            .content {{
+                max-width: 1200px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }}
+            .preview {{
+                border-bottom: 1px solid #eee;
+                padding: 20px 0;
+            }}
+            .preview h2 {{
+                margin: 0 0 10px 0;
+                font-size: 1.5em;
+            }}
+            .preview img, .preview video {{
+                max-width: 100%;
+                height: auto;
+                margin: 10px 0;
+                border-radius: 4px;
+            }}
+            .ad-container {{
+                margin: 20px 0;
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
+    </head> }}
+    <body>style>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="content">
+            <h1>테스트프로 - 페이지 {page_num}</h1>
+
+            <!-- 상단 광고 -->
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-9374368296307755"
+                     data-ad-slot="8384240134"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+            </div>
+    """
+
+    for post in posts_data:
+        html_template += f"""
+            <div class="preview">
+                <h2>{post['title']}</h2>
+                <div class="content">{post['content']}</div>
+        """
+        
+        # 이미지 추가
+        for img_path in post['images']:
+            html_template += f'<img src="{img_path}" alt="이미지">\n'
+            
+        # 비디오 추가
+        for video_path in post['videos']:
+            html_template += f'<video controls src="{video_path}"></video>\n'
+            
+        html_template += "</div>\n"
+
+    html_template += """
+            <!-- 하단 광고 -->
+            <div class="ad-container">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-9374368296307755"
+                     data-ad-slot="8384240134"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    save_html_file(page_num, html_template)
 
 def infinite_scrape():
     print("\n=== HumorWorld 전체 게시글 스크래핑 시작 ===")
@@ -42,41 +159,40 @@ def infinite_scrape():
             
             for post in posts:
                 try:
+                    # 게시물 데이터 구조 수정
                     post_data = {
                         'title': post.find_element(By.CSS_SELECTOR, ".entry-title").text.strip(),
-                        'link': post.find_element(By.CSS_SELECTOR, ".entry-title a").get_attribute('href'),
-                        'content': post.find_element(By.CSS_SELECTOR, ".entry-content").text.strip()[:200],
+                        'content': post.find_element(By.CSS_SELECTOR, ".entry-content").text.strip(),
                         'images': [],
-                        'videos': []
+                        'videos': [],
+                        'link': None  # link 키 추가
                     }
                     
-                    if save_post_to_db(post_data):
-                        new_posts_count += 1
-                        total_posts += 1
-                        
-                        # 이미지와 비디오 처리
-                        images = post.find_elements(By.CSS_SELECTOR, "img")
-                        videos = post.find_elements(By.CSS_SELECTOR, "video source, iframe")
-                        
-                        for img in images:
-                            img_url = img.get_attribute('src')
-                            if img_url:
-                                saved_path = download_media(img_url, os.path.join(media_folder, 'images'))
-                                if saved_path:
-                                    post_data['images'].append(saved_path)
-                        
-                        for video in videos:
-                            video_url = video.get_attribute('src')
-                            if video_url:
-                                saved_path = download_media(video_url, os.path.join(media_folder, 'videos'))
-                                if saved_path:
-                                    post_data['videos'].append(saved_path)
-                        
-                        posts_data.append(post_data)
-                        print(f"제목: {post_data['title']}")
-                        print(f"링크: {post_data['link']}")
-                        print(f"내용: {post_data['content']}...\n")
-                        
+                    new_posts_count += 1
+                    total_posts += 1
+                    
+                    # 이미지와 비디오 처리
+                    images = post.find_elements(By.CSS_SELECTOR, "img")
+                    videos = post.find_elements(By.CSS_SELECTOR, "video source, iframe")
+                    
+                    for img in images:
+                        img_url = img.get_attribute('src')
+                        if img_url:
+                            saved_path = download_media(img_url, os.path.join(media_folder, 'images'))
+                            if saved_path:
+                                post_data['images'].append(saved_path)
+                    
+                    for video in videos:
+                        video_url = video.get_attribute('src')
+                        if video_url:
+                            saved_path = download_media(video_url, os.path.join(media_folder, 'videos'))
+                            if saved_path:
+                                post_data['videos'].append(saved_path)
+                    
+                    posts_data.append(post_data)
+                    print(f"제목: {post_data['title']}")
+                    print(f"내용: {post_data['content'][:200]}...\n")
+                    
                 except Exception as e:
                     logging.error(f"게시글 파싱 중 오류: {str(e)}")
                     continue

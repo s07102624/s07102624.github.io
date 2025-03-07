@@ -43,3 +43,35 @@
 2025-03-07 17:57:36,883 - INFO - Get LATEST chromedriver version for google-chrome
 2025-03-07 17:57:36,934 - INFO - Get LATEST chromedriver version for google-chrome
 2025-03-07 17:57:36,994 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 19:17:00,356 - INFO - ====== WebDriver manager ======
+2025-03-07 19:17:01,792 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:17:01,840 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:17:01,883 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 19:17:11,827 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:11,870 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:11,919 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:11,957 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:11,992 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:12,027 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:12,062 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:12,094 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:12,131 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:12,173 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:14,508 - INFO - ====== WebDriver manager ======
+2025-03-07 19:17:15,776 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:17:15,815 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:17:15,854 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-07 19:17:25,037 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,205 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,250 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,284 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,319 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,353 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,388 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,422 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,463 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:17:25,505 - ERROR - 게시글 저장 중 오류: 'link'
+2025-03-07 19:21:15,019 - INFO - ====== WebDriver manager ======
+2025-03-07 19:21:16,336 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:21:16,394 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-07 19:21:16,431 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
