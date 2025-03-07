@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시물 제목</title>
+    <meta name="description" content="게시물 설명">
+    <meta name="keywords" content="키워드1, 키워드2">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            margin: 20px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        .navigation a {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+        }
+        .navigation a:hover {
+            background: #e9ecef;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 비율 */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- 광고 사전 로드를 위한 숨겨진 컨테이너 -->
+    <div class="ad-container">
+        <ins class="adsbygoogle popup-ad"
+             style="display:block"
+             data-ad-client="ca-pub-9374368296307755"
+             data-ad-slot="8384240134"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
+
+    <!-- Ad Popup -->
+    <div class="ad-popup" id="adPopup" style="display: none;">
+        <div class="timer" id="timer">7</div>
+        <button class="close-btn" id="closeBtn" disabled>X</button>
+        <div id="popupAdContainer"></div>
+    </div>
+    <div class="overlay" id="overlay" style="display: none;"></div>
+
+    <div class="content">
+        <!-- 상단 광고 -->
+        <div class="top-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9374368296307755"
+                 data-ad-slot="4994254497"
+                 data-ad-format="horizontal"
+                 data-full-width-responsive="true"></ins>
+        </div>
+
+        <!-- 콘텐츠 영역 -->
+        <h1>게시물 제목</h1>
+
+        <!-- 네비게이션 추가 -->
+        <div class="navigation">
+            <a href="이전페이지.html">← 이전 글</a>
+            <a href="index.html">목록으로</a>
+            <a href="다음페이지.html">다음 글 →</a>
+        </div>
+
+        <!-- 유튜브 동영상 컨테이너 수정 -->
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/VIDEO_ID" 
+                title="YouTube video player"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- 게시물 내용 -->
+        <div class="post-content">
+            <!-- 여기에 게시물 내용 작성 -->
+        </div>
+
+        <!-- 중간 광고 -->
+        <div class="ad-section">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9374368296307755"
+                 data-ad-slot="4994254497"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+    </div>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 광고 초기화
+            function initializeAds() {
+                try {
+                    const ads = document.querySelectorAll('.adsbygoogle');
+                    ads.forEach(ad => {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    });
+                } catch (e) {
+                    console.error('광고 초기화 실패:', e);
+                }
+            }
+
+            function disableScroll() {
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function enableScroll() {
+                document.body.style.overflow = 'auto';
+            }
+
+            function showAdPopup() {
+                const adPopup = document.getElementById('adPopup');
+                const overlay = document.getElementById('overlay');
+                const popupAdContainer = document.getElementById('popupAdContainer');
+                const preloadedAd = document.querySelector('.popup-ad');
+
+                if (adPopup && overlay && preloadedAd && popupAdContainer) {
+                    popupAdContainer.appendChild(preloadedAd);
+                    adPopup.style.display = 'block';
+                    overlay.style.display = 'block';
+                    startTimer();
+                }
+            }
+
+            function startTimer() {
+                let timeLeft = 7;
+                const timerElement = document.getElementById('timer');
+                const closeBtn = document.getElementById('closeBtn');
+                
+                const timer = setInterval(function() {
+                    timeLeft--;
+                    if (timerElement) timerElement.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        if (closeBtn) {
+                            closeBtn.disabled = false;
+                            closeBtn.addEventListener('click', function() {
+                                document.getElementById('adPopup').style.display = 'none';
+                                document.getElementById('overlay').style.display = 'none';
+                                enableScroll();
+                            });
+                        }
+                        if (timerElement) timerElement.style.display = 'none';
+                    }
+                }, 1000);
+            }
+
+            disableScroll();
+            initializeAds();
+            showAdPopup();
+        });
+    </script>
+</body>
+</html>

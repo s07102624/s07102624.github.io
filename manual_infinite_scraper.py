@@ -74,7 +74,8 @@ def save_html_file(page_num, html_content, posts_data=None):
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-def save_to_html(posts_data, page_num):
+def save_to_html(post_data, page_num):
+    # 단일 post_data를 받도록 수정
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -227,25 +228,39 @@ def save_to_html(posts_data, page_num):
             </div>
     """
 
-    for post in posts_data:
-        html_template += f"""
-            <div class="preview">
-                <h2>{post['title']}</h2>
-                <div class="content">{post['content']}</div>
-        """
+    html_template += f"""
+    <div class="navigation">
+        <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
+        <a href="index.html">목록으로</a>
+        <a href="{page_num+1}.html">다음 글 →</a>
+    </div>
+    
+    <div class="preview">
+        <h2>{post_data['title']}</h2>
+        <div class="content">{post_data['content']}</div>
+    """
+    
+    # 이미지와 비디오 처리
+    for img_path in post_data['images']:
+        html_template += f'<img src="{img_path}" alt="이미지">\n'
         
-        # 이미지 추가 (상대 경로 사용)
-        for img_path in post['images']:
-            if img_path:
-                html_template += f'<img src="{img_path}" alt="이미지">\n'
+    for video_path in post_data['videos']:
+        if 'youtube.com' in video_path or 'youtu.be' in video_path:
+            video_id = extract_youtube_id(video_path)
+            html_template += f'''
+            <div class="video-container">
+                <iframe 
+                    src="https://www.youtube.com/embed/{video_id}"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            '''
+        else:
+            html_template += f'<video controls src="{video_path}"></video>\n'
             
-        # 비디오 추가 (상대 경로 사용)
-        for video_path in post['videos']:
-            if video_path:
-                html_template += f'<video controls src="{video_path}"></video>\n'
-            
-        html_template += "</div>\n"
-
     html_template += """
             <!-- 하단 광고 -->
             <div class="ad-container">
@@ -307,7 +322,15 @@ def save_to_html(posts_data, page_num):
     </html>
     """
 
-    save_html_file(page_num, html_template, posts_data)
+    save_html_file(page_num, html_template, [post_data])
+
+def extract_youtube_id(url):
+    # YouTube URL에서 video ID 추출
+    if 'youtu.be/' in url:
+        return url.split('youtu.be/')[-1]
+    elif 'watch?v=' in url:
+        return url.split('watch?v=')[-1].split('&')[0]
+    return url
 
 def update_index_file(total_pages):
     """인덱스 파일 업데이트"""
@@ -542,16 +565,16 @@ def infinite_scrape():
                     continue
             
             if posts_data:
-                save_to_html(posts_data, page)
-                print(f"페이지 {page}: 새로운 게시글 {new_posts_count}개 저장됨")
+                for post_data in posts_data:
+                    save_to_html(post_data, page)
+                    page += 1
+                print(f"페이지 {page-1}: 새로운 게시글 {new_posts_count}개 저장됨")
                 # 인덱스 파일 업데이트
-                update_index_file(page)  # 여기서 인덱스가 업데이트됨
+                update_index_file(page-1)  # 여기서 인덱스가 업데이트됨
             
             if new_posts_count == 0:
                 print(f"\n새로운 게시글이 없습니다. 총 {total_posts}개의 게시글을 스크래핑했습니다.")
                 break
-                
-            page += 1
             
             # 사용자에게 계속할지 물어보기
             if page % 5 == 0:  # 5페이지마다
