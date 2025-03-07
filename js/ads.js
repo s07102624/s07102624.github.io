@@ -1,12 +1,13 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     // 광고 초기 로드
     function initializeAds() {
         try {
-            // 모든 광고 로드
-            (adsbygoogle = window.adsbygoogle || []).push({});
+            // 모든 광고 슬롯 초기화
+            document.querySelectorAll('.adsbygoogle').forEach(function(ad) {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            });
         } catch (e) {
-            console.error('광고 초기 로드 실패:', e);
+            console.error('광고 초기화 실패:', e);
         }
     }
 
