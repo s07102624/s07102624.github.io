@@ -110,3 +110,7 @@ Stacktrace:
 2025-03-08 10:41:25,520 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
 2025-03-08 10:41:25,585 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
 2025-03-08 10:41:25,641 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 21:57:23,137 - INFO - ====== WebDriver manager ======
+2025-03-08 21:57:27,375 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 21:57:27,444 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 21:57:27,508 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
