@@ -1,0 +1,112 @@
+2025-03-08 09:40:26,503 - INFO - ====== WebDriver manager ======
+2025-03-08 09:40:28,144 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 09:40:28,230 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 09:40:28,348 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-08 09:50:45,275 - ERROR - 미디어 다운로드 실패 (https://www.humorworld.net/wp-content/uploads/6-82.png): [Errno 2] No such file or directory: 'downloaded_media\\images\\6-82.png'
+2025-03-08 09:50:55,917 - ERROR - 게시글 파싱 중 오류: Message: tab crashed
+  (Session info: chrome=133.0.6943.142)
+Stacktrace:
+	GetHandleVerifier [0x00500B43+25139]
+	(No symbol) [0x004913F4]
+	(No symbol) [0x00370340]
+	(No symbol) [0x00362193]
+	(No symbol) [0x003615F7]
+	(No symbol) [0x00361193]
+	(No symbol) [0x00360EA1]
+	(No symbol) [0x0035ED80]
+	(No symbol) [0x0035F92D]
+	(No symbol) [0x0036BDF9]
+	(No symbol) [0x0037D2B5]
+	(No symbol) [0x00382BA6]
+	(No symbol) [0x0035FF3D]
+	(No symbol) [0x0037CE65]
+	(No symbol) [0x003FE687]
+	(No symbol) [0x003DCDC6]
+	(No symbol) [0x003ABDE9]
+	(No symbol) [0x003AD124]
+	GetHandleVerifier [0x00804373+3185251]
+	GetHandleVerifier [0x0082291A+3309578]
+	GetHandleVerifier [0x0081CF42+3286578]
+	GetHandleVerifier [0x00597AE0+643536]
+	(No symbol) [0x0049A20D]
+	(No symbol) [0x004970B8]
+	(No symbol) [0x00497257]
+	(No symbol) [0x00489E00]
+	BaseThreadInitThunk [0x76C4FCC9+25]
+	RtlGetAppContainerNamedObjectPath [0x77A482AE+286]
+	RtlGetAppContainerNamedObjectPath [0x77A4827E+238]
+
+2025-03-08 09:50:55,924 - ERROR - 게시글 파싱 중 오류: Message: tab crashed
+  (Session info: chrome=133.0.6943.142)
+Stacktrace:
+	GetHandleVerifier [0x00500B43+25139]
+	(No symbol) [0x004913F4]
+	(No symbol) [0x00370340]
+	(No symbol) [0x00360E60]
+	(No symbol) [0x0035ED80]
+	(No symbol) [0x0035F92D]
+	(No symbol) [0x0036BDF9]
+	(No symbol) [0x0037D2B5]
+	(No symbol) [0x00382BA6]
+	(No symbol) [0x0035FF3D]
+	(No symbol) [0x0037CE65]
+	(No symbol) [0x003FE687]
+	(No symbol) [0x003DCDC6]
+	(No symbol) [0x003ABDE9]
+	(No symbol) [0x003AD124]
+	GetHandleVerifier [0x00804373+3185251]
+	GetHandleVerifier [0x0082291A+3309578]
+	GetHandleVerifier [0x0081CF42+3286578]
+	GetHandleVerifier [0x00597AE0+643536]
+	(No symbol) [0x0049A20D]
+	(No symbol) [0x004970B8]
+	(No symbol) [0x00497257]
+	(No symbol) [0x00489E00]
+	BaseThreadInitThunk [0x76C4FCC9+25]
+	RtlGetAppContainerNamedObjectPath [0x77A482AE+286]
+	RtlGetAppContainerNamedObjectPath [0x77A4827E+238]
+
+2025-03-08 09:50:55,931 - ERROR - 게시글 파싱 중 오류: Message: tab crashed
+  (Session info: chrome=133.0.6943.142)
+Stacktrace:
+	GetHandleVerifier [0x00500B43+25139]
+	(No symbol) [0x004913F4]
+	(No symbol) [0x00370340]
+	(No symbol) [0x00360E60]
+	(No symbol) [0x0035ED80]
+	(No symbol) [0x0035F92D]
+	(No symbol) [0x0036BDF9]
+	(No symbol) [0x0037D2B5]
+	(No symbol) [0x00382BA6]
+	(No symbol) [0x0035FF3D]
+	(No symbol) [0x0037CE65]
+	(No symbol) [0x003FE687]
+	(No symbol) [0x003DCDC6]
+	(No symbol) [0x003ABDE9]
+	(No symbol) [0x003AD124]
+	GetHandleVerifier [0x00804373+3185251]
+	GetHandleVerifier [0x0082291A+3309578]
+	GetHandleVerifier [0x0081CF42+3286578]
+	GetHandleVerifier [0x00597AE0+643536]
+	(No symbol) [0x0049A20D]
+	(No symbol) [0x004970B8]
+	(No symbol) [0x00497257]
+	(No symbol) [0x00489E00]
+	BaseThreadInitThunk [0x76C4FCC9+25]
+	RtlGetAppContainerNamedObjectPath [0x77A482AE+286]
+	RtlGetAppContainerNamedObjectPath [0x77A4827E+238]
+
+2025-03-08 10:41:12,873 - INFO - ====== WebDriver manager ======
+2025-03-08 10:41:14,591 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 10:41:14,641 - INFO - Get LATEST chromedriver version for google-chrome
+2025-03-08 10:41:14,678 - INFO - Driver [C:\Users\com\.wdm\drivers\chromedriver\win64\133.0.6943.141\chromedriver-win32/chromedriver.exe] found in cache
+2025-03-08 10:41:25,061 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,124 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,188 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,255 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,315 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,374 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,449 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,520 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,585 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined
+2025-03-08 10:41:25,641 - ERROR - 게시글 파싱 중 오류: name 'urlparse' is not defined

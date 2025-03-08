@@ -2,6 +2,8 @@ import sys
 import io
 import sqlite3
 import json
+import requests  # requests 모듈 추가
+from urllib.parse import urlparse  # urlparse 함수 추가
 from scraping_example import (
     setup_logging, setup_database, save_post_to_db, 
     download_media, save_to_html, Options, webdriver, 
@@ -244,21 +246,23 @@ def save_to_html(post_data, page_num):
     for img_path in post_data['images']:
         html_template += f'<img src="{img_path}" alt="이미지">\n'
         
+    # 비디오 처리 부분 수정
     for video_path in post_data['videos']:
         if 'youtube.com' in video_path or 'youtu.be' in video_path:
             video_id = extract_youtube_id(video_path)
-            html_template += f'''
-            <div class="video-container">
-                <iframe 
-                    src="https://www.youtube.com/embed/{video_id}"
-                    title="YouTube video player"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen>
-                </iframe>
-            </div>
-            '''
-        else:
+            if video_id:
+                html_template += f'''
+                <div class="video-container">
+                    <iframe 
+                        src="https://www.youtube.com/embed/{video_id}"
+                        title="YouTube video player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                '''
+        elif video_path.endswith(('.mp4', '.webm', '.ogg')):
             html_template += f'<video controls src="{video_path}"></video>\n'
             
     html_template += """
@@ -325,12 +329,15 @@ def save_to_html(post_data, page_num):
     save_html_file(page_num, html_template, [post_data])
 
 def extract_youtube_id(url):
-    # YouTube URL에서 video ID 추출
+    if not url:
+        return None
     if 'youtu.be/' in url:
-        return url.split('youtu.be/')[-1]
+        return url.split('youtu.be/')[-1].split('?')[0]
+    elif 'youtube.com/embed/' in url:
+        return url.split('embed/')[-1].split('?')[0]
     elif 'watch?v=' in url:
         return url.split('watch?v=')[-1].split('&')[0]
-    return url
+    return None
 
 def update_index_file(total_pages):
     """인덱스 파일 업데이트"""
@@ -462,6 +469,48 @@ def update_index_file(total_pages):
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(index_template)
 
+def download_media(url, folder):
+    """미디어 다운로드 함수 개선"""
+    try:
+        # URL 검증
+        if not url or 'data:' in url:
+            return None
+            
+        # 폴더 생성
+        os.makedirs(folder, exist_ok=True)
+        
+        # 파일명 생성 (URL의 마지막 부분 사용)
+        filename = os.path.join(folder, os.path.basename(url.split('?')[0]))
+        
+        # User-Agent 헤더 추가
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
+            'Referer': 'https://www.humorworld.net/'
+        }
+        
+        # 최대 3번 재시도
+        for attempt in range(3):
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()  # HTTP 에러 체크
+                
+                # 파일 저장
+                with open(filename, 'wb') as f:
+                    f.write(response.content)
+                
+                # 상대 경로 반환
+                return os.path.relpath(filename, start='output/20250307')
+                
+            except requests.exceptions.RequestException as e:
+                print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
+                if attempt == 2:  # 마지막 시도였다면
+                    return None
+                time.sleep(2)  # 재시도 전 대기
+                
+    except Exception as e:
+        print(f"미디어 다운로드 중 에러 발생: {str(e)}")
+        return None
+
 def infinite_scrape():
     print("\n=== HumorWorld 전체 게시글 스크래핑 시작 ===")
     options = Options()
@@ -532,31 +581,56 @@ def infinite_scrape():
                             'content': post.find_element(By.CSS_SELECTOR, ".entry-content").text.strip(),
                             'images': [],
                             'videos': [],
-                            'link': None  # link 키 추가
+                            'link': None
                         }
                         
-                        new_posts_count += 1
-                        total_posts += 1
+                        # 미디어 다운로드 성공 여부 플래그
+                        media_download_success = True
                         
-                        # 이미지와 비디오 처리
-                        images = post.find_elements(By.CSS_SELECTOR, ".entry-content img")  # 이미지 선택자 수정
-                        videos = post.find_elements(By.CSS_SELECTOR, ".entry-content video source, .entry-content iframe")
-                        
+                        # 이미지 처리
+                        images = post.find_elements(By.CSS_SELECTOR, ".entry-content img")
                         for img in images:
                             img_url = img.get_attribute('src')
-                            if img_url and not img_url.startswith('data:'):  # base64 이미지 제외
+                            if img_url:
+                                if not urlparse(img_url).netloc:
+                                    img_url = f"https://www.humorworld.net{img_url}"
+                                
                                 saved_path = download_media(img_url, os.path.join(media_folder, 'images'))
                                 if saved_path:
                                     post_data['images'].append(saved_path)
+                                else:
+                                    print(f"이미지 다운로드 실패로 게시물 건너뛰기: {title}")
+                                    media_download_success = False
+                                    break
                         
+                        # 이미지 다운로드 실패시 다음 게시물로
+                        if not media_download_success:
+                            continue
+                        
+                        # 비디오 처리
+                        videos = post.find_elements(By.CSS_SELECTOR, ".entry-content iframe[src*='youtube.com'], .entry-content iframe[src*='youtu.be'], .entry-content video")
                         for video in videos:
                             video_url = video.get_attribute('src')
                             if video_url:
-                                saved_path = download_media(video_url, os.path.join(media_folder, 'videos'))
-                                if saved_path:
-                                    post_data['videos'].append(saved_path)
+                                if 'youtube.com' in video_url or 'youtu.be' in video_url:
+                                    post_data['videos'].append(video_url)
+                                elif video.tag_name == 'video':
+                                    saved_path = download_media(video_url, os.path.join(media_folder, 'videos'))
+                                    if saved_path:
+                                        post_data['videos'].append(saved_path)
+                                    else:
+                                        print(f"비디오 다운로드 실패로 게시물 건너뛰기: {title}")
+                                        media_download_success = False
+                                        break
                         
+                        # 비디오 다운로드 실패시 다음 게시물로
+                        if not media_download_success:
+                            continue
+                        
+                        # 모든 미디어가 성공적으로 다운로드된 경우에만 게시물 저장
                         posts_data.append(post_data)
+                        new_posts_count += 1
+                        total_posts += 1
                         print(f"제목: {post_data['title']}")
                         print(f"내용: {post_data['content'][:200]}...\n")
                         
