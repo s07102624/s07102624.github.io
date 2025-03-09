@@ -11,20 +11,31 @@
         .navigation {
             display: flex;
             justify-content: space-between;
-            padding: 20px 0;
-            margin: 20px 0;
+            padding: 15px 0;
+            margin: 30px 0;
             border-top: 1px solid #eee;
             border-bottom: 1px solid #eee;
+            position: sticky;
+            bottom: 20px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
         .navigation a {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            flex: 1;
+            padding: 12px 20px;
+            background: #fff;
             text-decoration: none;
-            color: #333;
+            color: #007bff;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid #007bff;
+            margin: 0 5px;
+            border-radius: 50px;
         }
         .navigation a:hover {
-            background: #e9ecef;
+            background: #007bff;
+            color: white;
         }
         .video-container {
             position: relative;
@@ -75,13 +86,6 @@
         <!-- 콘텐츠 영역 -->
         <h1>게시물 제목</h1>
 
-        <!-- 네비게이션 추가 -->
-        <div class="navigation">
-            <a href="이전페이지.html">← 이전 글</a>
-            <a href="index.html">목록으로</a>
-            <a href="다음페이지.html">다음 글 →</a>
-        </div>
-
         <!-- 유튜브 동영상 컨테이너 수정 -->
         <div class="video-container">
             <iframe 
@@ -96,6 +100,13 @@
         <!-- 게시물 내용 -->
         <div class="post-content">
             <!-- 여기에 게시물 내용 작성 -->
+        </div>
+
+        <!-- 네비게이션을 하단으로 이동 -->
+        <div class="navigation">
+            <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
+            <a href="../../../index.html">목록으로</a>
+            <a href="{page_num+1}.html">다음 글 →</a>
         </div>
 
         <!-- 중간 광고 -->
