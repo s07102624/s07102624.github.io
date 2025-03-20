@@ -50,8 +50,7 @@ def shift_posts(output_dir):
                  os.path.join(output_dir, new_name))
 
 def save_html_file(page_num, html_content, posts_data=None):
-    # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', 'news')
+    output_dir = os.path.join('output', 'news')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -429,9 +428,9 @@ def update_index_file(total_pages):
         <div class="page-list" id="pageList">
 """
     
-    # 페이지 링크 생성 부분 수정
+    # 페이지 링크 생성
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/news/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="output/news/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -491,16 +490,16 @@ def update_index_file(total_pages):
 def download_media(url, folder):
     """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
+        # URL 검증
         if not url or 'data:' in url:
             return None
             
-        # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
-        os.makedirs(image_dir, exist_ok=True)
+        # 폴더 생성
+        os.makedirs(folder, exist_ok=True)
         
-        # 파일명 생성
+        # 파일명 생성 (확장자를 .webp로 변경)
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
-        filename = os.path.join(image_dir, f"{base_name}.webp")
+        filename = os.path.join(folder, f"{base_name}.webp")
         
         # User-Agent 헤더 추가
         headers = {
@@ -529,8 +528,8 @@ def download_media(url, folder):
                     with open(filename, 'wb') as f:
                         f.write(response.content)
                 
-                # 상대 경로 반환 (HTML에서 참조할 경로)
-                return os.path.join('images', f"{base_name}.webp")
+                # 상대 경로 반환
+                return os.path.relpath(filename, start='output/news')
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
@@ -660,13 +659,13 @@ def infinite_scrape():
                             'hash': hashlib.md5((title + content).encode('utf-8')).hexdigest()
                         }
                         
-                        # 이미지 처리 부분 수정
+                        # 이미지 처리
                         for img in images:
                             img_url = img.get('src', '') or img.get('data-src', '')
                             if img_url:
                                 if not urlparse(img_url).netloc:
                                     img_url = f"https://www.humorworld.net{img_url}"
-                                saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'news', 'images'))
+                                saved_path = download_media(img_url, os.path.join('downloaded_media', 'images'))
                                 if saved_path:
                                     post_data['images'].append(saved_path)
                         
