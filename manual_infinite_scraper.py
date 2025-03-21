@@ -51,7 +51,7 @@ def shift_posts(output_dir):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', '2005')
+    output_dir = os.path.join('s07102624.github.io', 'output', '2025')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -95,58 +95,14 @@ def save_html_file(page_num, html_content, posts_data=None):
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-def generate_clickbait_title(original_title):
-    """클릭을 유도하는 제목으로 변경"""
-    clickbait_prefixes = [
-        "충격) ", "경악) ", "기절) ", "초대박) ", "전설의 ", "역대급 ", "실화) ", 
-        "개쩌는 ", "핵심) ", "급발진) ", "대박) ", "놀라운) ", "속보) ", "극찬) ",
-        "화제의 ", "완전 ", "레전드 ", "반전) ", "감동) ", "최초) ", "단독) ",
-        "충격적) ", "심장주의) ", "긴급) ", "초강력 ", "핫이슈) ", "폭발) ",
-        "공감) ", "경이로운 ", "엄청난 ", "초특급 ", "초고급 ", "무서운 ",
-        "놀라워) ", "신기한 ", "미쳤다) ", "기가막힌 ", "대단한 ", "끝판왕 ",
-        "무한대박 "
-    ]
-    
-    clickbait_suffixes = [
-        " (진짜 충격적)", " (대박사건)", " (완전 실화)", " (믿을 수 없음)", 
-        " (역대급)", " (레전드)", " (핵심 요약)", " (현실 상황)", " (심장 주의)", 
-        " (꼭 봐야함)", " (실화임)", " (진짜임)", " (충격 반전)", " (진실 공개)",
-        " (완전 대박)", " (전설급)", " (극한 상황)", " (절대 놓치지 마세요)", 
-        " (눈물 주의)", " (감동 실화)", " (충격적 진실)", " (공감 100%)",
-        " (신기함 주의)", " (반전 엔딩)", " (극한 상황)", " (완전 실화임)",
-        " (기적 같은)", " (놀라운 결과)", " (충격과 공포)", " (진실 폭로)",
-        " (필독)", " (초강력)", " (폭소 주의)", " (극비 공개)", " (경악)",
-        " (충격 실화)", " (동공지진)", " (화제의 그것)", " (완전 소름)",
-        " (기가 막힘)"
-    ]
-    
-    # 1페이지, 2페이지 등의 텍스트 제거
-    title = re.sub(r'\d+페이지\s*', '', original_title)
-    
-    # 원본 제목이 이미 자극적인 키워드를 포함하고 있는지 확인
-    if any(prefix.strip(') ') in title for prefix in clickbait_prefixes):
-        # 접두어가 이미 있다면 접미어만 추가
-        return title + random.choice(clickbait_suffixes)
-    else:
-        # 접두어와 접미어 모두 추가
-        return random.choice(clickbait_prefixes) + title + random.choice(clickbait_suffixes)
-
-# 상단에 re 모듈 import 추가
-import re
-
 def save_to_html(post_data, page_num):
-    # 제목 수정
-    modified_title = post_data['title']
-    if not modified_title.startswith(('1페이지', '2페이지')):
-        modified_title = generate_clickbait_title(modified_title)
-    
-    # HTML 템플릿에 수정된 제목 적용
+    # HTML 템플릿 수정 - 제목을 게시글 제목으로 변경
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
-        <title>{modified_title}</title>
+        <title>{post_data['title']} - {page_num}페이지</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
@@ -291,19 +247,23 @@ def save_to_html(post_data, page_num):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
+    """
 
-            <div class="navigation">
-                <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
-                <a href="index.html">목록으로</a>
-                <a href="{page_num+1}.html">다음 글 →</a>
-            </div>
-
-            <p class="title">{modified_title}</p>
+    html_template += f"""
+    <div class="navigation">
+        <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
+        <a href="index.html">목록으로</a>
+        <a href="{page_num+1}.html">다음 글 →</a>
+    </div>
+    
+    <div class="preview">
+        <h2>{post_data['title']}</h2>
+        <div class="content">{post_data['content']}</div>
     """
     
-    # 이미지 처리 - div 감싸기 제거
+    # 이미지와 비디오 처리
     for img_path in post_data['images']:
-        html_template += f'<img src="{img_path}" alt="이미지" loading="lazy">\n'
+        html_template += f'<img src="{img_path}" alt="이미지">\n'
         
     # 비디오 처리 부분 수정
     for video_path in post_data['videos']:
@@ -471,7 +431,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/2005/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="s07102624.github.io/output/2025/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -528,31 +488,18 @@ def update_index_file(total_pages):
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(index_template)
 
-def is_image_exists(image_name):
-    """이미지 중복 체크"""
-    image_dir = os.path.join('s07102624.github.io', 'output', '2005', 'images')
-    image_path = os.path.join(image_dir, f"{image_name}.webp")
-    return os.path.exists(image_path)
-
 def download_media(url, folder):
     """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
-        # URL 검증
         if not url or 'data:' in url:
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', '2005', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', '2025', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
-        
-        # 이미지 중복 체크
-        if is_image_exists(base_name):
-            print(f"이미지 중복 발견: {base_name}")
-            return None
-        
         filename = os.path.join(image_dir, f"{base_name}.webp")
         
         # User-Agent 헤더 추가
@@ -672,6 +619,45 @@ def get_post_detail(scraper, url):
         print(f"상세 페이지 스크래핑 중 오류: {str(e)}")
         return None
 
+def generate_clickbait_title(original_title):
+    """클릭을 유도하는 제목으로 변경"""
+    clickbait_prefixes = [
+        "충격) ", "경악) ", "기절) ", "초대박) ", "전설의 ", "역대급 ", "실화) ", 
+        "개쩌는 ", "핵심) ", "급발진) ", "대박) ", "놀라운) ", "속보) ", "극찬) ",
+        "화제의 ", "완전 ", "레전드 ", "반전) ", "감동) ", "최초) ", "단독) ",
+        "충격적) ", "심장주의) ", "긴급) ", "초강력 ", "핫이슈) ", "폭발) ",
+        "공감) ", "경이로운 ", "엄청난 ", "초특급 ", "초고급 ", "무서운 ",
+        "놀라워) ", "신기한 ", "미쳤다) ", "기가막힌 ", "대단한 ", "끝판왕 ",
+        "무한대박 "
+    ]
+    
+    clickbait_suffixes = [
+        " (진짜 충격적)", " (대박사건)", " (완전 실화)", " (믿을 수 없음)", 
+        " (역대급)", " (레전드)", " (핵심 요약)", " (현실 상황)", " (심장 주의)", 
+        " (꼭 봐야함)", " (실화임)", " (진짜임)", " (충격 반전)", " (진실 공개)",
+        " (완전 대박)", " (전설급)", " (극한 상황)", " (절대 놓치지 마세요)", 
+        " (눈물 주의)", " (감동 실화)", " (충격적 진실)", " (공감 100%)",
+        " (신기함 주의)", " (반전 엔딩)", " (극한 상황)", " (완전 실화임)",
+        " (기적 같은)", " (놀라운 결과)", " (충격과 공포)", " (진실 폭로)",
+        " (필독)", " (초강력)", " (폭소 주의)", " (극비 공개)", " (경악)",
+        " (충격 실화)", " (동공지진)", " (화제의 그것)", " (완전 소름)",
+        " (기가 막힘)"
+    ]
+    
+    # 50% 확률로 접두어 추가
+    if random.random() < 0.5:
+        prefix = random.choice(clickbait_prefixes)
+    else:
+        prefix = ""
+        
+    # 50% 확률로 접미어 추가
+    if random.random() < 0.5:
+        suffix = random.choice(clickbait_suffixes)
+    else:
+        suffix = ""
+        
+    return f"{prefix}{original_title}{suffix}"
+
 def infinite_scrape():
     print("\n=== HumorWorld 전체 게시글 스크래핑 시작 ===")
     
@@ -741,30 +727,18 @@ def infinite_scrape():
                             print("상세 페이지 스크래핑 실패")
                             continue
                         
-                        # 게시물 데이터 구성
+                        # 게시물 데이터 구성 부분 수정
                         post_data = {
-                            'title': title_elem.get_text(strip=True),
+                            'title': generate_clickbait_title(title_elem.get_text(strip=True)),
                             'content': detail_data['content'],
                             'images': [],
                             'videos': detail_data['videos'],
                             'hash': hashlib.md5((title_elem.get_text(strip=True) + detail_data['content']).encode('utf-8')).hexdigest()
                         }
                         
-                        # 이미지 다운로드 시도 및 중복 체크
-                        has_duplicate_image = False
-                        for img_url in detail_data['images']:
-                            base_name = os.path.splitext(os.path.basename(img_url.split('?')[0]))[0]
-                            if is_image_exists(base_name):
-                                print(f"\n중복된 이미지가 있는 게시물 건너뛰기: {post_data['title']}")
-                                has_duplicate_image = True
-                                break
-                        
-                        if has_duplicate_image:
-                            continue
-                        
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '2005', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '2025', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
@@ -786,8 +760,8 @@ def infinite_scrape():
                 page += 1
                 update_index_file(page-1)
                 
-                # 사용자 입력 확인 (15페이지마다)
-                if page % 15 == 0:
+                # 사용자 입력 확인 (5페이지마다)
+                if page % 5 == 0:
                     choice = input(f"\n현재 {total_posts}개의 게시글을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                     if choice.lower() != 'y':
                         break
