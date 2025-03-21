@@ -51,7 +51,7 @@ def shift_posts(output_dir):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', 'news')
+    output_dir = os.path.join('s07102624.github.io', 'output', 'new')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -471,7 +471,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/news/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="s07102624.github.io/output/new/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -530,7 +530,7 @@ def update_index_file(total_pages):
 
 def is_image_exists(image_name):
     """이미지 중복 체크"""
-    image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
+    image_dir = os.path.join('s07102624.github.io', 'output', 'new', 'images')
     image_path = os.path.join(image_dir, f"{image_name}.webp")
     return os.path.exists(image_path)
 
@@ -542,7 +542,7 @@ def download_media(url, folder):
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', 'new', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 파일명 생성
@@ -764,7 +764,7 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'news', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'new', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
