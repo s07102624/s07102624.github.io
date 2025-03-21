@@ -51,7 +51,7 @@ def shift_posts(output_dir):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', 'new')
+    output_dir = os.path.join('s07102624.github.io', 'output', '2005')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -471,7 +471,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/new/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="s07102624.github.io/output/2005/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -530,7 +530,7 @@ def update_index_file(total_pages):
 
 def is_image_exists(image_name):
     """이미지 중복 체크"""
-    image_dir = os.path.join('s07102624.github.io', 'output', 'new', 'images')
+    image_dir = os.path.join('s07102624.github.io', 'output', '2005', 'images')
     image_path = os.path.join(image_dir, f"{image_name}.webp")
     return os.path.exists(image_path)
 
@@ -542,7 +542,7 @@ def download_media(url, folder):
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', 'new', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', '2005', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 파일명 생성
@@ -764,7 +764,7 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'new', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '2005', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
@@ -786,8 +786,8 @@ def infinite_scrape():
                 page += 1
                 update_index_file(page-1)
                 
-                # 사용자 입력 확인 (5페이지마다)
-                if page % 5 == 0:
+                # 사용자 입력 확인 (15페이지마다)
+                if page % 15 == 0:
                     choice = input(f"\n현재 {total_posts}개의 게시글을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                     if choice.lower() != 'y':
                         break
