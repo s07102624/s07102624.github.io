@@ -51,7 +51,7 @@ def shift_posts(output_dir):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', '2025')
+    output_dir = os.path.join('s07102624.github.io', 'output', '1004')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -126,12 +126,49 @@ def save_to_html(post_data, page_num):
             .preview {{
                 border-bottom: 1px solid #eee;
                 padding: 15px 0;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 15px;
             }}
-            .preview h2 {{
-                margin: 0 0 10px 0;
+            .preview-media {{
+                width: 100%;
+                aspect-ratio: 16/9;
+                overflow: hidden;
+                border-radius: 8px;
+            }}
+            .preview-media img {{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }}
+            .preview-content {{
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }}
+            .preview-content h2 {{
+                margin: 0;
                 font-size: 1.2em;
                 color: #333;
                 word-break: break-all;
+            }}
+            .full-content {{
+                margin-top: 15px;
+            }}
+            .full-content img {{
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                margin: 10px 0;
+                border-radius: 4px;
+            }}
+            @media (min-width: 768px) {{
+                .preview {{
+                    grid-template-columns: 300px 1fr;
+                }}
+                .preview-media {{
+                    aspect-ratio: 4/3;
+                }}
             }}
             .preview .content {{
                 margin: 10px 0;
@@ -257,9 +294,14 @@ def save_to_html(post_data, page_num):
     </div>
     
     <div class="preview">
-        <h2>{post_data['title']}</h2>
-        <div class="content">{post_data['content']}</div>
-    """
+        <!-- 이미지를 먼저 표시하도록 순서 변경 -->
+        <div class="preview-media">
+            {' '.join([f'<img src="{img_path}" alt="이미지" loading="lazy">' for img_path in post_data['images'][:1]])}
+        </div>
+        <div class="preview-content">
+            <h2>{post_data['title']}</h2>
+            <div class="content">{post_data['content']}</div>
+        """
     
     # 이미지와 비디오 처리
     for img_path in post_data['images']:
@@ -283,7 +325,7 @@ def save_to_html(post_data, page_num):
                 '''
         elif video_path.endswith(('.mp4', '.webm', '.ogg')):
             html_template += f'<video controls src="{video_path}"></video>\n'
-            
+
     html_template += """
             <!-- 하단 광고 -->
             <div class="ad-container">
@@ -431,7 +473,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/2025/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="s07102624.github.io/output/1004/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -495,7 +537,7 @@ def download_media(url, folder):
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', '2025', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', '1004', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 파일명 생성
@@ -738,7 +780,7 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '2025', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '1004', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
