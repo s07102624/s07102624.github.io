@@ -95,14 +95,58 @@ def save_html_file(page_num, html_content, posts_data=None):
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
+def generate_clickbait_title(original_title):
+    """클릭을 유도하는 제목으로 변경"""
+    clickbait_prefixes = [
+        "충격) ", "경악) ", "기절) ", "초대박) ", "전설의 ", "역대급 ", "실화) ", 
+        "개쩌는 ", "핵심) ", "급발진) ", "대박) ", "놀라운) ", "속보) ", "극찬) ",
+        "화제의 ", "완전 ", "레전드 ", "반전) ", "감동) ", "최초) ", "단독) ",
+        "충격적) ", "심장주의) ", "긴급) ", "초강력 ", "핫이슈) ", "폭발) ",
+        "공감) ", "경이로운 ", "엄청난 ", "초특급 ", "초고급 ", "무서운 ",
+        "놀라워) ", "신기한 ", "미쳤다) ", "기가막힌 ", "대단한 ", "끝판왕 ",
+        "무한대박 "
+    ]
+    
+    clickbait_suffixes = [
+        " (진짜 충격적)", " (대박사건)", " (완전 실화)", " (믿을 수 없음)", 
+        " (역대급)", " (레전드)", " (핵심 요약)", " (현실 상황)", " (심장 주의)", 
+        " (꼭 봐야함)", " (실화임)", " (진짜임)", " (충격 반전)", " (진실 공개)",
+        " (완전 대박)", " (전설급)", " (극한 상황)", " (절대 놓치지 마세요)", 
+        " (눈물 주의)", " (감동 실화)", " (충격적 진실)", " (공감 100%)",
+        " (신기함 주의)", " (반전 엔딩)", " (극한 상황)", " (완전 실화임)",
+        " (기적 같은)", " (놀라운 결과)", " (충격과 공포)", " (진실 폭로)",
+        " (필독)", " (초강력)", " (폭소 주의)", " (극비 공개)", " (경악)",
+        " (충격 실화)", " (동공지진)", " (화제의 그것)", " (완전 소름)",
+        " (기가 막힘)"
+    ]
+    
+    # 1페이지, 2페이지 등의 텍스트 제거
+    title = re.sub(r'\d+페이지\s*', '', original_title)
+    
+    # 원본 제목이 이미 자극적인 키워드를 포함하고 있는지 확인
+    if any(prefix.strip(') ') in title for prefix in clickbait_prefixes):
+        # 접두어가 이미 있다면 접미어만 추가
+        return title + random.choice(clickbait_suffixes)
+    else:
+        # 접두어와 접미어 모두 추가
+        return random.choice(clickbait_prefixes) + title + random.choice(clickbait_suffixes)
+
+# 상단에 re 모듈 import 추가
+import re
+
 def save_to_html(post_data, page_num):
-    # HTML 템플릿 수정 - 제목을 게시글 제목으로 변경
+    # 제목 수정
+    modified_title = post_data['title']
+    if not modified_title.startswith(('1페이지', '2페이지')):
+        modified_title = generate_clickbait_title(modified_title)
+    
+    # HTML 템플릿에 수정된 제목 적용
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
-        <title>{post_data['title']} - {page_num}페이지</title>
+        <title>{modified_title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
@@ -257,7 +301,7 @@ def save_to_html(post_data, page_num):
     </div>
     
     <div class="preview">
-        <h2>{post_data['title']}</h2>
+        <h2>{modified_title}</h2>
         <div class="content">{post_data['content']}</div>
     """
     
@@ -488,9 +532,16 @@ def update_index_file(total_pages):
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(index_template)
 
+def is_image_exists(image_name):
+    """이미지 중복 체크"""
+    image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
+    image_path = os.path.join(image_dir, f"{image_name}.webp")
+    return os.path.exists(image_path)
+
 def download_media(url, folder):
     """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
+        # URL 검증
         if not url or 'data:' in url:
             return None
             
@@ -500,6 +551,12 @@ def download_media(url, folder):
         
         # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
+        
+        # 이미지 중복 체크
+        if is_image_exists(base_name):
+            print(f"이미지 중복 발견: {base_name}")
+            return None
+        
         filename = os.path.join(image_dir, f"{base_name}.webp")
         
         # User-Agent 헤더 추가
@@ -696,6 +753,18 @@ def infinite_scrape():
                             'videos': detail_data['videos'],
                             'hash': hashlib.md5((title_elem.get_text(strip=True) + detail_data['content']).encode('utf-8')).hexdigest()
                         }
+                        
+                        # 이미지 다운로드 시도 및 중복 체크
+                        has_duplicate_image = False
+                        for img_url in detail_data['images']:
+                            base_name = os.path.splitext(os.path.basename(img_url.split('?')[0]))[0]
+                            if is_image_exists(base_name):
+                                print(f"\n중복된 이미지가 있는 게시물 건너뛰기: {post_data['title']}")
+                                has_duplicate_image = True
+                                break
+                        
+                        if has_duplicate_image:
+                            continue
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
