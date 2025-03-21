@@ -291,23 +291,19 @@ def save_to_html(post_data, page_num):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
-    """
 
-    html_template += f"""
-    <div class="navigation">
-        <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
-        <a href="index.html">목록으로</a>
-        <a href="{page_num+1}.html">다음 글 →</a>
-    </div>
-    
-    <div class="preview">
-        <h2>{modified_title}</h2>
-        <div class="content">{post_data['content']}</div>
+            <div class="navigation">
+                <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
+                <a href="index.html">목록으로</a>
+                <a href="{page_num+1}.html">다음 글 →</a>
+            </div>
+
+            <p class="title">{modified_title}</p>
     """
     
-    # 이미지와 비디오 처리
+    # 이미지 처리 - div 감싸기 제거
     for img_path in post_data['images']:
-        html_template += f'<img src="{img_path}" alt="이미지">\n'
+        html_template += f'<img src="{img_path}" alt="이미지" loading="lazy">\n'
         
     # 비디오 처리 부분 수정
     for video_path in post_data['videos']:
