@@ -156,7 +156,14 @@ def save_to_html(post_data, title):
     if not modified_title.startswith(('1페이지', '2페이지')):
         modified_title = generate_clickbait_title(modified_title)
     
-    # HTML 템플릿에 수정된 제목 적용
+    # 첫 번째 이미지를 썸네일로 사용
+    thumbnail_url = ''
+    if post_data['images']:
+        # 상대 경로를 절대 URL로 변환
+        image_path = post_data['images'][0]
+        thumbnail_url = f"https://kk.testpro.site/output/news/{image_path}"
+
+    # HTML 템플릿에 메타 태그 추가
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -164,6 +171,21 @@ def save_to_html(post_data, title):
         <meta charset="UTF-8">
         <title>{modified_title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        
+        <!-- OpenGraph 메타 태그 추가 -->
+        <meta property="og:title" content="{modified_title}">
+        <meta property="og:description" content="{post_data['content'][:200]}...">
+        <meta property="og:image" content="{thumbnail_url}">
+        <meta property="og:url" content="https://kk.testpro.site/output/news/{sanitize_filename(title)}.html">
+        <meta property="og:type" content="article">
+        <meta property="og:site_name" content="테스트프로">
+        
+        <!-- Twitter 카드 메타 태그 -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{modified_title}">
+        <meta name="twitter:description" content="{post_data['content'][:200]}...">
+        <meta name="twitter:image" content="{thumbnail_url}">
+        
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
             body {{
@@ -485,7 +507,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/news/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="https://kk.testpro.site/output/news/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
