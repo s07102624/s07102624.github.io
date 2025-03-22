@@ -54,7 +54,7 @@ def generate_filename(title):
     """제목을 파일명으로 변환"""
     # 특수문자 제거 및 공백을 하이픈으로 변환
     filename = re.sub(r'[^\w\s-]', '', title)
-    filename = re.sub(r'[-\s]+', '-', filename).strip('-')
+    filename = re.sub(r'[-\s]+', '-', title).strip('-')
     return filename.lower()[:50]  # 최대 50자로 제한
 
 def save_html_file(page_num, html_content, posts_data=None):
@@ -517,11 +517,11 @@ def update_index_file(total_pages):
     for i in range(1, total_pages + 1):
         preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
         filename = page_mapping.get(str(i), f"{i}.html")
-        image_path = preview['image'] if preview['image'] else '/output/posts/images/default.webp'
+        image_path = preview['image'] if preview['image'] else '/images/default.webp'  # 이미지 경로 수정
         image_path = image_path.replace('\\', '/')  # 백슬래시를 슬래시로 변환
         preview_html = f'''
-            <a href="/output/posts/{filename}">
-                <img class="preview-image" src="{image_path}" alt="{preview['title']}">
+            <a href="/posts/{filename}">
+                <img class="preview-image" src="{image_path}" alt="{preview['title']}" loading="lazy">
                 <p class="preview-title">{preview['title']}</p>
             </a>
         '''
@@ -637,7 +637,7 @@ def download_media(url, folder):
                         f.write(response.content)
                 
                 # 상대 경로 반환 (HTML에서 참조할 경로)
-                return 'images/' + f"{base_name}.webp"  # 경로 구분자를 슬래시로 통일
+                return '/images/' + f"{base_name}.webp"  # 경로를 절대 경로로 수정
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
