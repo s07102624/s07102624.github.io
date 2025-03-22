@@ -121,7 +121,7 @@ def save_html_file(page_num, html_content, posts_data=None):
     return filename
 
 def save_to_html(post_data, page_num):
-    # 도메인 설정 수정
+    # 도메인 설정 
     domain = "https://kk.testpro.site"
     
     # 첫 번째 이미지를 썸네일로 사용
@@ -141,11 +141,15 @@ def save_to_html(post_data, page_num):
     try:
         with open(mapping_file, 'r', encoding='utf-8') as f:
             mapping = json.load(f)
-            prev_file = mapping.get(str(page_num-1), '')
-            next_file = mapping.get(str(page_num+1), '')
+            prev_file = mapping.get(str(page_num-1), f"{page_num-1}.html")
+            next_file = mapping.get(str(page_num+1), f"{page_num+1}.html")
+            
+            # 이전/다음 링크에 도메인 추가
+            prev_url = f"{domain}/output/posts/{prev_file}" if prev_file else ""
+            next_url = f"{domain}/output/posts/{next_file}" if next_file else ""
     except FileNotFoundError:
-        prev_file = f"{page_num-1}.html"
-        next_file = f"{page_num+1}.html"
+        prev_url = f"{domain}/output/posts/{page_num-1}.html"
+        next_url = f"{domain}/output/posts/{page_num+1}.html"
 
     html_template = f"""
     <!DOCTYPE html>
@@ -310,9 +314,9 @@ def save_to_html(post_data, page_num):
             </div>
 
             <div class="navigation" style="display: flex; justify-content: space-between; margin: 20px 0;">
-                <a href="/output/posts/{prev_file}" style="text-decoration: none; color: #007bff; {'' if page_num > 1 else 'visibility: hidden'}">← 이전 글</a>
-                <a href="/index.html#1" style="text-decoration: none; color: #007bff;">목록으로</a>
-                <a href="/output/posts/{next_file}" style="text-decoration: none; color: #007bff; {'' if next_file else 'visibility: hidden'}">다음 글 →</a>
+                <a href="{prev_url}" style="text-decoration: none; color: #007bff; {'' if page_num > 1 else 'visibility: hidden'}">← 이전 글</a>
+                <a href="{domain}/index.html#1" style="text-decoration: none; color: #007bff;">목록으로</a>
+                <a href="{next_url}" style="text-decoration: none; color: #007bff; {'' if not next_file else 'visibility: hidden'}">다음 글 →</a>
             </div>
             
             <div class="preview">
