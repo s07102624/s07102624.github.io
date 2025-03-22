@@ -156,30 +156,13 @@ def save_to_html(post_data, title):
     if not modified_title.startswith(('1페이지', '2페이지')):
         modified_title = generate_clickbait_title(modified_title)
     
-    # HTML 템플릿에 수정된 제목 적용
-    html_template = f"""
-    <!DOCTYPE html>
+    # HTML 템플릿에 수정된 제목 적용 (1.html과 완전히 동일한 구조)
+    html_template = f"""<!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
         <title>{modified_title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        
-        <!-- Open Graph / 공유용 메타태그 추가 -->
-        <meta property="og:type" content="article">
-        <meta property="og:title" content="{modified_title}">
-        <meta property="og:description" content="{post_data['content'][:150]}...">
-        <meta property="og:url" content="https://kk.testpro.site//output/news/{sanitize_filename(title)}.html">
-        
-        <!-- 첫 번째 이미지를 썸네일로 사용 -->
-        {"<meta property='og:image' content='https://kk.testpro.site//output/news/" + post_data['images'][0] + "'>" if post_data['images'] else ""}
-        
-        <!-- Twitter Card -->
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{modified_title}">
-        <meta name="twitter:description" content="{post_data['content'][:150]}...">
-        {"<meta name='twitter:image' content='https://kk.testpro.site//output/news/" + post_data['images'][0] + "'>" if post_data['images'] else ""}
-        
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
             body {{
@@ -292,6 +275,18 @@ def save_to_html(post_data, title):
             #closeBtn:disabled {{
                 background: #ccc;
             }}
+            .navigation {{
+                display: flex;
+                justify-content: space-between;
+                margin: 15px 0;
+            }}
+            .navigation a {{
+                color: #007bff;
+                text-decoration: none;
+            }}
+            .navigation a:hover {{
+                text-decoration: underline;
+            }}
         </style>
     </head>
     <body>
@@ -299,7 +294,6 @@ def save_to_html(post_data, title):
         <div id="adPopup" class="popup">
             <div id="timer">7</div>
             <div id="popupAdContainer">
-                <!-- 보험 팝업 광고 -->
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-9374368296307755"
@@ -313,7 +307,6 @@ def save_to_html(post_data, title):
         <div class="content">
             <h1>테스트프로 - 페이지 {title}</h1>
 
-            <!-- 상단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -323,39 +316,24 @@ def save_to_html(post_data, title):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
+    
+            <div class="navigation">
+                <a href="{int(title)-1}.html" style='visibility:{("hidden" if int(title) <= 1 else "visible")}'>← 이전 글</a>
+                <a href="index.html">목록으로</a>
+                <a href="{int(title)+1}.html">다음 글 →</a>
+            </div>
+    
+            <div class="preview">
+                <h2>{modified_title}</h2>
+                <div class="content">{post_data['content']}</div>
     """
 
-    html_template += f"""
-    <div class="preview">
-        <h2>{modified_title}</h2>
-        <div class="content">{post_data['content']}</div>
-    """
-    
-    # 이미지와 비디오 처리
+    # 이미지 처리 (1.html과 동일한 방식)
     for img_path in post_data['images']:
-        html_template += f'<img src="{img_path}" alt="이미지">\n'
-        
-    # 비디오 처리 부분 수정
-    for video_path in post_data['videos']:
-        if 'youtube.com' in video_path or 'youtu.be' in video_path:
-            video_id = extract_youtube_id(video_path)
-            if video_id:
-                html_template += f'''
-                <div class="video-container">
-                    <iframe 
-                        src="https://www.youtube.com/embed/{video_id}"
-                        title="YouTube video player"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-                '''
-        elif video_path.endswith(('.mp4', '.webm', '.ogg')):
-            html_template += f'<video controls src="{video_path}"></video>\n'
-            
-    html_template += """
-            <!-- 하단 광고 -->
+        html_template += f'<img src="../../downloaded_media/images/{os.path.basename(img_path)}" alt="이미지">\n'
+
+    # 나머지 템플릿
+    html_template += """</div>
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -415,11 +393,13 @@ def save_to_html(post_data, title):
     </html>
     """
 
-    # 이미지 경로 수정 - 상대경로를 절대경로로 변경
-    for i, img_path in enumerate(post_data['images']):
-        post_data['images'][i] = f"https://kk.testpro.site//output/news/{img_path}"
-
-    save_html_file(title, html_template, [post_data])
+    # 파일 저장 경로 수정 (1.html과 동일하게)
+    base_dir = os.path.join('output', f'{time.strftime("%Y%m%d")}')
+    os.makedirs(base_dir, exist_ok=True)
+    
+    file_path = os.path.join(base_dir, f'{title}.html')
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(html_template)
 
 def extract_youtube_id(url):
     if not url:
