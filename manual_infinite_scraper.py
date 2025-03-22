@@ -52,10 +52,11 @@ def shift_posts(output_dir):
 
 def generate_filename(title):
     """제목을 파일명으로 변환"""
-    # 특수문자 제거 및 공백을 하이픈으로 변환
-    filename = re.sub(r'[^\w\s-]', '', title)
-    filename = re.sub(r'[-\s]+', '-', filename).strip('-')  # title을 filename으로 수정
-    return filename.lower()[:50]  # 최대 50자로 제한
+    # 한글, 영문, 숫자만 남기고 나머지는 제거
+    filename = re.sub(r'[^\w\s가-힣]', '', title)
+    # 공백을 하이픈으로 변환
+    filename = re.sub(r'\s+', '-', filename).strip('-')
+    return filename[:50]  # 최대 50자로 제한
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
@@ -120,9 +121,12 @@ def save_html_file(page_num, html_content, posts_data=None):
     return filename
 
 def save_to_html(post_data, page_num):
-    # 첫 번째 이미지를 썸네일로 사용 (URL 경로로 변환)
+    # 도메인 설정 수정
+    domain = "https://kk.testpro.site"
+    
+    # 첫 번째 이미지를 썸네일로 사용 (전체 URL 경로로 변환)
     thumbnail_url = post_data['images'][0] if post_data['images'] else '/output/posts/images/default.webp'
-    thumbnail_url = thumbnail_url.replace('\\', '/')  # 백슬래시를 슬래시로 변환
+    thumbnail_url = domain + thumbnail_url  # 전체 URL로 변환
     
     # 이전/다음 페이지 파일명 가져오기
     output_dir = os.path.join('s07102624.github.io', 'output', 'posts')
@@ -144,12 +148,12 @@ def save_to_html(post_data, page_num):
         <title>{post_data['title']} - {page_num}페이지</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         
-        <!-- Open Graph 메타 태그 추가 -->
+        <!-- Open Graph 메타 태그 수정 -->
         <meta property="og:title" content="{post_data['title']}">
         <meta property="og:image" content="{thumbnail_url}">
         <meta property="og:type" content="article">
         
-        <!-- Twitter 카드 메타 태그 추가 -->
+        <!-- Twitter 카드 메타 태그 수정 -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{post_data['title']}">
         <meta name="twitter:image" content="{thumbnail_url}">
@@ -513,14 +517,15 @@ def update_index_file(total_pages):
     except FileNotFoundError:
         page_mapping = {}
     
+    domain = "https://kk.testpro.site"
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
         preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
         filename = page_mapping.get(str(i), f"{i}.html")
-        # 이미지 경로 수정
         image_path = preview['image'] if preview['image'] else '/output/posts/images/default.webp'
+        image_path = domain + image_path  # 전체 URL로 변환
         preview_html = f'''
-            <a href="/output/posts/{filename}">
+            <a href="{domain}/output/posts/{filename}">
                 <img class="preview-image" src="{image_path}" alt="{preview['title']}" loading="lazy">
                 <p class="preview-title">{preview['title']}</p>
             </a>
@@ -637,7 +642,7 @@ def download_media(url, folder):
                         f.write(response.content)
                 
                 # 상대 경로 반환 (HTML에서 참조할 경로)
-                return '/output/posts/images/' + f"{base_name}.webp"  # 절대 경로로 수정
+                return '/output/posts/images/' + f"{base_name}.webp"  # 전체 URL로 변환되도록 경로 수정
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
