@@ -59,7 +59,7 @@ def generate_filename(title):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', 'post')
+    output_dir = os.path.join('s07102624.github.io', 'output', 'posts')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -120,11 +120,12 @@ def save_html_file(page_num, html_content, posts_data=None):
     return filename
 
 def save_to_html(post_data, page_num):
-    # 첫 번째 이미지를 썸네일로 사용
-    thumbnail_url = post_data['images'][0] if post_data['images'] else 'output/post/images/default.webp'
+    # 첫 번째 이미지를 썸네일로 사용 (URL 경로로 변환)
+    thumbnail_url = post_data['images'][0] if post_data['images'] else '/output/posts/images/default.webp'
+    thumbnail_url = thumbnail_url.replace('\\', '/')  # 백슬래시를 슬래시로 변환
     
     # 이전/다음 페이지 파일명 가져오기
-    output_dir = os.path.join('s07102624.github.io', 'output', 'post')
+    output_dir = os.path.join('s07102624.github.io', 'output', 'posts')
     mapping_file = os.path.join(output_dir, 'page_mapping.json')
     try:
         with open(mapping_file, 'r', encoding='utf-8') as f:
@@ -145,14 +146,12 @@ def save_to_html(post_data, page_num):
         
         <!-- Open Graph 메타 태그 추가 -->
         <meta property="og:title" content="{post_data['title']}">
-        <meta property="og:description" content="{post_data['content'][:200]}...">
         <meta property="og:image" content="{thumbnail_url}">
         <meta property="og:type" content="article">
         
         <!-- Twitter 카드 메타 태그 추가 -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{post_data['title']}">
-        <meta name="twitter:description" content="{post_data['content'][:200]}...">
         <meta name="twitter:image" content="{thumbnail_url}">
         
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
@@ -299,10 +298,10 @@ def save_to_html(post_data, page_num):
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
 
-            <div class="navigation">
-                <a href="{prev_file}" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
-                <a href="../../../index.html">목록으로</a>
-                <a href="{next_file}" {"style='visibility:hidden'" if not next_file else ""}>다음 글 →</a>
+            <div class="navigation" style="display: flex; justify-content: space-between; margin: 20px 0;">
+                <a href="/output/posts/{prev_file}" style="text-decoration: none; color: #007bff; {'' if page_num > 1 else 'visibility: hidden'}">← 이전 글</a>
+                <a href="/index.html#1" style="text-decoration: none; color: #007bff;">목록으로</a>
+                <a href="/output/posts/{next_file}" style="text-decoration: none; color: #007bff; {'' if next_file else 'visibility: hidden'}">다음 글 →</a>
             </div>
             
             <div class="preview">
@@ -507,7 +506,7 @@ def update_index_file(total_pages):
 """
     
     # 페이지 매핑 로드
-    mapping_file = os.path.join('s07102624.github.io', 'output', 'post', 'page_mapping.json')
+    mapping_file = os.path.join('s07102624.github.io', 'output', 'posts', 'page_mapping.json')
     try:
         with open(mapping_file, 'r', encoding='utf-8') as f:
             page_mapping = json.load(f)
@@ -518,9 +517,10 @@ def update_index_file(total_pages):
     for i in range(1, total_pages + 1):
         preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
         filename = page_mapping.get(str(i), f"{i}.html")
-        image_path = preview['image'] if preview['image'] else 'output/post/images/default.webp'
+        image_path = preview['image'] if preview['image'] else '/output/posts/images/default.webp'
+        image_path = image_path.replace('\\', '/')  # 백슬래시를 슬래시로 변환
         preview_html = f'''
-            <a href="output/post/{filename}">
+            <a href="/output/posts/{filename}">
                 <img class="preview-image" src="{image_path}" alt="{preview['title']}">
                 <p class="preview-title">{preview['title']}</p>
             </a>
@@ -532,10 +532,8 @@ def update_index_file(total_pages):
         <div class="pagination" id="pagination"></div>
     </div>
     <script>
-        const itemsPerPage = 1; // 한 페이지당 1개씩 표시
-        const pageList = document.getElementById('pageList');
-        const pagination = document.getElementById('pagination');
-        const links = pageList.getElementsByTagName('a');
+        // URL에서 해시 값을 가져와서 초기 페이지 결정
+        const hashPage = parseInt(window.location.hash.replace('#', '')) || 1;
         
         function showPage(pageNum) {
             // 모든 링크 숨기기
@@ -548,6 +546,9 @@ def update_index_file(total_pages):
             if (links[current]) {
                 links[current].style.display = 'block';
             }
+            
+            // URL 해시 업데이트
+            window.location.hash = '#' + pageNum;
             
             updatePagination(pageNum);
         }
@@ -573,7 +574,13 @@ def update_index_file(total_pages):
         }
         
         // 초기 페이지 표시
-        showPage(1);
+        showPage(hashPage);
+        
+        // 해시 변경 감지
+        window.addEventListener('hashchange', function() {
+            const newPage = parseInt(window.location.hash.replace('#', '')) || 1;
+            showPage(newPage);
+        });
     </script>
 </body>
 </html>
@@ -589,7 +596,7 @@ def download_media(url, folder):
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', 'post', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', 'posts', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 기본 이미지 생성 (처음 실행시)
@@ -630,7 +637,7 @@ def download_media(url, folder):
                         f.write(response.content)
                 
                 # 상대 경로 반환 (HTML에서 참조할 경로)
-                return os.path.join('images', f"{base_name}.webp")
+                return 'images/' + f"{base_name}.webp"  # 경로 구분자를 슬래시로 통일
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
@@ -799,7 +806,7 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'post', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'posts', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
