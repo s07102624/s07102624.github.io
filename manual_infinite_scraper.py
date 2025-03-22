@@ -49,30 +49,9 @@ def shift_posts(output_dir):
         os.rename(os.path.join(output_dir, file), 
                  os.path.join(output_dir, new_name))
 
-def sanitize_filename(title):
-    """게시물 제목을 유효한 파일명으로 변환"""
-    # 파일명으로 사용할 수 없는 문자 제거
-    invalid_chars = '<>:"/\\|?*'
-    filename = ''.join(c for c in title if c not in invalid_chars)
-    # 길이 제한 (파일 시스템 제한 고려)
-    filename = filename[:150]
-    return filename.strip()
-
-def check_duplicate_title(title, output_dir):
-    """동일 제목의 파일이 존재하는지 확인"""
-    sanitized_title = sanitize_filename(title)
-    return os.path.exists(os.path.join(output_dir, f'{sanitized_title}.html'))
-
-def save_html_file(title, html_content, posts_data=None):
-    # 경로 수정 - 1.html과 동일하게 YYYYMMDD 형식으로
-    output_dir = os.path.join('output', time.strftime('%Y%m%d'))
+def save_html_file(filename, html_content, posts_data=None):
+    output_dir = os.path.join('output', 'news')
     os.makedirs(output_dir, exist_ok=True)
-    
-    # 이미지 저장 경로도 수정
-    image_dir = os.path.join('downloaded_media', 'images')
-    os.makedirs(image_dir, exist_ok=True)
-    
-    sanitized_title = sanitize_filename(title)
     
     if posts_data:
         # DB 연결
@@ -111,7 +90,7 @@ def save_html_file(title, html_content, posts_data=None):
     # HTML 내용 변경 (title 파라미터 추가)
     html_content = replace_text_content(html_content, posts_data[0]['title'] if posts_data else 'Default Title')
     
-    file_path = os.path.join(output_dir, f'{sanitized_title}.html')
+    file_path = os.path.join(output_dir, filename)
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
@@ -154,14 +133,49 @@ def generate_clickbait_title(original_title):
 # 상단에 re 모듈 import 추가
 import re
 
-def save_to_html(post_data, title):
+# 새로운 함수 추가
+def get_safe_filename(title):
+    """제목을 안전한 파일명으로 변환"""
+    # 허용되지 않는 문자 제거 또는 변환
+    filename = re.sub(r'[\\/*?:"<>|]', "", title)
+    filename = filename.replace(' ', '_')
+    # 최대 길이 제한
+    if len(filename) > 150:
+        filename = filename[:150]
+    return filename + '.html'
+
+def get_file_list():
+    """현재 존재하는 HTML 파일 목록 반환"""
+    output_dir = os.path.join('output', 'news')
+    return [f for f in os.listdir(output_dir) if f.endswith('.html')]
+
+def find_adjacent_files(current_file, file_list):
+    """이전/다음 파일 찾기"""
+    sorted_files = sorted(file_list)
+    current_index = sorted_files.index(current_file)
+    prev_file = sorted_files[current_index - 1] if current_index > 0 else None
+    next_file = sorted_files[current_index + 1] if current_index < len(sorted_files) - 1 else None
+    return prev_file, next_file
+
+def save_to_html(post_data, page_num):
+    # 파일명 생성
+    filename = get_safe_filename(post_data['title'])
+    output_dir = os.path.join('output', 'news')
+    file_path = os.path.join(output_dir, filename)
+    
+    # 파일 중복 체크
+    if os.path.exists(file_path):
+        print(f"중복된 게시물 발견: {filename}")
+        return False
+
     # 제목 수정
     modified_title = post_data['title']
     if not modified_title.startswith(('1페이지', '2페이지')):
         modified_title = generate_clickbait_title(modified_title)
     
-    # HTML 템플릿에 수정된 제목 적용 (1.html과 완전히 동일한 구조)
-    html_template = f"""<!DOCTYPE html>
+    # HTML 템플릿에 수정된 제목 적용
+    html_template = f"""
+    <!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
@@ -279,18 +293,6 @@ def save_to_html(post_data, title):
             #closeBtn:disabled {{
                 background: #ccc;
             }}
-            .navigation {{
-                display: flex;
-                justify-content: space-between;
-                margin: 15px 0;
-            }}
-            .navigation a {{
-                color: #007bff;
-                text-decoration: none;
-            }}
-            .navigation a:hover {{
-                text-decoration: underline;
-            }}
         </style>
     </head>
     <body>
@@ -298,6 +300,7 @@ def save_to_html(post_data, title):
         <div id="adPopup" class="popup">
             <div id="timer">7</div>
             <div id="popupAdContainer">
+                <!-- 보험 팝업 광고 -->
                 <ins class="adsbygoogle"
                      style="display:block"
                      data-ad-client="ca-pub-9374368296307755"
@@ -309,8 +312,9 @@ def save_to_html(post_data, title):
         </div>
 
         <div class="content">
-            <h1>테스트프로 - 페이지 {title}</h1>
+            <h1>테스트프로 - 페이지 {page_num}</h1>
 
+            <!-- 상단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -320,24 +324,51 @@ def save_to_html(post_data, title):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
-    
-            <div class="navigation">
-                <a href="{int(title)-1}.html" style='visibility:{("hidden" if int(title) <= 1 else "visible")}'>← 이전 글</a>
-                <a href="index.html">목록으로</a>
-                <a href="{int(title)+1}.html">다음 글 →</a>
-            </div>
-    
-            <div class="preview">
-                <h2>{modified_title}</h2>
-                <div class="content">{post_data['content']}</div>
     """
 
-    # 이미지 처리 (1.html과 동일한 방식)
+    # 네비게이션 부분 수정
+    file_list = get_file_list()
+    prev_file, next_file = find_adjacent_files(filename, file_list)
+    
+    html_template += f"""
+    <div class="navigation">
+        <a href="{prev_file or '#'}" {"style='visibility:hidden'" if not prev_file else ""}>← 이전 글</a>
+        <a href="index.html">목록으로</a>
+        <a href="{next_file or '#'}" {"style='visibility:hidden'" if not next_file else ""}>다음 글 →</a>
+    </div>
+    """
+    
+    html_template += f"""
+    <div class="preview">
+        <h2>{modified_title}</h2>
+        <div class="content">{post_data['content']}</div>
+    """
+    
+    # 이미지와 비디오 처리
     for img_path in post_data['images']:
-        html_template += f'<img src="../../downloaded_media/images/{os.path.basename(img_path)}" alt="이미지">\n'
-
-    # 나머지 템플릿
-    html_template += """</div>
+        html_template += f'<img src="{img_path}" alt="이미지">\n'
+        
+    # 비디오 처리 부분 수정
+    for video_path in post_data['videos']:
+        if 'youtube.com' in video_path or 'youtu.be' in video_path:
+            video_id = extract_youtube_id(video_path)
+            if video_id:
+                html_template += f'''
+                <div class="video-container">
+                    <iframe 
+                        src="https://www.youtube.com/embed/{video_id}"
+                        title="YouTube video player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                '''
+        elif video_path.endswith(('.mp4', '.webm', '.ogg')):
+            html_template += f'<video controls src="{video_path}"></video>\n'
+            
+    html_template += """
+            <!-- 하단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
@@ -397,13 +428,8 @@ def save_to_html(post_data, title):
     </html>
     """
 
-    # 파일 저장 경로 수정 (1.html과 동일하게)
-    base_dir = os.path.join('output', f'{time.strftime("%Y%m%d")}')
-    os.makedirs(base_dir, exist_ok=True)
-    
-    file_path = os.path.join(base_dir, f'{title}.html')
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(html_template)
+    save_html_file(filename, html_template, [post_data])
+    return True
 
 def extract_youtube_id(url):
     if not url:
@@ -489,17 +515,21 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/news/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="/output/news/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
         <div class="pagination" id="pagination"></div>
     </div>
     <script>
-        const itemsPerPage = 1; // 한 페이지당 1개씩 표시
-        const pageList = document.getElementById('pageList');
-        const pagination = document.getElementById('pagination');
-        const links = pageList.getElementsByTagName('a');
+        // 페이지 정보를 저장할 배열
+        const pageUrls = [];
+        
+        // 페이지 링크들을 순회하면서 URL 저장
+        const links = document.getElementById('pageList').getElementsByTagName('a');
+        for (let link of links) {
+            pageUrls.push(link.href);
+        }
         
         function showPage(pageNum) {
             // 모든 링크 숨기기
@@ -520,9 +550,15 @@ def update_index_file(total_pages):
             const totalPages = links.length;
             let html = '';
             
+            // 이전 페이지 URL
+            const prevUrl = pageUrls[currentPage - 2]; // 배열은 0부터 시작하므로 2를 뺌
+            
+            // 다음 페이지 URL
+            const nextUrl = pageUrls[currentPage];
+            
             // 이전 버튼
             if (currentPage > 1) {
-                html += `<button onclick="showPage(${currentPage - 1})">이전</button>`;
+                html += `<button onclick="window.location.href='${prevUrl}'">이전</button>`;
             }
             
             // 현재 페이지
@@ -530,7 +566,7 @@ def update_index_file(total_pages):
             
             // 다음 버튼
             if (currentPage < totalPages) {
-                html += `<button onclick="showPage(${currentPage + 1})">다음</button>`;
+                html += `<button onclick="window.location.href='${nextUrl}'">다음</button>`;
             }
             
             pagination.innerHTML = html;
@@ -548,7 +584,7 @@ def update_index_file(total_pages):
 
 def is_image_exists(image_name):
     """이미지 중복 체크"""
-    image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
+    image_dir = os.path.join('output', 'news', 'images')
     image_path = os.path.join(image_dir, f"{image_name}.webp")
     return os.path.exists(image_path)
 
@@ -559,17 +595,19 @@ def download_media(url, folder):
         if not url or 'data:' in url:
             return None
             
-        # 이미지 저장 경로를 1.html과 동일하게 수정
-        image_dir = os.path.join('downloaded_media', 'images')
+        # 이미지 저장 경로 수정
+        image_dir = os.path.join('output', 'news', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
-        # 파일명 생성 - webp 대신 원본 확장자 유지
+        # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
-        ext = os.path.splitext(url)[1].lower()
-        if not ext:
-            ext = '.jpg'
-            
-        filename = os.path.join(image_dir, f"{base_name}{ext}")
+        
+        # 이미지 중복 체크
+        if is_image_exists(base_name):
+            print(f"이미지 중복 발견: {base_name}")
+            return None
+        
+        filename = os.path.join(image_dir, f"{base_name}.webp")
         
         # User-Agent 헤더 추가
         headers = {
@@ -598,8 +636,8 @@ def download_media(url, folder):
                     with open(filename, 'wb') as f:
                         f.write(response.content)
                 
-                # 상대 경로 반환 수정 - 1.html과 동일하게
-                return f"../../downloaded_media/images/{os.path.basename(filename)}"
+                # 상대 경로 반환 (HTML에서 참조할 경로)
+                return os.path.join('images', f"{base_name}.webp")
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
@@ -749,13 +787,6 @@ def infinite_scrape():
                         if not post_url:
                             continue
                             
-                        post_title = title_elem.get_text(strip=True)
-                        
-                        # 중복 체크
-                        if check_duplicate_title(post_title, os.path.join('s07102624.github.io', 'output', 'news')):
-                            print(f"\n중복된 제목의 게시물 건너뛰기: {post_title}")
-                            continue
-                        
                         # 상세 페이지 스크래핑
                         print(f"\n상세 페이지 스크래핑 중: {post_url}")
                         detail_data = get_post_detail(scraper, post_url)
@@ -766,11 +797,11 @@ def infinite_scrape():
                         
                         # 게시물 데이터 구성
                         post_data = {
-                            'title': post_title,
+                            'title': title_elem.get_text(strip=True),
                             'content': detail_data['content'],
                             'images': [],
                             'videos': detail_data['videos'],
-                            'hash': hashlib.md5((post_title + detail_data['content']).encode('utf-8')).hexdigest()
+                            'hash': hashlib.md5((title_elem.get_text(strip=True) + detail_data['content']).encode('utf-8')).hexdigest()
                         }
                         
                         # 이미지 다운로드 시도 및 중복 체크
@@ -787,12 +818,15 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'news', 'images'))
+                            saved_path = download_media(img_url, os.path.join('output', 'news', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
-                        # HTML 파일 저장 (페이지 번호 대신 제목 사용)
-                        save_to_html(post_data, post_title)
+                        # HTML 파일 저장
+                        if not save_to_html(post_data, page):
+                            print("중복된 게시물이므로 건너뜁니다.")
+                            continue
+                        
                         total_posts += 1
                         
                         print(f"\n성공적으로 스크래핑된 게시물:")
