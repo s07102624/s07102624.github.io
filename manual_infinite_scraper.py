@@ -156,14 +156,7 @@ def save_to_html(post_data, title):
     if not modified_title.startswith(('1페이지', '2페이지')):
         modified_title = generate_clickbait_title(modified_title)
     
-    # 첫 번째 이미지를 썸네일로 사용
-    thumbnail_url = ''
-    if post_data['images']:
-        # 상대 경로를 절대 URL로 변환하고 백슬래시를 슬래시로 변경
-        image_path = post_data['images'][0].replace('\\', '/')
-        thumbnail_url = f"https://kk.testpro.site/output/news/{image_path}"
-
-    # HTML 템플릿에 메타 태그 추가
+    # HTML 템플릿에 수정된 제목 적용
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -172,19 +165,20 @@ def save_to_html(post_data, title):
         <title>{modified_title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         
-        <!-- OpenGraph 메타 태그 추가 -->
-        <meta property="og:title" content="{modified_title}">
-        <meta property="og:description" content="{post_data['content'][:200]}...">
-        <meta property="og:image" content="{thumbnail_url}">
-        <meta property="og:url" content="https://kk.testpro.site/output/news/{sanitize_filename(title)}.html">
+        <!-- Open Graph / 공유용 메타태그 추가 -->
         <meta property="og:type" content="article">
-        <meta property="og:site_name" content="테스트프로">
+        <meta property="og:title" content="{modified_title}">
+        <meta property="og:description" content="{post_data['content'][:150]}...">
+        <meta property="og:url" content="https://kk.testpro.site//output/news/{sanitize_filename(title)}.html">
         
-        <!-- Twitter 카드 메타 태그 -->
+        <!-- 첫 번째 이미지를 썸네일로 사용 -->
+        {"<meta property='og:image' content='https://kk.testpro.site//output/news/" + post_data['images'][0] + "'>" if post_data['images'] else ""}
+        
+        <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{modified_title}">
-        <meta name="twitter:description" content="{post_data['content'][:200]}...">
-        <meta name="twitter:image" content="{thumbnail_url}">
+        <meta name="twitter:description" content="{post_data['content'][:150]}...">
+        {"<meta name='twitter:image' content='https://kk.testpro.site//output/news/" + post_data['images'][0] + "'>" if post_data['images'] else ""}
         
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
@@ -421,6 +415,10 @@ def save_to_html(post_data, title):
     </html>
     """
 
+    # 이미지 경로 수정 - 상대경로를 절대경로로 변경
+    for i, img_path in enumerate(post_data['images']):
+        post_data['images'][i] = f"https://kk.testpro.site//output/news/{img_path}"
+
     save_html_file(title, html_template, [post_data])
 
 def extract_youtube_id(url):
@@ -507,7 +505,7 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="https://kk.testpro.site/output/news/{i}.html">페이지 {i}</a>\n'
+        index_template += f'            <a href="s07102624.github.io/output/news/{i}.html">페이지 {i}</a>\n'
     
     index_template += """
         </div>
@@ -571,51 +569,54 @@ def is_image_exists(image_name):
     return os.path.exists(image_path)
 
 def download_media(url, folder):
-    """미디어 다운로드 함수 - WebP 지원 및 이미지 크기 조정"""
+    """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
+        # URL 검증
         if not url or 'data:' in url:
             return None
             
+        # 이미지 저장 경로 수정
         image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
+        # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
         
+        # 이미지 중복 체크
         if is_image_exists(base_name):
             print(f"이미지 중복 발견: {base_name}")
             return None
         
         filename = os.path.join(image_dir, f"{base_name}.webp")
         
+        # User-Agent 헤더 추가
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
             'Referer': 'https://www.humorworld.net/'
         }
         
+        # 최대 3번 재시도
         for attempt in range(3):
             try:
                 response = requests.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
                 
+                # 이미지인 경우 WebP로 변환
                 if any(url.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif']):
                     img = Image.open(io.BytesIO(response.content))
-                    
                     # RGBA 모드인 경우 RGB로 변환
                     if img.mode in ('RGBA', 'LA'):
                         background = Image.new('RGB', img.size, (255, 255, 255))
                         background.paste(img, mask=img.split()[-1])
                         img = background
-                    
-                    # 이미지 크기 조정 (1200x630)
-                    target_size = (1200, 630)
-                    img = img.resize(target_size, Image.Resampling.LANCZOS)
-                    
                     # WebP로 저장 (품질 85%)
                     img.save(filename, 'WEBP', quality=85)
                 else:
+                    # 비디오 등 다른 미디어는 그대로 저장
                     with open(filename, 'wb') as f:
                         f.write(response.content)
                 
+                # 상대 경로 반환 (HTML에서 참조할 경로)
                 return os.path.join('images', f"{base_name}.webp")
                 
             except requests.exceptions.RequestException as e:
