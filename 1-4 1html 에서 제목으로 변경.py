@@ -549,51 +549,54 @@ def is_image_exists(image_name):
     return os.path.exists(image_path)
 
 def download_media(url, folder):
-    """미디어 다운로드 함수 - WebP 지원 및 이미지 크기 조정"""
+    """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
+        # URL 검증
         if not url or 'data:' in url:
             return None
             
+        # 이미지 저장 경로 수정
         image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
+        # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
         
+        # 이미지 중복 체크
         if is_image_exists(base_name):
             print(f"이미지 중복 발견: {base_name}")
             return None
         
         filename = os.path.join(image_dir, f"{base_name}.webp")
         
+        # User-Agent 헤더 추가
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
             'Referer': 'https://www.humorworld.net/'
         }
         
+        # 최대 3번 재시도
         for attempt in range(3):
             try:
                 response = requests.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
                 
+                # 이미지인 경우 WebP로 변환
                 if any(url.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif']):
                     img = Image.open(io.BytesIO(response.content))
-                    
                     # RGBA 모드인 경우 RGB로 변환
                     if img.mode in ('RGBA', 'LA'):
                         background = Image.new('RGB', img.size, (255, 255, 255))
                         background.paste(img, mask=img.split()[-1])
                         img = background
-                    
-                    # 이미지 크기 조정 (1200x630)
-                    target_size = (1200, 630)
-                    img = img.resize(target_size, Image.Resampling.LANCZOS)
-                    
                     # WebP로 저장 (품질 85%)
                     img.save(filename, 'WEBP', quality=85)
                 else:
+                    # 비디오 등 다른 미디어는 그대로 저장
                     with open(filename, 'wb') as f:
                         f.write(response.content)
                 
+                # 상대 경로 반환 (HTML에서 참조할 경로)
                 return os.path.join('images', f"{base_name}.webp")
                 
             except requests.exceptions.RequestException as e:
