@@ -25,6 +25,7 @@ except ImportError as e:
     sys.exit(1)
 
 import random
+import re
 
 # UTF-8 인코딩 설정
 if sys.stdout.encoding != 'utf-8':
@@ -48,6 +49,13 @@ def shift_posts(output_dir):
         new_name = f"{current_num + 1}.html"
         os.rename(os.path.join(output_dir, file), 
                  os.path.join(output_dir, new_name))
+
+def generate_filename(title):
+    """제목을 파일명으로 변환"""
+    # 특수문자 제거 및 공백을 하이픈으로 변환
+    filename = re.sub(r'[^\w\s-]', '', title)
+    filename = re.sub(r'[-\s]+', '-', filename).strip('-')
+    return filename.lower()[:50]  # 최대 50자로 제한
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
@@ -87,13 +95,29 @@ def save_html_file(page_num, html_content, posts_data=None):
         
         conn.commit()
         conn.close()
+        
+        # 파일명을 제목 기반으로 생성
+        title = posts_data[0]['title']
+        filename = f"{generate_filename(title)}.html"
+        
+        # 파일 경로와 URL 매핑 저장
+        mapping_file = os.path.join(output_dir, 'page_mapping.json')
+        try:
+            with open(mapping_file, 'r', encoding='utf-8') as f:
+                mapping = json.load(f)
+        except FileNotFoundError:
+            mapping = {}
+        
+        mapping[str(page_num)] = filename
+        
+        with open(mapping_file, 'w', encoding='utf-8') as f:
+            json.dump(mapping, f, ensure_ascii=False, indent=2)
     
-    # HTML 내용 변경 (title 파라미터 추가)
-    html_content = replace_text_content(html_content, posts_data[0]['title'] if posts_data else 'Default Title')
-    
-    file_path = os.path.join(output_dir, f'{page_num}.html')
+    file_path = os.path.join(output_dir, filename)
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
+    
+    return filename
 
 def save_to_html(post_data, page_num):
     # HTML 템플릿 수정 - 제목을 게시글 제목으로 변경
@@ -457,12 +481,21 @@ def update_index_file(total_pages):
         <div class="page-list" id="pageList">
 """
     
+    # 페이지 매핑 로드
+    mapping_file = os.path.join('s07102624.github.io', 'output', 'post', 'page_mapping.json')
+    try:
+        with open(mapping_file, 'r', encoding='utf-8') as f:
+            page_mapping = json.load(f)
+    except FileNotFoundError:
+        page_mapping = {}
+    
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
         preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
+        filename = page_mapping.get(str(i), f"{i}.html")
         image_path = preview['image'] if preview['image'] else 'output/post/images/default.webp'
         preview_html = f'''
-            <a href="output/post/{i}.html">
+            <a href="output/post/{filename}">
                 <img class="preview-image" src="{image_path}" alt="{preview['title']}">
                 <p class="preview-title">{preview['title']}</p>
             </a>
