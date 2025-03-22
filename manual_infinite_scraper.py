@@ -64,9 +64,13 @@ def check_duplicate_title(title, output_dir):
     return os.path.exists(os.path.join(output_dir, f'{sanitized_title}.html'))
 
 def save_html_file(title, html_content, posts_data=None):
-    # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', 'news')
+    # 경로 수정 - 1.html과 동일하게 YYYYMMDD 형식으로
+    output_dir = os.path.join('output', time.strftime('%Y%m%d'))
     os.makedirs(output_dir, exist_ok=True)
+    
+    # 이미지 저장 경로도 수정
+    image_dir = os.path.join('downloaded_media', 'images')
+    os.makedirs(image_dir, exist_ok=True)
     
     sanitized_title = sanitize_filename(title)
     
@@ -555,19 +559,17 @@ def download_media(url, folder):
         if not url or 'data:' in url:
             return None
             
-        # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', 'news', 'images')
+        # 이미지 저장 경로를 1.html과 동일하게 수정
+        image_dir = os.path.join('downloaded_media', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
-        # 파일명 생성
+        # 파일명 생성 - webp 대신 원본 확장자 유지
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
-        
-        # 이미지 중복 체크
-        if is_image_exists(base_name):
-            print(f"이미지 중복 발견: {base_name}")
-            return None
-        
-        filename = os.path.join(image_dir, f"{base_name}.webp")
+        ext = os.path.splitext(url)[1].lower()
+        if not ext:
+            ext = '.jpg'
+            
+        filename = os.path.join(image_dir, f"{base_name}{ext}")
         
         # User-Agent 헤더 추가
         headers = {
@@ -596,8 +598,8 @@ def download_media(url, folder):
                     with open(filename, 'wb') as f:
                         f.write(response.content)
                 
-                # 상대 경로 반환 (HTML에서 참조할 경로)
-                return os.path.join('images', f"{base_name}.webp")
+                # 상대 경로 반환 수정 - 1.html과 동일하게
+                return f"../../downloaded_media/images/{os.path.basename(filename)}"
                 
             except requests.exceptions.RequestException as e:
                 print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
