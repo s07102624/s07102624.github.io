@@ -124,24 +124,16 @@ def save_to_html(post_data, page_num):
     # 도메인 설정 수정
     domain = "https://kk.testpro.site"
     
-    # 썸네일용 이미지 생성 및 저장
+    # 첫 번째 이미지를 썸네일로 사용
     if post_data['images']:
-        thumbnail_path = create_thumbnail(post_data['images'][0], domain)
-        thumbnail_url = domain + thumbnail_path
-    else:
-        thumbnail_url = domain + '/output/posts/images/default.webp'
-
-    # 이미지 절대 경로로 변환
-    images = []
-    for img in post_data['images']:
-        if not img.startswith('http'):
-            images.append(domain + img)
+        first_image = post_data['images'][0]
+        if '/thumbnails/' not in first_image:
+            thumbnail_url = domain + create_thumbnail(os.path.join('s07102624.github.io', first_image.lstrip('/')))
         else:
-            images.append(img)
-    post_data['images'] = images
-    
-    # 첫 번째 이미지를 썸네일로 사용 (전체 URL 경로로 변환)
-    thumbnail_url = post_data['images'][0] if post_data['images'] else domain + '/output/posts/images/default.webp'
+            thumbnail_url = domain + first_image
+    else:
+        default_thumb = create_thumbnail(os.path.join('s07102624.github.io', 'output', 'posts', 'images', 'default.webp'))
+        thumbnail_url = domain + default_thumb
     
     # 이전/다음 페이지 파일명 가져오기
     output_dir = os.path.join('s07102624.github.io', 'output', 'posts')
@@ -165,12 +157,8 @@ def save_to_html(post_data, page_num):
         
         <!-- Open Graph 메타 태그 수정 -->
         <meta property="og:title" content="{post_data['title']}">
-        <meta property="og:site_name" content="테스트프로">
         <meta property="og:image" content="{thumbnail_url}">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
         <meta property="og:type" content="article">
-        <meta property="og:url" content="{domain}/output/posts/{filename}">
         
         <!-- Twitter 카드 메타 태그 수정 -->
         <meta name="twitter:card" content="summary_large_image">
@@ -420,41 +408,6 @@ def save_to_html(post_data, page_num):
     
     save_html_file(page_num, html_template, [post_data])
 
-def create_thumbnail(image_path, domain):
-    """썸네일 이미지 생성"""
-    try:
-        # 원본 이미지 경로
-        full_path = image_path.replace(domain, '')
-        src_path = os.path.join('s07102624.github.io', full_path.lstrip('/'))
-        
-        # 썸네일 저장 경로
-        thumb_dir = os.path.join('s07102624.github.io', 'output', 'posts', 'thumbnails')
-        os.makedirs(thumb_dir, exist_ok=True)
-        
-        # 파일명 생성
-        base_name = os.path.splitext(os.path.basename(image_path))[0]
-        thumb_path = os.path.join(thumb_dir, f"{base_name}_thumb.jpg")
-        
-        # 썸네일 생성
-        with Image.open(src_path) as img:
-            # 크기 조정
-            img = img.convert('RGB')
-            img.thumbnail((1200, 630))
-            
-            # 비율 맞추기
-            background = Image.new('RGB', (1200, 630), (255, 255, 255))
-            offset = ((1200 - img.width) // 2, (630 - img.height) // 2)
-            background.paste(img, offset)
-            
-            # JPG로 저장 (WebP 대신)
-            background.save(thumb_path, 'JPEG', quality=85)
-        
-        return '/output/posts/thumbnails/' + os.path.basename(thumb_path)
-        
-    except Exception as e:
-        print(f"썸네일 생성 중 오류: {str(e)}")
-        return '/output/posts/images/default.webp'
-
 def extract_youtube_id(url):
     if not url:
         return None
@@ -650,6 +603,43 @@ def update_index_file(total_pages):
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(index_template)
 
+def create_thumbnail(image_path):
+    """썸네일 이미지 생성 (1200x630)"""
+    try:
+        thumb_dir = os.path.join('s07102624.github.io', 'output', 'posts', 'thumbnails')
+        os.makedirs(thumb_dir, exist_ok=True)
+        
+        base_name = os.path.splitext(os.path.basename(image_path))[0]
+        thumb_path = os.path.join(thumb_dir, f"{base_name}_thumb.webp")
+        
+        with Image.open(image_path) as img:
+            # RGB 모드로 변환
+            if img.mode in ('RGBA', 'LA'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1])
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # 비율 유지하며 리사이즈
+            img.thumbnail((1200, 630))
+            
+            # 1200x630 캔버스 생성
+            canvas = Image.new('RGB', (1200, 630), (255, 255, 255))
+            
+            # 이미지를 중앙에 배치
+            offset = ((1200 - img.width) // 2, (630 - img.height) // 2)
+            canvas.paste(img, offset)
+            
+            # WebP로 저장
+            canvas.save(thumb_path, 'WEBP', quality=90)
+            
+        return '/output/posts/thumbnails/' + os.path.basename(thumb_path)
+        
+    except Exception as e:
+        print(f"썸네일 생성 중 오류: {str(e)}")
+        return None
+
 def download_media(url, folder):
     """미디어 다운로드 함수 - WebP 지원 추가"""
     try:
@@ -692,6 +682,10 @@ def download_media(url, folder):
                         img = background
                     # WebP로 저장 (품질 85%)
                     img.save(filename, 'WEBP', quality=85)
+                    
+                    # 첫 번째 이미지인 경우 썸네일도 생성
+                    if not os.path.exists(os.path.join(image_dir, 'thumbnails')):
+                        return create_thumbnail(filename)
                 else:
                     # 비디오 등 다른 미디어는 그대로 저장
                     with open(filename, 'wb') as f:
