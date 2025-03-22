@@ -124,9 +124,17 @@ def save_to_html(post_data, page_num):
     # 도메인 설정 수정
     domain = "https://kk.testpro.site"
     
+    # 이미지 절대 경로로 변환
+    images = []
+    for img in post_data['images']:
+        if not img.startswith('http'):
+            images.append(domain + img)
+        else:
+            images.append(img)
+    post_data['images'] = images
+    
     # 첫 번째 이미지를 썸네일로 사용 (전체 URL 경로로 변환)
-    thumbnail_url = post_data['images'][0] if post_data['images'] else '/output/posts/images/default.webp'
-    thumbnail_url = domain + thumbnail_url  # 전체 URL로 변환
+    thumbnail_url = post_data['images'][0] if post_data['images'] else domain + '/output/posts/images/default.webp'
     
     # 이전/다음 페이지 파일명 가져오기
     output_dir = os.path.join('s07102624.github.io', 'output', 'posts')
@@ -314,6 +322,8 @@ def save_to_html(post_data, page_num):
     
     # 이미지와 비디오 처리
     for img_path in post_data['images']:
+        if not img_path.startswith('http'):
+            img_path = domain + img_path
         html_template += f'<img src="{img_path}" alt="{post_data["title"]}">\n'
         
     # 비디오 처리 부분
