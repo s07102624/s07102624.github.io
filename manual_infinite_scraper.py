@@ -51,7 +51,7 @@ def shift_posts(output_dir):
 
 def save_html_file(page_num, html_content, posts_data=None):
     # 경로 수정
-    output_dir = os.path.join('s07102624.github.io', 'output', '1004')
+    output_dir = os.path.join('s07102624.github.io', 'output', 'post')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -126,49 +126,12 @@ def save_to_html(post_data, page_num):
             .preview {{
                 border-bottom: 1px solid #eee;
                 padding: 15px 0;
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 15px;
             }}
-            .preview-media {{
-                width: 100%;
-                aspect-ratio: 16/9;
-                overflow: hidden;
-                border-radius: 8px;
-            }}
-            .preview-media img {{
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }}
-            .preview-content {{
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }}
-            .preview-content h2 {{
-                margin: 0;
+            .preview h2 {{
+                margin: 0 0 10px 0;
                 font-size: 1.2em;
                 color: #333;
                 word-break: break-all;
-            }}
-            .full-content {{
-                margin-top: 15px;
-            }}
-            .full-content img {{
-                width: 100%;
-                max-width: 100%;
-                height: auto;
-                margin: 10px 0;
-                border-radius: 4px;
-            }}
-            @media (min-width: 768px) {{
-                .preview {{
-                    grid-template-columns: 300px 1fr;
-                }}
-                .preview-media {{
-                    aspect-ratio: 4/3;
-                }}
             }}
             .preview .content {{
                 margin: 10px 0;
@@ -294,14 +257,9 @@ def save_to_html(post_data, page_num):
     </div>
     
     <div class="preview">
-        <!-- 이미지를 먼저 표시하도록 순서 변경 -->
-        <div class="preview-media">
-            {' '.join([f'<img src="{img_path}" alt="이미지" loading="lazy">' for img_path in post_data['images'][:1]])}
-        </div>
-        <div class="preview-content">
-            <h2>{post_data['title']}</h2>
-            <div class="content">{post_data['content']}</div>
-        """
+        <h2>{post_data['title']}</h2>
+        <div class="content">{post_data['content']}</div>
+    """
     
     # 이미지와 비디오 처리
     for img_path in post_data['images']:
@@ -325,7 +283,7 @@ def save_to_html(post_data, page_num):
                 '''
         elif video_path.endswith(('.mp4', '.webm', '.ogg')):
             html_template += f'<video controls src="{video_path}"></video>\n'
-
+            
     html_template += """
             <!-- 하단 광고 -->
             <div class="ad-container">
@@ -400,8 +358,34 @@ def extract_youtube_id(url):
         return url.split('watch?v=')[-1].split('&')[0]
     return None
 
+def get_post_previews():
+    """DB에서 모든 게시글의 미리보기 정보를 가져옴"""
+    previews = []
+    try:
+        conn = sqlite3.connect('posts.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT title, images FROM posts ORDER BY id')
+        rows = cursor.fetchall()
+        
+        for row in rows:
+            title, images = row
+            image_list = json.loads(images)
+            first_image = image_list[0] if image_list else ''
+            previews.append({
+                'title': title,
+                'image': first_image
+            })
+        
+        conn.close()
+        return previews
+    except Exception as e:
+        logging.error(f"미리보기 데이터 조회 중 오류: {str(e)}")
+        return []
+
 def update_index_file(total_pages):
     """인덱스 파일 업데이트"""
+    previews = get_post_previews()
+    
     index_template = """
 <!DOCTYPE html>
 <html lang="ko">
@@ -434,34 +418,34 @@ def update_index_file(total_pages):
         .page-list a {
             display: block;
             padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            background: #fff;
+            border-radius: 8px;
             text-decoration: none;
             color: #333;
-            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            overflow: hidden;
         }
         .page-list a:hover {
-            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .pagination button {
-            padding: 8px 12px;
-            border: none;
-            background: #f8f9fa;
-            cursor: pointer;
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
             border-radius: 4px;
+            margin-bottom: 10px;
         }
-        .pagination button:hover {
-            background: #e9ecef;
-        }
-        .pagination button.active {
-            background: #007bff;
-            color: white;
+        .preview-title {
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
     </style>
 </head>
@@ -473,7 +457,14 @@ def update_index_file(total_pages):
     
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
-        index_template += f'            <a href="s07102624.github.io/output/1004/{i}.html">페이지 {i}</a>\n'
+        preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
+        preview_html = f'''
+            <a href="s07102624.github.io/output/post/{i}.html">
+                <img class="preview-image" src="{preview['image']}" alt="미리보기" onerror="this.src='default.jpg'">
+                <p class="preview-title">{preview['title']}</p>
+            </a>
+        '''
+        index_template += preview_html
     
     index_template += """
         </div>
@@ -537,7 +528,7 @@ def download_media(url, folder):
             return None
             
         # 이미지 저장 경로 수정
-        image_dir = os.path.join('s07102624.github.io', 'output', '1004', 'images')
+        image_dir = os.path.join('s07102624.github.io', 'output', 'post', 'images')
         os.makedirs(image_dir, exist_ok=True)
         
         # 파일명 생성
@@ -661,45 +652,6 @@ def get_post_detail(scraper, url):
         print(f"상세 페이지 스크래핑 중 오류: {str(e)}")
         return None
 
-def generate_clickbait_title(original_title):
-    """클릭을 유도하는 제목으로 변경"""
-    clickbait_prefixes = [
-        "충격) ", "경악) ", "기절) ", "초대박) ", "전설의 ", "역대급 ", "실화) ", 
-        "개쩌는 ", "핵심) ", "급발진) ", "대박) ", "놀라운) ", "속보) ", "극찬) ",
-        "화제의 ", "완전 ", "레전드 ", "반전) ", "감동) ", "최초) ", "단독) ",
-        "충격적) ", "심장주의) ", "긴급) ", "초강력 ", "핫이슈) ", "폭발) ",
-        "공감) ", "경이로운 ", "엄청난 ", "초특급 ", "초고급 ", "무서운 ",
-        "놀라워) ", "신기한 ", "미쳤다) ", "기가막힌 ", "대단한 ", "끝판왕 ",
-        "무한대박 "
-    ]
-    
-    clickbait_suffixes = [
-        " (진짜 충격적)", " (대박사건)", " (완전 실화)", " (믿을 수 없음)", 
-        " (역대급)", " (레전드)", " (핵심 요약)", " (현실 상황)", " (심장 주의)", 
-        " (꼭 봐야함)", " (실화임)", " (진짜임)", " (충격 반전)", " (진실 공개)",
-        " (완전 대박)", " (전설급)", " (극한 상황)", " (절대 놓치지 마세요)", 
-        " (눈물 주의)", " (감동 실화)", " (충격적 진실)", " (공감 100%)",
-        " (신기함 주의)", " (반전 엔딩)", " (극한 상황)", " (완전 실화임)",
-        " (기적 같은)", " (놀라운 결과)", " (충격과 공포)", " (진실 폭로)",
-        " (필독)", " (초강력)", " (폭소 주의)", " (극비 공개)", " (경악)",
-        " (충격 실화)", " (동공지진)", " (화제의 그것)", " (완전 소름)",
-        " (기가 막힘)"
-    ]
-    
-    # 50% 확률로 접두어 추가
-    if random.random() < 0.5:
-        prefix = random.choice(clickbait_prefixes)
-    else:
-        prefix = ""
-        
-    # 50% 확률로 접미어 추가
-    if random.random() < 0.5:
-        suffix = random.choice(clickbait_suffixes)
-    else:
-        suffix = ""
-        
-    return f"{prefix}{original_title}{suffix}"
-
 def infinite_scrape():
     print("\n=== HumorWorld 전체 게시글 스크래핑 시작 ===")
     
@@ -769,9 +721,9 @@ def infinite_scrape():
                             print("상세 페이지 스크래핑 실패")
                             continue
                         
-                        # 게시물 데이터 구성 부분 수정
+                        # 게시물 데이터 구성
                         post_data = {
-                            'title': generate_clickbait_title(title_elem.get_text(strip=True)),
+                            'title': title_elem.get_text(strip=True),
                             'content': detail_data['content'],
                             'images': [],
                             'videos': detail_data['videos'],
@@ -780,7 +732,7 @@ def infinite_scrape():
                         
                         # 이미지 다운로드
                         for img_url in detail_data['images']:
-                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', '1004', 'images'))
+                            saved_path = download_media(img_url, os.path.join('s07102624.github.io', 'output', 'post', 'images'))
                             if saved_path:
                                 post_data['images'].append(saved_path)
                         
