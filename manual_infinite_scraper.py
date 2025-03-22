@@ -411,13 +411,14 @@ def update_index_file(total_pages):
         }
         .page-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
             margin: 20px 0;
         }
         .page-list a {
-            display: block;
-            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
             background: #fff;
             border-radius: 8px;
             text-decoration: none;
@@ -432,13 +433,13 @@ def update_index_file(total_pages):
         }
         .preview-image {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            display: block;
         }
         .preview-title {
-            font-size: 0.9em;
+            padding: 12px;
+            font-size: 0.95em;
             line-height: 1.4;
             margin: 0;
             overflow: hidden;
@@ -446,6 +447,7 @@ def update_index_file(total_pages):
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            background: #fff;
         }
     </style>
 </head>
@@ -458,9 +460,10 @@ def update_index_file(total_pages):
     # 페이지 링크 생성 부분 수정
     for i in range(1, total_pages + 1):
         preview = previews[i-1] if i <= len(previews) else {'title': f'페이지 {i}', 'image': ''}
+        image_path = preview['image'] if preview['image'] else 'output/post/images/default.webp'
         preview_html = f'''
-            <a href="s07102624.github.io/output/post/{i}.html">
-                <img class="preview-image" src="{preview['image']}" alt="미리보기" onerror="this.src='default.jpg'">
+            <a href="output/post/{i}.html">
+                <img class="preview-image" src="{image_path}" alt="{preview['title']}">
                 <p class="preview-title">{preview['title']}</p>
             </a>
         '''
@@ -530,6 +533,12 @@ def download_media(url, folder):
         # 이미지 저장 경로 수정
         image_dir = os.path.join('s07102624.github.io', 'output', 'post', 'images')
         os.makedirs(image_dir, exist_ok=True)
+        
+        # 기본 이미지 생성 (처음 실행시)
+        default_image = os.path.join(image_dir, 'default.webp')
+        if not os.path.exists(default_image):
+            img = Image.new('RGB', (800, 450), color='#f0f0f0')
+            img.save(default_image, 'WEBP', quality=85)
         
         # 파일명 생성
         base_name = os.path.splitext(os.path.basename(url.split('?')[0]))[0]
