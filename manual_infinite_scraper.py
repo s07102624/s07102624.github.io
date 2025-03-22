@@ -159,8 +159,8 @@ def save_to_html(post_data, title):
     # 첫 번째 이미지를 썸네일로 사용
     thumbnail_url = ''
     if post_data['images']:
-        # 상대 경로를 절대 URL로 변환
-        image_path = post_data['images'][0]
+        # 상대 경로를 절대 URL로 변환하고 백슬래시를 슬래시로 변경
+        image_path = post_data['images'][0].replace('\\', '/')
         thumbnail_url = f"https://kk.testpro.site/output/news/{image_path}"
 
     # HTML 템플릿에 메타 태그 추가
