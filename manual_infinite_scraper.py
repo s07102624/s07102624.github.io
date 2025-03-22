@@ -120,7 +120,9 @@ def save_html_file(page_num, html_content, posts_data=None):
     return filename
 
 def save_to_html(post_data, page_num):
-    # HTML 템플릿 수정 - 제목을 게시글 제목으로 변경
+    # 첫 번째 이미지를 썸네일로 사용
+    thumbnail_url = post_data['images'][0] if post_data['images'] else 'output/post/images/default.webp'
+    
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -128,6 +130,19 @@ def save_to_html(post_data, page_num):
         <meta charset="UTF-8">
         <title>{post_data['title']} - {page_num}페이지</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        
+        <!-- Open Graph 메타 태그 추가 -->
+        <meta property="og:title" content="{post_data['title']}">
+        <meta property="og:description" content="{post_data['content'][:200]}...">
+        <meta property="og:image" content="{thumbnail_url}">
+        <meta property="og:type" content="article">
+        
+        <!-- Twitter 카드 메타 태그 추가 -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{post_data['title']}">
+        <meta name="twitter:description" content="{post_data['content'][:200]}...">
+        <meta name="twitter:image" content="{thumbnail_url}">
+        
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
         <style>
             body {{
