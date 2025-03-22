@@ -123,6 +123,18 @@ def save_to_html(post_data, page_num):
     # 첫 번째 이미지를 썸네일로 사용
     thumbnail_url = post_data['images'][0] if post_data['images'] else 'output/post/images/default.webp'
     
+    # 이전/다음 페이지 파일명 가져오기
+    output_dir = os.path.join('s07102624.github.io', 'output', 'post')
+    mapping_file = os.path.join(output_dir, 'page_mapping.json')
+    try:
+        with open(mapping_file, 'r', encoding='utf-8') as f:
+            mapping = json.load(f)
+            prev_file = mapping.get(str(page_num-1), '')
+            next_file = mapping.get(str(page_num+1), '')
+    except FileNotFoundError:
+        prev_file = f"{page_num-1}.html"
+        next_file = f"{page_num+1}.html"
+
     html_template = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -274,7 +286,7 @@ def save_to_html(post_data, page_num):
         </div>
 
         <div class="content">
-            <h1>테스트프로 - 페이지 {page_num}</h1>
+            <h1>{post_data['title']}</h1>
 
             <!-- 상단 광고 -->
             <div class="ad-container">
@@ -286,25 +298,22 @@ def save_to_html(post_data, page_num):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
-    """
 
-    html_template += f"""
-    <div class="navigation">
-        <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
-        <a href="index.html">목록으로</a>
-        <a href="{page_num+1}.html">다음 글 →</a>
-    </div>
-    
-    <div class="preview">
-        <h2>{post_data['title']}</h2>
-        <div class="content">{post_data['content']}</div>
+            <div class="navigation">
+                <a href="{prev_file}" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
+                <a href="../../../index.html">목록으로</a>
+                <a href="{next_file}" {"style='visibility:hidden'" if not next_file else ""}>다음 글 →</a>
+            </div>
+            
+            <div class="preview">
+                <h2>{post_data['title']}</h2>
     """
     
     # 이미지와 비디오 처리
     for img_path in post_data['images']:
-        html_template += f'<img src="{img_path}" alt="이미지">\n'
+        html_template += f'<img src="{img_path}" alt="{post_data["title"]}">\n'
         
-    # 비디오 처리 부분 수정
+    # 비디오 처리 부분
     for video_path in post_data['videos']:
         if 'youtube.com' in video_path or 'youtu.be' in video_path:
             video_id = extract_youtube_id(video_path)
@@ -313,7 +322,7 @@ def save_to_html(post_data, page_num):
                 <div class="video-container">
                     <iframe 
                         src="https://www.youtube.com/embed/{video_id}"
-                        title="YouTube video player"
+                        title="{post_data['title']}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowfullscreen>
@@ -322,8 +331,9 @@ def save_to_html(post_data, page_num):
                 '''
         elif video_path.endswith(('.mp4', '.webm', '.ogg')):
             html_template += f'<video controls src="{video_path}"></video>\n'
-            
+    
     html_template += """
+            </div>
             <!-- 하단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
@@ -383,7 +393,7 @@ def save_to_html(post_data, page_num):
     </body>
     </html>
     """
-
+    
     save_html_file(page_num, html_template, [post_data])
 
 def extract_youtube_id(url):
