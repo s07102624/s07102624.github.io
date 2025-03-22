@@ -124,6 +124,13 @@ def save_to_html(post_data, page_num):
     # 도메인 설정 수정
     domain = "https://kk.testpro.site"
     
+    # 썸네일용 이미지 생성 및 저장
+    if post_data['images']:
+        thumbnail_path = create_thumbnail(post_data['images'][0], domain)
+        thumbnail_url = domain + thumbnail_path
+    else:
+        thumbnail_url = domain + '/output/posts/images/default.webp'
+
     # 이미지 절대 경로로 변환
     images = []
     for img in post_data['images']:
@@ -158,8 +165,12 @@ def save_to_html(post_data, page_num):
         
         <!-- Open Graph 메타 태그 수정 -->
         <meta property="og:title" content="{post_data['title']}">
+        <meta property="og:site_name" content="테스트프로">
         <meta property="og:image" content="{thumbnail_url}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <meta property="og:type" content="article">
+        <meta property="og:url" content="{domain}/output/posts/{filename}">
         
         <!-- Twitter 카드 메타 태그 수정 -->
         <meta name="twitter:card" content="summary_large_image">
@@ -408,6 +419,41 @@ def save_to_html(post_data, page_num):
     """
     
     save_html_file(page_num, html_template, [post_data])
+
+def create_thumbnail(image_path, domain):
+    """썸네일 이미지 생성"""
+    try:
+        # 원본 이미지 경로
+        full_path = image_path.replace(domain, '')
+        src_path = os.path.join('s07102624.github.io', full_path.lstrip('/'))
+        
+        # 썸네일 저장 경로
+        thumb_dir = os.path.join('s07102624.github.io', 'output', 'posts', 'thumbnails')
+        os.makedirs(thumb_dir, exist_ok=True)
+        
+        # 파일명 생성
+        base_name = os.path.splitext(os.path.basename(image_path))[0]
+        thumb_path = os.path.join(thumb_dir, f"{base_name}_thumb.jpg")
+        
+        # 썸네일 생성
+        with Image.open(src_path) as img:
+            # 크기 조정
+            img = img.convert('RGB')
+            img.thumbnail((1200, 630))
+            
+            # 비율 맞추기
+            background = Image.new('RGB', (1200, 630), (255, 255, 255))
+            offset = ((1200 - img.width) // 2, (630 - img.height) // 2)
+            background.paste(img, offset)
+            
+            # JPG로 저장 (WebP 대신)
+            background.save(thumb_path, 'JPEG', quality=85)
+        
+        return '/output/posts/thumbnails/' + os.path.basename(thumb_path)
+        
+    except Exception as e:
+        print(f"썸네일 생성 중 오류: {str(e)}")
+        return '/output/posts/images/default.webp'
 
 def extract_youtube_id(url):
     if not url:
