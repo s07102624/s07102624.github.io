@@ -53,12 +53,16 @@ def setup_folders():
 
 def save_article(title, content, images, base_path, prev_post=None, next_post=None):
     """HTML 파일로 게시물 저장"""
-    safe_title = clean_filename(title)
-    filename = os.path.join(base_path, f'{safe_title}.html')
-
-    # 게시물 HTML 구조 추출
-    html_content = f"""
-<!DOCTYPE html>
+    try:
+        safe_title = clean_filename(title)
+        filename = os.path.join(base_path, f'{safe_title}.html')
+        
+        logging.info(f"Saving HTML file: {filename}")
+        
+        # 원본 컨텐츠에서 HTML 구조 유지
+        content_html = str(content) if isinstance(content, BeautifulSoup) else content
+        
+        html_content = f"""<!DOCTYPE html>
 <html lang="ko-KR" class="js">
 <head>
     <meta charset="UTF-8">
@@ -77,7 +81,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
                                 <h1 class="entry-title">{title}</h1>
                             </header>
                             <div class="entry-content">
-                                {content}
+                                {content_html}
                                 {images}
                             </div>
                             <footer class="entry-footer">
@@ -96,11 +100,15 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
     </div>
 </body>
 </html>"""
-
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    
-    return filename
+        
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
+        logging.info(f"Successfully saved HTML file: {filename}")
+        return filename
+    except Exception as e:
+        logging.error(f"Error saving HTML file: {str(e)}")
+        return None
 
 def is_duplicate_post(title, base_path):
     """게시물 제목 중복 검사"""
@@ -165,24 +173,26 @@ def scrape_category():
                                 with open(img_path, 'wb') as f:
                                     f.write(img_response.content)
                                 images_html += f'<img src="images/{img_name}" alt="{title}">\n'
+                                logging.info(f"Image saved: {img_name}")
                             except Exception as e:
                                 logging.error(f"Failed to download image: {str(e)}")
 
-                    # 게시물 정보 저장
-                    posts_info.append({
-                        'title': title,
-                        'content': str(content),
-                        'images': images_html,
-                        'filename': f'{clean_filename(title)}.html'
-                    })
+                    # 게시물 저장 직접 수행
+                    saved_file = save_article(
+                        title,
+                        content,  # BeautifulSoup 객체 그대로 전달
+                        images_html,
+                        base_path
+                    )
                     
-                    post_count += 1
-                    logging.info(f"Successfully scraped: {title}")
+                    if saved_file:
+                        logging.info(f"Article saved: {title}")
+                        post_count += 1
                     
                     if post_count % 10 == 0:
                         choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                         if choice.lower() != 'y':
-                            break
+                            return
                     
                     time.sleep(random.uniform(2, 4))
                     
@@ -192,20 +202,6 @@ def scrape_category():
             
             page += 1
             time.sleep(random.uniform(3, 5))
-        
-        # 게시물 저장 시 이전/다음 글 정보 포함
-        for i, post_info in enumerate(posts_info):
-            prev_post = posts_info[i-1] if i > 0 else None
-            next_post = posts_info[i+1] if i < len(posts_info)-1 else None
-            
-            save_article(
-                post_info['title'],
-                post_info['content'],
-                post_info['images'],
-                base_path,
-                prev_post,
-                next_post
-            )
             
     except Exception as e:
         logging.error(f'Error occurred: {str(e)}')
