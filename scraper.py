@@ -9,10 +9,12 @@ try:
     from bs4 import BeautifulSoup
     import cloudscraper
     from fake_useragent import UserAgent
+    from PIL import Image
+    import io
 except ImportError as e:
     print(f"필요한 패키지가 설치되지 않았습니다: {str(e)}")
     print("다음 명령어로 필요한 패키지를 설치하세요:")
-    print("pip install beautifulsoup4 cloudscraper fake-useragent")
+    print("pip install beautifulsoup4 cloudscraper fake-useragent pillow")
     sys.exit(1)
 
 # 로깅 설정
@@ -320,21 +322,31 @@ def scrape_category():
                         logging.error(f"Content not found for: {title}")
                         continue
 
-                    # 이미지 처리
+                    # 이미지 처리 - WebP 변환 추가
                     images_html = ""
                     for img in content.find_all('img'):
                         if img.get('src'):
                             img_name = clean_filename(os.path.basename(img['src']))
-                            img_path = os.path.join(image_path, img_name)
+                            webp_name = f"{os.path.splitext(img_name)[0]}.webp"
+                            img_path = os.path.join(image_path, webp_name)
                             
                             try:
+                                # 이미지 다운로드
                                 img_response = scraper.get(img['src'])
-                                with open(img_path, 'wb') as f:
-                                    f.write(img_response.content)
-                                images_html += f'<img src="images/{img_name}" alt="{title}">\n'
-                                logging.info(f"Image saved: {img_name}")
+                                img_data = Image.open(io.BytesIO(img_response.content))
+                                
+                                # RGBA 이미지를 RGB로 변환
+                                if img_data.mode in ('RGBA', 'LA'):
+                                    background = Image.new('RGB', img_data.size, (255, 255, 255))
+                                    background.paste(img_data, mask=img_data.split()[-1])
+                                    img_data = background
+                                
+                                # WebP로 저장 (품질 85%)
+                                img_data.save(img_path, 'WEBP', quality=85)
+                                images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy">\n'
+                                logging.info(f"Image saved as WebP: {webp_name}")
                             except Exception as e:
-                                logging.error(f"Failed to download image: {str(e)}")
+                                logging.error(f"Failed to process image: {str(e)}")
 
                     # 현재 게시물 정보 저장 - 구조 수정
                     current_post = {
