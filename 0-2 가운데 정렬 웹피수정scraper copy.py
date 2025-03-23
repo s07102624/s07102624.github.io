@@ -276,12 +276,6 @@ def is_duplicate_post(title, base_path):
     safe_title = clean_filename(title)
     return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
 
-def resize_image(img, width=600):
-    """이미지 리사이즈 함수"""
-    w_percent = width / float(img.size[0])
-    h_size = int(float(img.size[1]) * float(w_percent))
-    return img.resize((width, h_size), Image.Resampling.LANCZOS)
-
 def scrape_category():
     """게시물 스크래핑 함수"""
     base_path, image_path = setup_folders()
@@ -337,13 +331,9 @@ def scrape_category():
                             img_path = os.path.join(image_path, webp_name)
                             
                             try:
-                                # 이미지 다운로드 및 처리
+                                # 이미지 다운로드
                                 img_response = scraper.get(img['src'])
                                 img_data = Image.open(io.BytesIO(img_response.content))
-                                
-                                # 이미지 크기가 600px보다 큰 경우에만 리사이즈
-                                if img_data.size[0] > 600:
-                                    img_data = resize_image(img_data, width=600)
                                 
                                 # RGBA 이미지를 RGB로 변환
                                 if img_data.mode in ('RGBA', 'LA'):
@@ -353,7 +343,7 @@ def scrape_category():
                                 
                                 # WebP로 저장 (품질 85%)
                                 img_data.save(img_path, 'WEBP', quality=85)
-                                images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy" style="max-width:100%; height:auto;">\n'
+                                images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy">\n'
                                 logging.info(f"Image saved as WebP: {webp_name}")
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
