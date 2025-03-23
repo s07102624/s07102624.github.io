@@ -57,20 +57,6 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         safe_title = clean_filename(title)
         filename = os.path.join(base_path, f'{safe_title}.html')
         
-        # 네비게이션 링크 설정 - 파일명 처리 수정
-        nav_links = []
-        if prev_post and 'title' in prev_post:
-            prev_filename = f"{clean_filename(prev_post['title'])}.html"
-            nav_links.append(f'<a href="./{prev_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
-        
-        nav_links.append('<a href="https://kk.testpro.site/" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
-        
-        if next_post and 'title' in next_post:
-            next_filename = f"{clean_filename(next_post['title'])}.html"
-            nav_links.append(f'<a href="./{next_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
-        
-        nav_html = '\n'.join(nav_links)
-
         # content가 BeautifulSoup 객체인 경우 HTML 추출
         if isinstance(content, BeautifulSoup):
             content_html = str(content)
@@ -265,13 +251,19 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         <div class="container">
             <div class="nav-links" style="
                 display: flex;
-                justify-content: space-between;
+                justify-content: center;
                 align-items: center;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 0 20px;
+                gap: 20px;
             ">
-                {nav_html}
+                <a href="https://kk.testpro.site/" style="
+                    color: #333;
+                    text-decoration: none;
+                    padding: 8px 15px;
+                    border-radius: 4px;
+                    transition: background-color 0.3s;
+                ">홈</a>
+                {f'<a href="{prev_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">이전 글</a>' if prev_post else ''}
+                {f'<a href="{next_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글</a>' if next_post else ''}
             </div>
         </div>
     </nav>
@@ -301,7 +293,7 @@ def is_duplicate_post(title, base_path):
 def scrape_category():
     """게시물 스크래핑 함수"""
     base_path, image_path = setup_folders()
-    posts_info = []  # 모든 게시물 정보를 저장할 리스트
+    posts_info = []
     post_count = 0
     base_url = 'https://humorworld.net/category/humorstorage/'
     
@@ -360,41 +352,13 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to download image: {str(e)}")
 
-                    # 현재 게시물 정보 저장 - 구조 수정
-                    current_post = {
-                        'title': title,
-                        'content': content,
-                        'images': images_html,
-                        'filename': f'{clean_filename(title)}.html'  # filename 추가
-                    }
-                    
-                    # 이전/다음 게시물 정보 설정
-                    prev_post = posts_info[-1] if posts_info else None
-                    
-                    # 게시물 저장
+                    # 게시물 저장 직접 수행
                     saved_file = save_article(
                         title,
                         content,  # BeautifulSoup 객체 그대로 전달
                         images_html,
-                        base_path,
-                        prev_post,
-                        None  # 다음 게시물은 아직 알 수 없음
+                        base_path
                     )
-                    
-                    # 게시물 정보 저장
-                    if saved_file:
-                        posts_info.append(current_post)
-                        
-                        # 이전 게시물 업데이트
-                        if prev_post:
-                            save_article(
-                                prev_post['title'],
-                                prev_post['content'],
-                                prev_post['images'],
-                                base_path,
-                                posts_info[-3] if len(posts_info) > 2 else None,
-                                current_post
-                            )
                     
                     if saved_file:
                         logging.info(f"Article saved: {title}")
