@@ -23,78 +23,67 @@
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
         }
         
         /* 컨테이너 레이아웃 */
         .container {
-            display: flex;
+            width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             gap: 30px;
         }
         
         /* 메인 콘텐츠 영역 */
         .content-area {
-            flex: 1;
+            width: 800px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 30px;
+            margin: 0 auto;
         }
         
-        /* 사이드바 영역 */
+        /* 사이드바 제거하고 메인 컨텐츠 중앙 정렬 */
         .widget-area {
-            width: 300px;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
+            display: none;
         }
         
-        /* 광고 스타일 */
+        /* 광고 컨테이너 중앙 정렬 */
         .ad-container {
-            margin: 20px 0;
+            width: 100%;
+            max-width: 728px;
+            margin: 20px auto;
             text-align: center;
-        }
-        
-        .ad-sticky {
-            position: sticky;
-            top: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .ad-fixed {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            width: 300px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         /* 반응형 디자인 */
         @media (max-width: 768px) {
             .container {
-                flex-direction: column;
                 padding: 10px;
             }
             
-            .widget-area {
+            .content-area {
                 width: 100%;
-                position: relative;
-                top: 0;
+                padding: 15px;
             }
-            
-            .ad-container {
-                display: flex;
-                justify-content: center;
-            }
-            
-            .ad-fixed {
-                display: none;
-            }
+        }
+
+        /* 하단 네비게이션 중앙 정렬 */
+        .bottom-navigation .container {
+            padding: 0;
+            margin: 0 auto;
+        }
+        
+        .nav-links {
+            justify-content: center;
+            gap: 20px;
         }
     </style>
 </head>
@@ -220,19 +209,6 @@
                 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
         </main>
-        
-        <aside class="widget-area">
-            <!-- 사이드바 광고 -->
-            <div class="ad-sticky">
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-9374368296307755"
-                     data-ad-slot="8384240134"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-        </aside>
     </div>
     
     <!-- 고정 광고 -->
