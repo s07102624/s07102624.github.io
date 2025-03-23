@@ -57,28 +57,86 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         safe_title = clean_filename(title)
         filename = os.path.join(base_path, f'{safe_title}.html')
         
-        logging.info(f"Saving HTML file: {filename}")
-        
-        # 원본 컨텐츠에서 HTML 구조 유지
-        content_html = str(content) if isinstance(content, BeautifulSoup) else content
-        
+        # content가 BeautifulSoup 객체인 경우 HTML 추출
+        if isinstance(content, BeautifulSoup):
+            content_html = str(content)
+            # 원본 HTML 구조 유지를 위해 태그 보존
+            content_html = content_html.replace('src="/', 'src="https://humorworld.net/')
+        else:
+            content_html = f"<p>{content}</p>"
+
         html_content = f"""<!DOCTYPE html>
 <html lang="ko-KR" class="js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{title}</title>
-    <link rel="stylesheet" href="https://humorworld.net/wp-content/themes/blogberg/style.css">
+    
+    <!-- 원본 스타일시트 -->
+    <link rel='stylesheet' id='wp-block-library-css' href='https://humorworld.net/wp-includes/css/dist/block-library/style.min.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='classic-theme-styles-css' href='https://humorworld.net/wp-includes/css/classic-themes.min.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='blogberg-style-css' href='https://humorworld.net/wp-content/themes/blogberg/style.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='blogberg-google-fonts-css' href='https://fonts.googleapis.com/css?family=Poppins:300,400,400i,500,600,700,700i|Rubik:300,400,400i,500,700,700i' type='text/css' media='all' />
+    <link rel='stylesheet' id='bootstrap-css' href='https://humorworld.net/wp-content/themes/blogberg/assets/vendors/bootstrap/css/bootstrap.min.css' type='text/css' media='all' />
+    
+    <style type="text/css">
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.8;
+            color: #333333;
+            background-color: #f8f9fa;
+        }}
+        
+        .site-content {{
+            background-color: #ffffff;
+        }}
+        
+        .entry-title {{
+            color: #1a1a1a;
+            font-weight: 600;
+        }}
+        
+        .entry-content {{
+            color: #333333;
+        }}
+        
+        .nav-links a {{
+            color: #6EC1E4;
+        }}
+        
+        .nav-links a:hover {{
+            color: #54595F;
+        }}
+        
+        .widget-area {{
+            color: #7A7A7A;
+        }}
+        
+        .entry-meta {{
+            color: #61CE70;
+        }}
+        
+        @media (max-width: 768px) {{
+            .content-area {{
+                padding: 15px;
+            }}
+        }}
+    </style>
 </head>
 <body class="post-template-default single single-post">
     <div id="page" class="site">
         <div id="content" class="site-content">
             <div class="container">
-                <div id="primary" class="content-area">
+                <div id="primary" class="content-area col-lg-8">
                     <main id="main" class="site-main">
                         <article class="post format-standard hentry">
                             <header class="entry-header">
                                 <h1 class="entry-title">{title}</h1>
+                                <div class="entry-meta">
+                                    <span class="posted-on">
+                                        <time class="entry-date published">{datetime.now().strftime('%Y년 %m월 %d일')}</time>
+                                    </span>
+                                </div>
                             </header>
                             <div class="entry-content">
                                 {content_html}
@@ -95,9 +153,49 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
                         </article>
                     </main>
                 </div>
+                <aside id="secondary" class="widget-area col-lg-4">
+                    <!-- 사이드바 위젯 영역 -->
+                </aside>
             </div>
         </div>
     </div>
+    
+    <!-- 하단 네비게이션 바 추가 -->
+    <nav class="bottom-navigation" style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        z-index: 1000;
+    ">
+        <div class="container">
+            <div class="nav-links" style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 20px;
+            ">
+                <a href="https://kk.testpro.site/" style="
+                    color: #333;
+                    text-decoration: none;
+                    padding: 8px 15px;
+                    border-radius: 4px;
+                    transition: background-color 0.3s;
+                ">홈</a>
+                {f'<a href="{prev_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">이전 글</a>' if prev_post else ''}
+                {f'<a href="{next_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글</a>' if next_post else ''}
+            </div>
+        </div>
+    </nav>
+    
+    <div style="height: 60px;"><!-- 하단 네비게이션 바 공간 확보 --></div>
+    
+    <!-- 원본 사이트 스크립트 -->
+    <script src='https://humorworld.net/wp-includes/js/jquery/jquery.min.js' id='jquery-core-js'></script>
+    <script src='https://humorworld.net/wp-content/themes/blogberg/assets/vendors/bootstrap/js/bootstrap.min.js' id='bootstrap-js'></script>
 </body>
 </html>"""
         
