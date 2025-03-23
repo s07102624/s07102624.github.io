@@ -398,7 +398,7 @@ def scrape_category():
                         logging.info(f"Article saved: {title}")
                         post_count += 1
                     
-                    if post_count % 10 == 0:
+                    if post_count % 50 == 0:  # 10에서 50으로 변경
                         choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                         if choice.lower() != 'y':
                             return
