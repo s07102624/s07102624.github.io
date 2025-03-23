@@ -34,7 +34,7 @@ def shift_posts(output_dir):
                  os.path.join(output_dir, new_name))
 
 def save_html_file(page_num, html_content, posts_data=None):
-    output_dir = os.path.join('output', '20250307')
+    output_dir = os.path.join('output', '2025030')
     os.makedirs(output_dir, exist_ok=True)
     
     if posts_data:
@@ -270,7 +270,6 @@ def save_to_html(post_data, page_num):
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
-                     
                      data-ad-client="ca-pub-9374368296307755"
                      data-ad-slot="8384240134"
                      data-ad-format="auto"
@@ -520,65 +519,34 @@ def infinite_scrape():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument('--window-size=1920,1080')
-    options.add_argument("--enable-unsafe-swiftshader")
-    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--enable-unsafe-swiftshader")  # WebGL 오류 해결
+    options.add_argument("--disable-software-rasterizer")  # 렌더링 오류 해결
     options.add_argument(f"user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36")
     
     try:
-        # ChromeDriver 서비스 설정 수정
-        chrome_manager = ChromeDriverManager()
-        chrome_path = chrome_manager.install()
-        
-        # Chrome 서비스 설정
-        service = Service(executable_path=chrome_path)
-        
-        try:
-            driver = webdriver.Chrome(options=options)
-            print("Chrome WebDriver 초기화 성공!")
-        except Exception as e:
-            print(f"첫 번째 시도 실패, 다른 방법 시도 중... 에러: {str(e)}")
-            
-            try:
-                # 두 번째 시도: 직접 서비스 지정
-                driver = webdriver.Chrome(service=service, options=options)
-                print("두 번째 시도 성공!")
-            except Exception as e2:
-                print(f"두 번째 시도 실패, 마지막 방법 시도 중... 에러: {str(e2)}")
-                
-                try:
-                    # 세 번째 시도: 로컬 chromedriver 사용
-                    local_driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver.exe")
-                    if not os.path.exists(local_driver_path):
-                        # chromedriver.exe가 없으면 다운로드
-                        import shutil
-                        shutil.copy2(chrome_path, local_driver_path)
-                    
-                    service = Service(executable_path=local_driver_path)
-                    driver = webdriver.Chrome(service=service, options=options)
-                    print("세 번째 시도 성공!")
-                except Exception as e3:
-                    print(f"모든 시도 실패. 에러: {str(e3)}")
-                    print("크롬 브라우저가 설치되어 있는지 확인하세요.")
-                    print("수동으로 다음 명령어를 실행해보세요:")
-                    print("pip install --upgrade selenium webdriver-manager")
-                    return
-
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        # 페이지 로드 타임아웃 설정
         driver.set_page_load_timeout(30)
+        
+        # 연결 재시도 횟수 설정
         max_retries = 3
         retry_delay = 5
         
         base_url = "https://www.humorworld.net/?cat=1&paged={}"
         page = 1
         total_posts = 0
+        
+        # 이전 게시물의 제목들을 저장할 집합
         previous_titles = set()
         output_dir = os.path.join('output', '20250307')
         
+        # 이전 게시물 제목 로드
         if os.path.exists(os.path.join(output_dir, '1.html')):
             with open(os.path.join(output_dir, '1.html'), 'r', encoding='utf-8') as f:
                 content = f.read()
                 previous_titles = set(title.strip() for title in content.split('<h2>')[1:])
         
-        while True:
+        while True:  # 무한 스크래핑
             for retry in range(max_retries):
                 try:
                     current_url = base_url.format(page)
@@ -592,86 +560,98 @@ def infinite_scrape():
                     print(f"페이지 로드 실패, {retry_delay}초 후 재시도...")
                     time.sleep(retry_delay)
             
-            # 게시글 목록에서 링크 추출
-            post_links = []
-            posts = driver.find_elements(By.CSS_SELECTOR, "article.post .entry-title a")
-            
+            posts = driver.find_elements(By.CSS_SELECTOR, "article.post")
             if not posts:
                 print(f"\n더 이상 게시글이 없습니다. 총 {total_posts}개의 게시글을 스크래핑했습니다.")
                 break
+                
+            posts_data = []
+            new_posts_count = 0
+            media_folder = "downloaded_media"
             
-            # 링크 수집
             for post in posts:
                 try:
-                    link = post.get_attribute('href')
-                    title = post.text.strip()
+                    title = post.find_element(By.CSS_SELECTOR, ".entry-title").text.strip()
+                    
+                    # 새 게시물인 경우에만 처리
                     if title not in previous_titles:
-                        post_links.append((link, title))
-                except Exception as e:
-                    logging.error(f"링크 추출 중 오류: {str(e)}")
-                    continue
-            
-            # 각 게시글 상세 페이지 방문
-            for link, title in post_links:
-                try:
-                    print(f"\n게시글 스크래핑 중: {title}")
-                    driver.get(link)
-                    time.sleep(3)  # 페이지 로딩 대기
-                    
-                    # 게시물 데이터 구조
-                    post_data = {
-                        'title': title,
-                        'content': '',
-                        'images': [],
-                        'videos': [],
-                        'link': link
-                    }
-                    
-                    # 내용 추출 (상세 페이지에서)
-                    content_elem = driver.find_element(By.CSS_SELECTOR, ".entry-content")
-                    post_data['content'] = content_elem.text.strip()
-                    
-                    # 이미지 처리
-                    images = content_elem.find_elements(By.CSS_SELECTOR, "img")
-                    for img in images:
-                        img_url = img.get_attribute('src')
-                        if img_url:
-                            if not urlparse(img_url).netloc:
-                                img_url = f"https://www.humorworld.net{img_url}"
-                            
-                            saved_path = download_media(img_url, os.path.join("downloaded_media", 'images'))
-                            if saved_path:
-                                post_data['images'].append(saved_path)
-                    
-                    # 비디오 처리
-                    videos = content_elem.find_elements(By.CSS_SELECTOR, "iframe[src*='youtube.com'], iframe[src*='youtu.be'], video")
-                    for video in videos:
-                        video_url = video.get_attribute('src')
-                        if video_url:
-                            if 'youtube.com' in video_url or 'youtu.be' in video_url:
-                                post_data['videos'].append(video_url)
-                            elif video.tag_name == 'video':
-                                saved_path = download_media(video_url, os.path.join("downloaded_media", 'videos'))
+                        # 게시물 데이터 구조 수정
+                        post_data = {
+                            'title': title,
+                            'content': post.find_element(By.CSS_SELECTOR, ".entry-content").text.strip(),
+                            'images': [],
+                            'videos': [],
+                            'link': None
+                        }
+                        
+                        # 미디어 다운로드 성공 여부 플래그
+                        media_download_success = True
+                        
+                        # 이미지 처리
+                        images = post.find_elements(By.CSS_SELECTOR, ".entry-content img")
+                        for img in images:
+                            img_url = img.get_attribute('src')
+                            if img_url:
+                                if not urlparse(img_url).netloc:
+                                    img_url = f"https://www.humorworld.net{img_url}"
+                                
+                                saved_path = download_media(img_url, os.path.join(media_folder, 'images'))
                                 if saved_path:
-                                    post_data['videos'].append(saved_path)
-                    
-                    # HTML 파일 저장
-                    save_to_html(post_data, page)
-                    total_posts += 1
-                    page += 1
-                    
-                    print(f"제목: {post_data['title']}")
-                    print(f"내용: {post_data['content'][:200]}...")
-                    
+                                    post_data['images'].append(saved_path)
+                                else:
+                                    print(f"이미지 다운로드 실패로 게시물 건너뛰기: {title}")
+                                    media_download_success = False
+                                    break
+                        
+                        # 이미지 다운로드 실패시 다음 게시물로
+                        if not media_download_success:
+                            continue
+                        
+                        # 비디오 처리
+                        videos = post.find_elements(By.CSS_SELECTOR, ".entry-content iframe[src*='youtube.com'], .entry-content iframe[src*='youtu.be'], .entry-content video")
+                        for video in videos:
+                            video_url = video.get_attribute('src')
+                            if video_url:
+                                if 'youtube.com' in video_url or 'youtu.be' in video_url:
+                                    post_data['videos'].append(video_url)
+                                elif video.tag_name == 'video':
+                                    saved_path = download_media(video_url, os.path.join(media_folder, 'videos'))
+                                    if saved_path:
+                                        post_data['videos'].append(saved_path)
+                                    else:
+                                        print(f"비디오 다운로드 실패로 게시물 건너뛰기: {title}")
+                                        media_download_success = False
+                                        break
+                        
+                        # 비디오 다운로드 실패시 다음 게시물로
+                        if not media_download_success:
+                            continue
+                        
+                        # 모든 미디어가 성공적으로 다운로드된 경우에만 게시물 저장
+                        posts_data.append(post_data)
+                        new_posts_count += 1
+                        total_posts += 1
+                        print(f"제목: {post_data['title']}")
+                        print(f"내용: {post_data['content'][:200]}...\n")
+                        
                 except Exception as e:
-                    logging.error(f"게시글 스크래핑 중 오류: {str(e)}")
+                    logging.error(f"게시글 파싱 중 오류: {str(e)}")
                     continue
             
-            # 인덱스 파일 업데이트
-            update_index_file(page-1)
+            if posts_data:
+                for post_data in posts_data:
+                    save_to_html(post_data, page)
+                    page += 1
+                print(f"페이지 {page-1}: 새로운 게시글 {new_posts_count}개 저장됨")
+                # 인덱스 파일 업데이트
+                update_index_file(page-1)  # 여기서 인덱스가 업데이트됨
             
-            # 5페이지마다 계속할지 확인
-            if page % 5 == 0:
+            if new_posts_count == 0:
+                print(f"\n새로운 게시글이 없습니다. 총 {total_posts}개의 게시글을 스크래핑했습니다.")
+                break
+            
+            # 사용자에게 계속할지 물어보기
+            if page % 5 == 0:  # 5페이지마다
                 try:
                     choice = input(f"\n현재 {total_posts}개의 게시글을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                     if choice.lower() != 'y':
