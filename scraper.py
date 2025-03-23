@@ -42,7 +42,7 @@ def get_scraper():
 
 def setup_folders():
     """필요한 폴더 구조 생성"""
-    base_path = os.path.join('s07102624.github.io', 'output', 'news')
+    base_path = os.path.join('s07102624.github.io', 'output', '2025')
     image_path = os.path.join(base_path, 'images')
     
     # 폴더 생성
@@ -51,51 +51,73 @@ def setup_folders():
     
     return base_path, image_path
 
-def save_article(title, content, images, base_path):
+def save_article(title, content, images, base_path, prev_post=None, next_post=None):
     """HTML 파일로 게시물 저장"""
     safe_title = clean_filename(title)
     filename = os.path.join(base_path, f'{safe_title}.html')
-    
+
+    # 게시물 HTML 구조 추출
     html_content = f"""
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko-KR" class="js">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{title}</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }}
-        img {{ max-width: 100%; height: auto; }}
-    </style>
+    <link rel="stylesheet" href="https://humorworld.net/wp-content/themes/blogberg/style.css">
 </head>
-<body>
-    <h1>{title}</h1>
-    <div class="content">
-        {content}
-    </div>
-    <div class="images">
-        {images}
+<body class="post-template-default single single-post">
+    <div id="page" class="site">
+        <div id="content" class="site-content">
+            <div class="container">
+                <div id="primary" class="content-area">
+                    <main id="main" class="site-main">
+                        <article class="post format-standard hentry">
+                            <header class="entry-header">
+                                <h1 class="entry-title">{title}</h1>
+                            </header>
+                            <div class="entry-content">
+                                {content}
+                                {images}
+                            </div>
+                            <footer class="entry-footer">
+                                <nav class="navigation post-navigation">
+                                    <div class="nav-links">
+                                        {f'<div class="nav-previous"><a href="{prev_post["filename"]}">{prev_post["title"]}</a></div>' if prev_post else ''}
+                                        {f'<div class="nav-next"><a href="{next_post["filename"]}">{next_post["title"]}</a></div>' if next_post else ''}
+                                    </div>
+                                </nav>
+                            </footer>
+                        </article>
+                    </main>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
-</html>
-"""
-    
+</html>"""
+
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     return filename
 
-def scrape_category():
-    base_path, image_path = setup_folders()
-    try:
-        scraper = get_scraper()
-    except Exception as e:
-        logging.error(f"스크래퍼 초기화 실패: {str(e)}")
-        return
+def is_duplicate_post(title, base_path):
+    """게시물 제목 중복 검사"""
+    safe_title = clean_filename(title)
+    return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
 
+def scrape_category():
+    """게시물 스크래핑 함수"""
+    base_path, image_path = setup_folders()
+    posts_info = []
+    post_count = 0
     base_url = 'https://humorworld.net/category/humorstorage/'
-    page = 1
     
     try:
+        scraper = get_scraper()
+        page = 1
+        
         while True:
             url = f'{base_url}page/{page}/' if page > 1 else base_url
             logging.info(f"Scraping page {page}: {url}")
@@ -105,6 +127,7 @@ def scrape_category():
             
             articles = soup.select('article.format-standard')
             if not articles:
+                logging.info("No more articles found")
                 break
                 
             for article in articles:
@@ -113,40 +136,53 @@ def scrape_category():
                     if not title_elem:
                         continue
                     
-                    link = title_elem.get('href')
                     title = title_elem.get_text(strip=True)
+                    link = title_elem.get('href')
                     
-                    # 게시물 내용 스크래핑
+                    # 중복 게시물 검사
+                    if is_duplicate_post(title, base_path):
+                        logging.info(f"Skipping duplicate post: {title}")
+                        continue
+                    
+                    # 게시물 상세 페이지 스크래핑
                     article_response = scraper.get(link)
                     article_soup = BeautifulSoup(article_response.text, 'html.parser')
-                    content = article_soup.select_one('.entry-content')
                     
-                    if content:
-                        # 이미지 처리
-                        images_html = ""
-                        for img in content.find_all('img'):
-                            if img.get('src'):
-                                img_name = f"{clean_filename(img['src'].split('/')[-1])}"
-                                img_path = os.path.join(image_path, img_name)
-                                
-                                # 이미지 다운로드
-                                try:
-                                    img_response = scraper.get(img['src'])
-                                    with open(img_path, 'wb') as f:
-                                        f.write(img_response.content)
-                                    images_html += f'<img src="images/{img_name}" alt="{title}">\n'
-                                except Exception as e:
-                                    logging.error(f"이미지 다운로드 실패: {str(e)}")
-                        
-                        # HTML 파일 저장
-                        saved_file = save_article(
-                            title, 
-                            content.get_text(strip=True), 
-                            images_html,
-                            base_path
-                        )
-                        
-                        logging.info(f'Successfully saved: {saved_file}')
+                    content = article_soup.select_one('.entry-content')
+                    if not content:
+                        logging.error(f"Content not found for: {title}")
+                        continue
+
+                    # 이미지 처리
+                    images_html = ""
+                    for img in content.find_all('img'):
+                        if img.get('src'):
+                            img_name = clean_filename(os.path.basename(img['src']))
+                            img_path = os.path.join(image_path, img_name)
+                            
+                            try:
+                                img_response = scraper.get(img['src'])
+                                with open(img_path, 'wb') as f:
+                                    f.write(img_response.content)
+                                images_html += f'<img src="images/{img_name}" alt="{title}">\n'
+                            except Exception as e:
+                                logging.error(f"Failed to download image: {str(e)}")
+
+                    # 게시물 정보 저장
+                    posts_info.append({
+                        'title': title,
+                        'content': str(content),
+                        'images': images_html,
+                        'filename': f'{clean_filename(title)}.html'
+                    })
+                    
+                    post_count += 1
+                    logging.info(f"Successfully scraped: {title}")
+                    
+                    if post_count % 10 == 0:
+                        choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
+                        if choice.lower() != 'y':
+                            break
                     
                     time.sleep(random.uniform(2, 4))
                     
@@ -156,6 +192,20 @@ def scrape_category():
             
             page += 1
             time.sleep(random.uniform(3, 5))
+        
+        # 게시물 저장 시 이전/다음 글 정보 포함
+        for i, post_info in enumerate(posts_info):
+            prev_post = posts_info[i-1] if i > 0 else None
+            next_post = posts_info[i+1] if i < len(posts_info)-1 else None
+            
+            save_article(
+                post_info['title'],
+                post_info['content'],
+                post_info['images'],
+                base_path,
+                prev_post,
+                next_post
+            )
             
     except Exception as e:
         logging.error(f'Error occurred: {str(e)}')
