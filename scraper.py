@@ -282,6 +282,47 @@ def resize_image(img, width=600):
     h_size = int(float(img.size[1]) * float(w_percent))
     return img.resize((width, h_size), Image.Resampling.LANCZOS)
 
+def generate_clickbait_title(original_title):
+    """문맥을 고려한 클릭베이트 제목 생성"""
+    funny_prefixes = [
+        "초특급) ", "기절) ", "실화) ", "충격) ", "레전드) ", "폭소) ", "핫) ", "단독) ",
+        "화제) ", "최초공개) ", "초고속) ", "대박) ", "극찬) ", "화제의) ", "최강) ", "반전) ",
+        "돌직구) ", "경악) ", "초강력) ", "신기) ", "극한) ", "최고급) ", "센스) ", "꿀잼) ",
+        "핵심) ", "필독) ", "초대박) ", "찐) ", "전설의) ", "놀라운) ", "기가막힌) ", "충격적) ",
+        "대반전) ", "초특급) ", "완전) ", "미쳤다) ", "개쩌는) ", "빅뉴스) ", "긴급) ", "신박한) "
+    ]
+    
+    engaging_suffixes = [
+        " (리뷰 폭발)", " (실화입니다)", " (충격 반전)", " (완전 대박)", " (극찬 세례)", 
+        " (리뷰 폭주)", " (경악 주의)", " (실화 후기)", " (대박 반전)", " (진실 공개)",
+        " (전설의 시작)", " (화제의 그것)", " (반전 주의)", " (레전드 등극)", " (초강력 후기)", 
+        " (놀라운 결말)", " (유출 주의)", " (긴급 속보)", " (폭소 주의)", " (신기한 이유)",
+        " (대반전 주의)", " (충격적 진실)", " (필독 후기)", " (핵심 요약)", " (완전 실화)",
+        " (전설로 등극)", " (기적의 순간)", " (충격 엔딩)", " (초고속 전파)", " (진실 폭로)",
+        " (극찬 폭발)", " (대박 후기)", " (역대급 포텐)", " (인증 완료)", " (신기록 달성)",
+        " (완벽 요약)", " (대격변)", " (극한 도전)", " (최초 발견)", " (충격적 실화)"
+    ]
+
+    # 제목 내용에 따라 적절한 접두어/접미어 선택
+    keywords = {
+        '충격': ['초특급) ', '충격) ', '경악) ', '기절) '],
+        '웃음': ['폭소) ', '꿀잼) ', '레전드) ', '센스) '],
+        '최초': ['단독) ', '최초공개) ', '긴급) ', '화제의) '],
+        '반전': ['대반전) ', '충격적) ', '놀라운) ', '미쳤다) '],
+        '실화': ['실화) ', '찐) ', '진짜) ', '완전) ']
+    }
+    
+    matching_prefix = random.choice(funny_prefixes)  # 기본값
+    matching_suffix = random.choice(engaging_suffixes)  # 기본값
+    
+    # 제목 내용에 따라 맞춤형 접두어/접미어 선택
+    for keyword, prefixes in keywords.items():
+        if keyword in original_title:
+            matching_prefix = random.choice(prefixes)
+            break
+    
+    return f"{matching_prefix}{original_title}{matching_suffix}"
+
 def scrape_category():
     """게시물 스크래핑 함수"""
     base_path, image_path = setup_folders()
@@ -311,7 +352,8 @@ def scrape_category():
                     if not title_elem:
                         continue
                     
-                    title = title_elem.get_text(strip=True)
+                    original_title = title_elem.get_text(strip=True)
+                    title = generate_clickbait_title(original_title)  # 클릭베이트 제목으로 변환
                     link = title_elem.get('href')
                     
                     # 중복 게시물 검사
