@@ -85,89 +85,123 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
 <html lang="ko-KR" class="js">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{title}</title>
-    
-    <!-- 원본 스타일시트 -->
-    <link rel='stylesheet' id='wp-block-library-css' href='https://humorworld.net/wp-includes/css/dist/block-library/style.min.css' type='text/css' media='all' />
-    <link rel='stylesheet' id='classic-theme-styles-css' href='https://humorworld.net/wp-includes/css/classic-themes.min.css' type='text/css' media='all' />
-    <link rel='stylesheet' id='blogberg-style-css' href='https://humorworld.net/wp-content/themes/blogberg/style.css' type='text/css' media='all' />
-    <link rel='stylesheet' id='blogberg-google-fonts-css' href='https://fonts.googleapis.com/css?family=Poppins:300,400,400i,500,600,700,700i|Rubik:300,400,400i,500,700,700i' type='text/css' media='all' />
-    <link rel='stylesheet' id='bootstrap-css' href='https://humorworld.net/wp-content/themes/blogberg/assets/vendors/bootstrap/css/bootstrap.min.css' type='text/css' media='all' />
     
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
     
     <style type="text/css">
-        /* 기본 스타일 */
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-            line-height: 1.8;
-            color: #333333;
-            background-color: #f8f9fa;
+        * {{
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            -webkit-text-size-adjust: 100%; /* iOS 텍스트 크기 자동조절 방지 */
+            box-sizing: border-box;
         }}
         
-        /* 컨테이너 레이아웃 */
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            width: 100%;
+            overflow-x: hidden;
+        }}
+        
         .container {{
             width: 100%;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 30px;
-        }}
-        
-        /* 메인 콘텐츠 영역 */
-        .content-area {{
-            width: 100%;
-            max-width: 800px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 10px;
             margin: 0 auto;
         }}
         
-        /* 이미지 최적화 */
-        img {{
+        .content-area {{
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }}
+        
+        .entry-title {{
+            font-size: 1.5em;
+            margin: 10px 0;
+            word-break: keep-all;
+            line-height: 1.4;
+        }}
+        
+        .entry-meta {{
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }}
+        
+        .entry-content {{
+            width: 100%;
+            overflow-x: hidden;
+        }}
+        
+        .entry-content img {{
             max-width: 100% !important;
             height: auto !important;
             display: block;
-            margin: 1em auto;
+            margin: 10px auto;
         }}
         
-        /* 모바일 최적화 */
-        @media (max-width: 768px) {{
-            body {{
-                font-size: 16px;
-            }}
-            
+        .ad-container {{
+            width: 100%;
+            max-width: 800px;
+            margin: 15px auto;
+            text-align: center;
+            overflow: hidden;
+        }}
+        
+        .bottom-navigation {{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            z-index: 1000;
+        }}
+        
+        .nav-links {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 15px;
+            gap: 10px;
+        }}
+        
+        .nav-links a {{
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            font-size: 14px;
+            white-space: nowrap;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }}
+        
+        @media (max-width: 600px) {{
             .container {{
-                padding: 10px;
-                margin: 10px auto;
+                padding: 5px;
             }}
             
             .content-area {{
-                padding: 15px;
-                margin: 0;
+                padding: 10px;
                 border-radius: 0;
             }}
             
-            h1 {{
-                font-size: 1.5em;
-                line-height: 1.4;
-            }}
-            
-            /* 모바일에서 하단 네비게이션 최적화 */
-            .bottom-navigation {{
-                padding: 8px 0;
+            .entry-title {{
+                font-size: 1.3em;
             }}
             
             .nav-links {{
@@ -175,27 +209,8 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             }}
             
             .nav-links a {{
-                font-size: 14px;
-                padding: 6px 10px !important;
-                white-space: nowrap;
-            }}
-            
-            /* 광고 컨테이너 모바일 최적화 */
-            .ad-container {{
-                margin: 15px auto;
-                overflow-x: hidden;
-            }}
-        }}
-
-        /* 터치 최적화 */
-        @media (hover: none) {{
-            a, button {{
-                min-height: 44px;
-                min-width: 44px;
-            }}
-            
-            .nav-links a {{
-                padding: 12px 15px !important;
+                padding: 8px 10px;
+                font-size: 12px;
             }}
         }}
     </style>
