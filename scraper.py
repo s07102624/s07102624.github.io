@@ -4,7 +4,6 @@ import sys
 import random
 import logging
 import os
-from datetime import datetime
 try:
     from bs4 import BeautifulSoup
     import cloudscraper
@@ -46,12 +45,19 @@ def setup_folders():
     """필요한 폴더 구조 생성"""
     base_path = os.path.join('s07102624.github.io', 'output', '2025')
     image_path = os.path.join(base_path, 'images')
+    thumbnail_path = os.path.join(base_path, 'thumbnails')  # 썸네일용 폴더 추가
     
     # 폴더 생성
     os.makedirs(base_path, exist_ok=True)
     os.makedirs(image_path, exist_ok=True)
+    os.makedirs(thumbnail_path, exist_ok=True)  # 썸네일 폴더 생성
     
-    return base_path, image_path
+    return base_path, image_path, thumbnail_path
+
+def create_thumbnail(img, size=(100, 100)):
+    """썸네일 이미지 생성"""
+    img.thumbnail(size)
+    return img
 
 def save_article(title, content, images, base_path, prev_post=None, next_post=None):
     """HTML 파일로 게시물 저장"""
@@ -234,7 +240,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
                     <h1 class="entry-title">{title}</h1>
                     <div class="entry-meta">
                         <span class="posted-on">
-                            <time class="entry-date published">{datetime.now().strftime('%Y년 %m월 %d일')}</time>
+                            <!-- 날짜 제거 -->
                         </span>
                     </div>
                 </header>
@@ -324,7 +330,7 @@ def is_duplicate_post(title, base_path):
 def resize_image(img, width=600):
     """이미지 리사이즈 함수"""
     w_percent = width / float(img.size[0])
-    h_size = int(float(img.size[1]) * float(w_percent))
+    h_size = int(float(float(img.size[1]) * float(w_percent)))
     return img.resize((width, h_size), Image.Resampling.LANCZOS)
 
 def generate_clickbait_title(original_title):
@@ -370,7 +376,7 @@ def generate_clickbait_title(original_title):
 
 def scrape_category():
     """게시물 스크래핑 함수"""
-    base_path, image_path = setup_folders()
+    base_path, image_path, thumbnail_path = setup_folders()  # 썸네일 경로 추가
     posts_info = []  # 모든 게시물 정보를 저장할 리스트
     post_count = 0
     base_url = 'https://humorworld.net/category/humorstorage/'
@@ -417,6 +423,7 @@ def scrape_category():
 
                     # 이미지 처리 - WebP 변환 추가
                     images_html = ""
+                    is_first_image = True
                     for img in content.find_all('img'):
                         if img.get('src'):
                             img_name = clean_filename(os.path.basename(img['src']))
@@ -428,17 +435,33 @@ def scrape_category():
                                 img_response = scraper.get(img['src'])
                                 img_data = Image.open(io.BytesIO(img_response.content))
                                 
-                                # 이미지 크기가 600px보다 큰 경우에만 리사이즈
+                                # 첫 번째 이미지는 썸네일로도 저장
+                                if is_first_image:
+                                    thumbnail_name = f"thumb_{webp_name}"
+                                    thumbnail_path_full = os.path.join(thumbnail_path, thumbnail_name)
+                                    
+                                    # 썸네일용 이미지 생성
+                                    thumb_img = img_data.copy()
+                                    thumb_img.thumbnail((100, 100))
+                                    
+                                    # RGBA -> RGB 변환 (필요한 경우)
+                                    if thumb_img.mode in ('RGBA', 'LA'):
+                                        background = Image.new('RGB', thumb_img.size, (255, 255, 255))
+                                        background.paste(thumb_img, mask=thumb_img.split()[-1])
+                                        thumb_img = background
+                                    
+                                    thumb_img.save(thumbnail_path_full, 'WEBP', quality=85)
+                                    is_first_image = False
+                                
+                                # 원본 이미지 처리
                                 if img_data.size[0] > 600:
                                     img_data = resize_image(img_data, width=600)
                                 
-                                # RGBA 이미지를 RGB로 변환
                                 if img_data.mode in ('RGBA', 'LA'):
                                     background = Image.new('RGB', img_data.size, (255, 255, 255))
                                     background.paste(img_data, mask=img_data.split()[-1])
                                     img_data = background
                                 
-                                # WebP로 저장 (품질 85%)
                                 img_data.save(img_path, 'WEBP', quality=85)
                                 images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy" style="max-width:100%; height:auto;">\n'
                                 logging.info(f"Image saved as WebP: {webp_name}")
@@ -450,6 +473,7 @@ def scrape_category():
                         'title': title,
                         'content': content,
                         'images': images_html,
+                        'thumbnail': f"thumbnails/thumb_{webp_name}" if not is_first_image else "",
                         'filename': f'{clean_filename(title)}.html'  # filename 추가
                     }
                     
