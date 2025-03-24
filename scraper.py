@@ -327,11 +327,24 @@ def is_duplicate_post(title, base_path):
     safe_title = clean_filename(title)
     return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
 
-def resize_image(img, width=600):
+def resize_image(img, size=None):
     """이미지 리사이즈 함수"""
-    w_percent = width / float(img.size[0])
-    h_size = int(float(float(img.size[1]) * float(w_percent)))
-    return img.resize((width, h_size), Image.Resampling.LANCZOS)
+    if size:
+        # 썸네일용 정사각형 이미지 생성
+        thumb = img.copy()
+        thumb.thumbnail(size, Image.Resampling.LANCZOS)
+        # 정사각형으로 크롭
+        if thumb.size[0] != thumb.size[1]:
+            size = min(thumb.size)
+            box = ((thumb.size[0] - size) // 2, (thumb.size[1] - size) // 2,
+                  (thumb.size[0] + size) // 2, (thumb.size[1] + size) // 2)
+            thumb = thumb.crop(box)
+        return thumb
+    else:
+        # 원본 이미지 리사이즈
+        w_percent = 600 / float(img.size[0])
+        h_size = int(float(img.size[1]) * float(w_percent))
+        return img.resize((600, h_size), Image.Resampling.LANCZOS)
 
 def generate_clickbait_title(original_title):
     """문맥을 고려한 클릭베이트 제목 생성"""
@@ -421,9 +434,9 @@ def scrape_category():
                         logging.error(f"Content not found for: {title}")
                         continue
 
-                    # 이미지 처리 - WebP 변환 추가
+                    # 이미지 처리
                     images_html = ""
-                    is_first_image = True
+                    first_image = True
                     for img in content.find_all('img'):
                         if img.get('src'):
                             img_name = clean_filename(os.path.basename(img['src']))
@@ -431,36 +444,29 @@ def scrape_category():
                             img_path = os.path.join(image_path, webp_name)
                             
                             try:
-                                # 이미지 다운로드 및 처리
                                 img_response = scraper.get(img['src'])
                                 img_data = Image.open(io.BytesIO(img_response.content))
                                 
-                                # 첫 번째 이미지는 썸네일로도 저장
-                                if is_first_image:
-                                    thumbnail_name = f"thumb_{webp_name}"
-                                    thumbnail_path_full = os.path.join(thumbnail_path, thumbnail_name)
-                                    
-                                    # 썸네일용 이미지 생성
-                                    thumb_img = img_data.copy()
-                                    thumb_img.thumbnail((100, 100))
-                                    
-                                    # RGBA -> RGB 변환 (필요한 경우)
-                                    if thumb_img.mode in ('RGBA', 'LA'):
-                                        background = Image.new('RGB', thumb_img.size, (255, 255, 255))
-                                        background.paste(thumb_img, mask=thumb_img.split()[-1])
-                                        thumb_img = background
-                                    
-                                    thumb_img.save(thumbnail_path_full, 'WEBP', quality=85)
-                                    is_first_image = False
-                                
-                                # 원본 이미지 처리
-                                if img_data.size[0] > 600:
-                                    img_data = resize_image(img_data, width=600)
-                                
+                                # RGBA 이미지를 RGB로 변환
                                 if img_data.mode in ('RGBA', 'LA'):
                                     background = Image.new('RGB', img_data.size, (255, 255, 255))
                                     background.paste(img_data, mask=img_data.split()[-1])
                                     img_data = background
+
+                                if first_image:
+                                    # 썸네일 이미지 생성 (200x200)
+                                    thumb_name = f"thumb_{webp_name}"
+                                    thumb_path = os.path.join(image_path, thumb_name)
+                                    thumb_img = resize_image(img_data.copy(), size=(200, 200))
+                                    thumb_img.save(thumb_path, 'WEBP', quality=85)
+                                    
+                                    # 썸네일 이미지를 HTML 상단에 추가
+                                    images_html = f'<div class="thumbnail"><img src="images/{thumb_name}" alt="썸네일" style="width:200px; height:200px; object-fit:cover; margin:0 auto 20px;"></div>\n'
+                                    first_image = False
+
+                                # 원본 크기 이미지 처리
+                                if img_data.size[0] > 600:
+                                    img_data = resize_image(img_data)
                                 
                                 img_data.save(img_path, 'WEBP', quality=85)
                                 images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy" style="max-width:100%; height:auto;">\n'
@@ -473,7 +479,7 @@ def scrape_category():
                         'title': title,
                         'content': content,
                         'images': images_html,
-                        'thumbnail': f"thumbnails/thumb_{webp_name}" if not is_first_image else "",
+                        'thumbnail': f"thumbnails/thumb_{webp_name}" if first_image else "",
                         'filename': f'{clean_filename(title)}.html'  # filename 추가
                     }
                     
