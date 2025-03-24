@@ -109,6 +109,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            -webkit-text-size-adjust: 100%; /* iOS 텍스트 크기 자동조절 방지 */
         }}
         
         /* 컨테이너 레이아웃 */
@@ -116,7 +117,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             width: 100%;
             max-width: 1200px;
             margin: 20px auto;
-            padding: 0 20px;
+            padding: 0 15px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -125,48 +126,77 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         
         /* 메인 콘텐츠 영역 */
         .content-area {{
-            width: 800px;
+            width: 100%;
+            max-width: 800px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 30px;
+            padding: 20px;
             margin: 0 auto;
         }}
         
-        /* 사이드바 제거하고 메인 컨텐츠 중앙 정렬 */
-        .widget-area {{
-            display: none;
+        /* 이미지 최적화 */
+        img {{
+            max-width: 100% !important;
+            height: auto !important;
+            display: block;
+            margin: 1em auto;
         }}
         
-        /* 광고 컨테이너 중앙 정렬 */
-        .ad-container {{
-            width: 100%;
-            max-width: 728px;
-            margin: 20px auto;
-            text-align: center;
-        }}
-        
-        /* 반응형 디자인 */
+        /* 모바일 최적화 */
         @media (max-width: 768px) {{
+            body {{
+                font-size: 16px;
+            }}
+            
             .container {{
                 padding: 10px;
+                margin: 10px auto;
             }}
             
             .content-area {{
-                width: 100%;
                 padding: 15px;
+                margin: 0;
+                border-radius: 0;
+            }}
+            
+            h1 {{
+                font-size: 1.5em;
+                line-height: 1.4;
+            }}
+            
+            /* 모바일에서 하단 네비게이션 최적화 */
+            .bottom-navigation {{
+                padding: 8px 0;
+            }}
+            
+            .nav-links {{
+                padding: 0 10px;
+            }}
+            
+            .nav-links a {{
+                font-size: 14px;
+                padding: 6px 10px !important;
+                white-space: nowrap;
+            }}
+            
+            /* 광고 컨테이너 모바일 최적화 */
+            .ad-container {{
+                margin: 15px auto;
+                overflow-x: hidden;
             }}
         }}
 
-        /* 하단 네비게이션 중앙 정렬 */
-        .bottom-navigation .container {{
-            padding: 0;
-            margin: 0 auto;
-        }}
-        
-        .nav-links {{
-            justify-content: center;
-            gap: 20px;
+        /* 터치 최적화 */
+        @media (hover: none) {{
+            a, button {{
+                min-height: 44px;
+                min-width: 44px;
+            }}
+            
+            .nav-links a {{
+                padding: 12px 15px !important;
+            }}
         }}
     </style>
 </head>
@@ -440,7 +470,7 @@ def scrape_category():
                         logging.info(f"Article saved: {title}")
                         post_count += 1
                     
-                    if post_count % 50 == 0:  # 10에서 50으로 변경
+                    if post_count % 2 == 0:  # 10에서 50으로 변경
                         choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                         if choice.lower() != 'y':
                             return
