@@ -6,6 +6,7 @@ from scraping_example import (
     download_media, save_to_html, Options, webdriver, 
     Service, ChromeDriverManager, By, logging, time, os
 )
+import hashlib
 
 def get_next_file_number(output_dir):
     """다음 HTML 파일 번호를 찾습니다 (기존 번호 중 가장 큰 수 + 1)"""
@@ -15,6 +16,26 @@ def get_next_file_number(output_dir):
     
     max_num = max(int(f.split('.')[0]) for f in existing_files if f.split('.')[0].isdigit())
     return max_num + 1
+
+def is_post_exists(post_hash, base_path):
+    """해시값을 이용해 게시물 중복 검사"""
+    hash_file = os.path.join(base_path, 'post_hashes.txt')
+    
+    # 해시 파일이 없으면 생성
+    if not os.path.exists(hash_file):
+        return False
+        
+    # 해시 파일에서 기존 해시값들을 읽어옴
+    with open(hash_file, 'r', encoding='utf-8') as f:
+        existing_hashes = f.read().splitlines()
+    
+    return post_hash in existing_hashes
+
+def save_post_hash(post_hash, base_path):
+    """게시물 해시값 저장"""
+    hash_file = os.path.join(base_path, 'post_hashes.txt')
+    with open(hash_file, 'a', encoding='utf-8') as f:
+        f.write(f"{post_hash}\n")
 
 def process_single_page(driver, page, output_dir):
     """한 페이지를 스크랩하고 새로운 게시글만 HTML 생성"""
@@ -69,9 +90,10 @@ def process_single_page(driver, page, output_dir):
         for post in posts_data:
             # 중복 체크
             post_id = hashlib.md5(post['link'].encode()).hexdigest()
-            if not is_post_exists(post_id):
+            if not is_post_exists(post_id, output_dir):
                 new_posts.append(post)
                 save_post_to_db(post)
+                save_post_hash(post_id, output_dir)
         
         if new_posts:
             file_number = get_next_file_number(output_dir)

@@ -4,6 +4,7 @@ import sys
 import random
 import logging
 import os
+import hashlib
 from datetime import datetime
 try:
     from bs4 import BeautifulSoup
@@ -334,6 +335,27 @@ def is_duplicate_post(title, base_path):
     safe_title = clean_filename(title)
     return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
 
+def is_post_exists(post_hash, base_path):
+    """해시값을 이용해 게시물 중복 검사"""
+    hash_file = os.path.join(base_path, 'post_hashes.txt')
+    
+    # 해시 파일이 없으면 생성
+    if not os.path.exists(hash_file):
+        return False
+        
+    # 해시 파일에서 기존 해시값들을 읽어옴
+    with open(hash_file, 'r', encoding='utf-8') as f:
+        existing_hashes = f.read().splitlines()
+    
+    return post_hash in existing_hashes
+
+def save_post_hash(post_hash, base_path):
+    """게시물 해시값 저장"""
+    hash_file = os.path.join(base_path, 'post_hashes.txt')
+    
+    with open(hash_file, 'a', encoding='utf-8') as f:
+        f.write(f"{post_hash}\n")
+
 def resize_image(img, width=600):
     """이미지 리사이즈 함수"""
     w_percent = width / float(img.size[0])
@@ -411,18 +433,21 @@ def scrape_category():
                     if not title_elem:
                         continue
                     
+                    link = title_elem.get('href')  # link 변수를 여기로 이동
                     original_title = title_elem.get_text(strip=True)
                     title = generate_clickbait_title(original_title)  # 클릭베이트 제목으로 변환
                     safe_filename = generate_url_friendly_title(title, post_id)  # URL 친화적 파일명 생성
                     post_id += 1
                     
-                    # 중복 게시물 검사 시 새로운 파일명 사용
-                    if is_duplicate_post(safe_filename, base_path):
+                    # 게시물 해시값 생성 (제목 + 링크)
+                    post_hash = hashlib.md5(f"{title}{link}".encode()).hexdigest()
+                    
+                    # 중복 게시물 검사
+                    if is_post_exists(post_hash, base_path):
                         logging.info(f"Skipping duplicate post: {title}")
                         continue
                     
                     # 게시물 상세 페이지 스크래핑
-                    link = title_elem.get('href')
                     article_response = scraper.get(link)
                     article_soup = BeautifulSoup(article_response.text, 'html.parser')
                     
@@ -496,6 +521,10 @@ def scrape_category():
                                 posts_info[-3] if len(posts_info) > 2 else None,
                                 current_post
                             )
+                    
+                    # 게시물 저장 후 해시값 저장
+                    if saved_file:
+                        save_post_hash(post_hash, base_path)
                     
                     if saved_file:
                         logging.info(f"Article saved: {title}")
