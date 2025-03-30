@@ -399,18 +399,68 @@ def update_humor_pages(posts_info, base_path):
     for page in range(1, total_pages + 1):
         create_humor_page(posts_info, base_path, page)
 
+def initialize_humor_page(base_path):
+    """초기 유머 페이지 생성"""
+    html_content = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유머 게시판</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        #post-list {
+            list-style: none;
+            padding: 0;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>유머 게시판</h1>
+        <ul id="post-list"></ul>
+        <div class="pagination"></div>
+    </div>
+</body>
+</html>"""
+    
+    with open(os.path.join(base_path, 'humor.html'), 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
 def scrape_category():
     """게시물 스크래핑 함수"""
     base_path, image_path = setup_folders()
-    posts_info = []  # 모든 게시물 정보를 저장할 리스트
-    post_count = 0
-    base_url = 'https://humorworld.net/category/humorstorage/'
+    posts_info = []
+    
+    # 초기 유머 페이지 생성
+    initialize_humor_page(base_path)
     
     try:
         scraper = get_scraper()
         page = 1
         
         while True:
+            base_url = 'https://humorworld.net/category/humorstorage/'
             url = f'{base_url}page/{page}/' if page > 1 else base_url
             logging.info(f"Scraping page {page}: {url}")
             
@@ -471,52 +521,43 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 정보 저장 - filename 먼저 설정
+                    # 현재 게시물 정보
                     safe_title = clean_filename(process_title(title))
                     current_post = {
                         'title': title,
-                        'content': content,
-                        'images': images_html,
                         'filename': f'{safe_title}.html'
                     }
                     
-                    # 이전/다음 게시물 정보 설정
+                    # 이전/다음 포스트 설정
                     prev_post = posts_info[-1] if posts_info else None
+                    next_post = None
                     
-                    # 게시물 저장
+                    # 현재 게시물 저장
                     saved_file = save_article(
                         title,
-                        content,  # BeautifulSoup 객체 그대로 전달
+                        content,
                         images_html,
                         base_path,
                         prev_post,
-                        None  # 다음 게시물은 아직 알 수 없음
+                        next_post
                     )
                     
-                    # 게시물 정보 저장
                     if saved_file:
                         posts_info.append(current_post)
-                        
-                        # 이전 게시물 업데이트 - 현재 게시물을 다음 게시물로 전달
-                        if prev_post:
-                            save_article(
-                                prev_post['title'],
-                                prev_post['content'],
-                                prev_post['images'],
-                                base_path,
-                                posts_info[-3] if len(posts_info) > 2 else None,
-                                current_post
-                            )
-                    
-                    if saved_file:
-                        logging.info(f"Article saved: {title}")
-                        post_count += 1
-                    
-                    if post_count % 10 == 0:
-                        choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
-                        if choice.lower() != 'y':
+                        # 10개마다 유머 페이지 업데이트
+                        if len(posts_info) % 10 == 0:
                             update_humor_pages(posts_info, base_path)
-                            return
+                    
+                    # 이전 게시물 업데이트 (다음 게시물 정보 포함)
+                    if prev_post:
+                        save_article(
+                            prev_post['title'],
+                            posts_info[-2]['content'] if len(posts_info) > 1 else None,
+                            posts_info[-2]['images'] if len(posts_info) > 1 else None,
+                            base_path,
+                            posts_info[-3] if len(posts_info) > 2 else None,
+                            current_post
+                        )
                     
                     time.sleep(random.uniform(2, 4))
                     
@@ -524,13 +565,17 @@ def scrape_category():
                     logging.error(f'Error processing article: {str(e)}')
                     continue
             
+            # 페이지 단위로 유머 페이지 업데이트
+            update_humor_pages(posts_info, base_path)
+            
             page += 1
             time.sleep(random.uniform(3, 5))
-        
-        update_humor_pages(posts_info, base_path)
             
     except Exception as e:
         logging.error(f'Error occurred: {str(e)}')
+    finally:
+        # 최종 유머 페이지 업데이트
+        update_humor_pages(posts_info, base_path)
 
 if __name__ == '__main__':
     print('Starting to scrape humorworld.net category...')
