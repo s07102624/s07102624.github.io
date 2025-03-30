@@ -549,14 +549,15 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 저장
+                    # 현재 게시물 저장 - next_post 추가
+                    next_post = posts_info[-2] if len(posts_info) > 1 else None
                     saved_file = save_article(
                         current_post['title'],
                         content,
                         images_html,
                         base_path,
                         posts_info[-1] if posts_info else None,
-                        None
+                        next_post  # 다음 게시물 정보 추가
                     )
                     
                     if saved_file:
