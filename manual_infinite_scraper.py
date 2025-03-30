@@ -105,11 +105,13 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
 
         # content가 BeautifulSoup 객체인 경우 HTML 추출
         if isinstance(content, BeautifulSoup):
+            # 제목을 본문 시작 부분에 추가
+            title_html = f'<h2 style="font-size: 1.5em; margin-bottom: 20px; color: #333; font-weight: bold;">{processed_title}</h2>'
             content_html = str(content)
-            # 원본 HTML 구조 유지를 위해 태그 보존
+            content_html = title_html + content_html
             content_html = content_html.replace('src="/', 'src="https://humorworld.net/')
         else:
-            content_html = f"<p>{content}</p>"
+            content_html = f"<h2>{processed_title}</h2><p>{content}</p>"
 
         html_content = f"""<!DOCTYPE html>
 <html lang="ko-KR" class="js">
