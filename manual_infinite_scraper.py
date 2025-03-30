@@ -1,223 +1,208 @@
+import time
+import re
 import sys
-import io
-import sqlite3
-import json
-import requests  # requests 모듈 추가
-from urllib.parse import urlparse  # urlparse 함수 추가
-from scraping_example import (
-    setup_logging, setup_database, save_post_to_db, 
-    download_media, save_to_html, Options, webdriver, 
-    Service, ChromeDriverManager, By, logging, time, os
-)
+import random
+import logging
+import os
+from datetime import datetime
+try:
+    from bs4 import BeautifulSoup
+    import cloudscraper
+    from fake_useragent import UserAgent
+    from PIL import Image
+    import io
+except ImportError as e:
+    print(f"필요한 패키지가 설치되지 않았습니다: {str(e)}")
+    print("다음 명령어로 필요한 패키지를 설치하세요:")
+    print("pip install beautifulsoup4 cloudscraper fake-useragent pillow")
+    sys.exit(1)
 
-# UTF-8 인코딩 설정
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
-if sys.stderr.encoding != 'utf-8':
-    sys.stderr = open(sys.stderr.fileno(), mode='w', encoding='utf-8', buffering=1)
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def replace_text_content(html_content):
-    # HTML 내용에서 "유머월드" 텍스트를 "테스트프로"로 변경
-    html_content = html_content.replace('유머월드', '테스트프로')
-    html_content = html_content.replace('humorworld', 'testpro')
-    return html_content
+# 클릭 유도 접두어와 흥미로운 주제 접미어 리스트 추가
+CLICK_PREFIXES = [
+    "충격", "경악", "화제", "논란", "실화", "대박", "궁금", "알고보니", "충격적", "결국",
+    "현실", "경악", "공감", "화제의", "완벽", "역대급", "필독", "최초", "극과극", "충격반전",
+    "실시간", "속보", "단독", "전격", "긴급", "초특급", "절대", "화제의", "놀라운", "충격적인",
+    "완전", "초강력", "강추", "필수", "대유행", "최강", "극한", "전설의", "상상초월", "신기한"
+]
 
-def shift_posts(output_dir):
-    """기존 파일들을 한 단계씩 뒤로 이동"""
-    files = sorted([f for f in os.listdir(output_dir) if f.endswith('.html')], 
-                  key=lambda x: int(x.split('.')[0]), reverse=True)
+INTEREST_SUFFIXES = [
+    "비하인드", "꿀팁", "레전드", "사연", "현실", "반전", "근황", "비밀", "이야기", "심쿵",
+    "순간", "기적", "노하우", "핵심", "비결", "대반전", "진실", "TMI", "모음", "영상",
+    "현장", "총정리", "요약", "정보", "모음집", "기록", "사실", "모먼트", "포인트", "궁금증",
+    "꿀잼", "분석", "해설", "후기", "리뷰", "정리", "모음", "꿀팁", "레시피", "노하우"
+]
+
+def clean_filename(text):
+    """파일명으로 사용할 수 있게 문자열 정리"""
+    # 기본 파일명 정리
+    cleaned = re.sub(r'[\\/*?:"<>|]', "", text)
+    # URL에서 사용할 수 있도록 추가 처리
+    cleaned = cleaned.replace(' ', '-')  # 공백을 하이픈으로 변경
+    cleaned = re.sub(r'[^\w\-\.]', '', cleaned)  # 알파벳, 숫자, 하이픈, 점만 허용
+    cleaned = re.sub(r'-+', '-', cleaned)  # 연속된 하이픈을 하나로
+    return cleaned.strip('-')  # 앞뒤 하이픈 제거
+
+def process_title(title):
+    """제목에 랜덤 접두어와 접미어 추가"""
+    prefix = random.choice(CLICK_PREFIXES)
+    suffix = random.choice(INTEREST_SUFFIXES)
+    return f"[{prefix}] {title} ({suffix})"
+
+def get_scraper():
+    """클라우드플레어 우회 스크래퍼 생성"""
+    ua = UserAgent()
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True
+        }
+    )
+    scraper.headers.update({
+        'User-Agent': ua.random,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://www.humorworld.net/',
+        'DNT': '1',
+    })
+    return scraper
+
+def setup_folders():
+    """필요한 폴더 구조 생성"""
+    base_path = os.path.join('s07102624.github.io', 'output', '2025')
+    image_path = os.path.join(base_path, 'images')
     
-    for file in files:
-        current_num = int(file.split('.')[0])
-        new_name = f"{current_num + 1}.html"
-        os.rename(os.path.join(output_dir, file), 
-                 os.path.join(output_dir, new_name))
-
-def save_html_file(page_num, html_content, posts_data=None):
-    output_dir = os.path.join('output', '20250307')
-    os.makedirs(output_dir, exist_ok=True)
+    # 폴더 생성
+    os.makedirs(base_path, exist_ok=True)
+    os.makedirs(image_path, exist_ok=True)
     
-    if posts_data:
-        # DB 연결
-        conn = sqlite3.connect('posts.db')
-        cursor = conn.cursor()
+    return base_path, image_path
+
+def save_article(title, content, images, base_path, prev_post=None, next_post=None):
+    """HTML 파일로 게시물 저장"""
+    try:
+        # 제목 처리
+        processed_title = process_title(title)
+        safe_title = clean_filename(processed_title)
+        filename = os.path.join(base_path, f'{safe_title}.html')
         
-        # 테이블 생성
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            content TEXT,
-            images TEXT,
-            videos TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
+        # 네비게이션 링크 설정 - 파일명 처리 수정
+        nav_links = []
+        if prev_post and 'title' in prev_post:
+            prev_filename = clean_filename(process_title(prev_post['title'])) + '.html'
+            nav_links.append(f'<a href="./{prev_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
         
-        # 게시물들 저장
-        for post in posts_data:
-            cursor.execute(
-                'INSERT INTO posts (title, content, images, videos) VALUES (?, ?, ?, ?)',
-                (
-                    post['title'],
-                    post['content'],
-                    json.dumps(post.get('images', [])),
-                    json.dumps(post.get('videos', []))
-                )
-            )
+        nav_links.append('<a href="https://kk.testpro.site/" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
         
-        conn.commit()
-        conn.close()
-    
-    # HTML 내용 변경
-    html_content = replace_text_content(html_content)
-    
-    file_path = os.path.join(output_dir, f'{page_num}.html')
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(html_content)
+        if next_post and 'title' in next_post:
+            next_filename = clean_filename(process_title(next_post['title'])) + '.html'
+            nav_links.append(f'<a href="./{next_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
+        
+        nav_html = '\n'.join(nav_links)
 
-def save_to_html(post_data, page_num):
-    # 단일 post_data를 받도록 수정
-    html_template = f"""
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <title>테스트프로 {page_num}페이지</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
-        <style>
-            body {{
-                font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-                line-height: 1.6;
-                margin: 0;
+        # content가 BeautifulSoup 객체인 경우 HTML 추출
+        if isinstance(content, BeautifulSoup):
+            content_html = str(content)
+            # 원본 HTML 구조 유지를 위해 태그 보존
+            content_html = content_html.replace('src="/', 'src="https://humorworld.net/')
+        else:
+            content_html = f"<p>{content}</p>"
+
+        html_content = f"""<!DOCTYPE html>
+<html lang="ko-KR" class="js">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{processed_title}</title>
+    
+    <!-- 원본 스타일시트 -->
+    <link rel='stylesheet' id='wp-block-library-css' href='https://humorworld.net/wp-includes/css/dist/block-library/style.min.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='classic-theme-styles-css' href='https://humorworld.net/wp-includes/css/classic-themes.min.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='blogberg-style-css' href='https://humorworld.net/wp-content/themes/blogberg/style.css' type='text/css' media='all' />
+    <link rel='stylesheet' id='blogberg-google-fonts-css' href='https://fonts.googleapis.com/css?family=Poppins:300,400,400i,500,600,700,700i|Rubik:300,400,400i,500,700,700i' type='text/css' media='all' />
+    <link rel='stylesheet' id='bootstrap-css' href='https://humorworld.net/wp-content/themes/blogberg/assets/vendors/bootstrap/css/bootstrap.min.css' type='text/css' media='all' />
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9374368296307755" crossorigin="anonymous"></script>
+    
+    <style type="text/css">
+        /* 기본 스타일 */
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.8;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }}
+        
+        /* 컨테이너 레이아웃 */
+        .container {{
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+        }}
+        
+        /* 메인 콘텐츠 영역 */
+        .content-area {{
+            width: 800px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 0 auto;
+        }}
+        
+        /* 사이드바 제거하고 메인 컨텐츠 중앙 정렬 */
+        .widget-area {{
+            display: none;
+        }}
+        
+        /* 광고 컨테이너 중앙 정렬 */
+        .ad-container {{
+            width: 100%;
+            max-width: 728px;
+            margin: 20px auto;
+            text-align: center;
+        }}
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {{
+            .container {{
                 padding: 10px;
-                background: #f0f2f5;
             }}
-            .content {{
+            
+            .content-area {{
                 width: 100%;
-                max-width: 800px;
-                margin: 0 auto;
-                background: #fff;
                 padding: 15px;
-                border-radius: 8px;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-                box-sizing: border-box;
             }}
-            .preview {{
-                border-bottom: 1px solid #eee;
-                padding: 15px 0;
-            }}
-            .preview h2 {{
-                margin: 0 0 10px 0;
-                font-size: 1.2em;
-                color: #333;
-                word-break: break-all;
-            }}
-            .preview .content {{
-                margin: 10px 0;
-                color: #666;
-                padding: 0;
-                box-shadow: none;
-                font-size: 0.95em;
-                word-break: break-all;
-            }}
-            .preview img {{
-                display: block;
-                width: 100%;
-                max-width: 100%;
-                height: auto;
-                margin: 10px auto;
-                border-radius: 4px;
-            }}
-            .preview video {{
-                display: block;
-                width: 100%;
-                max-width: 100%;
-                height: auto;
-                margin: 10px auto;
-                border-radius: 4px;
-            }}
-            .ad-container {{
-                margin: 15px 0;
-                text-align: center;
-                overflow: hidden;
-            }}
-            @media screen and (max-width: 600px) {{
-                body {{
-                    padding: 5px;
-                }}
-                .content {{
-                    padding: 10px;
-                }}
-                .preview h2 {{
-                    font-size: 1.1em;
-                }}
-                .preview .content {{
-                    font-size: 0.9em;
-                }}
-            }}
-            .popup {{
-                display: none;
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                z-index: 1000;
-            }}
-            .overlay {{
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                z-index: 999;
-            }}
-            #timer {{
-                text-align: center;
-                margin-bottom: 10px;
-            }}
-            #closeBtn {{
-                display: block;
-                width: 100%;
-                padding: 10px;
-                margin-top: 10px;
-                border: none;
-                border-radius: 4px;
-                background: #007bff;
-                color: white;
-                cursor: pointer;
-            }}
-            #closeBtn:disabled {{
-                background: #ccc;
-            }}
-        </style>
-    </head>
-    <body>
-        <div id="overlay" class="overlay"></div>
-        <div id="adPopup" class="popup">
-            <div id="timer">7</div>
-            <div id="popupAdContainer">
-                <!-- 보험 팝업 광고 -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-9374368296307755"
-                     data-ad-slot="8384240134"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-            </div>
-            <button id="closeBtn" disabled>닫기 (<span id="timerText">7</span>초)</button>
-        </div>
+        }}
 
-        <div class="content">
-            <h1>테스트프로 - 페이지 {page_num}</h1>
-
+        /* 하단 네비게이션 중앙 정렬 */
+        .bottom-navigation .container {{
+            padding: 0;
+            margin: 0 auto;
+        }}
+        
+        .nav-links {{
+            justify-content: center;
+            gap: 20px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main class="content-area">
             <!-- 상단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
@@ -228,468 +213,230 @@ def save_to_html(post_data, page_num):
                      data-full-width-responsive="true"></ins>
                 <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
             </div>
-    """
-
-    html_template += f"""
-    <div class="navigation">
-        <a href="{page_num-1}.html" {"style='visibility:hidden'" if page_num == 1 else ""}>← 이전 글</a>
-        <a href="index.html">목록으로</a>
-        <a href="{page_num+1}.html">다음 글 →</a>
-    </div>
-    
-    <div class="preview">
-        <h2>{post_data['title']}</h2>
-        <div class="content">{post_data['content']}</div>
-    """
-    
-    # 이미지와 비디오 처리
-    for img_path in post_data['images']:
-        html_template += f'<img src="{img_path}" alt="이미지">\n'
-        
-    # 비디오 처리 부분 수정
-    for video_path in post_data['videos']:
-        if 'youtube.com' in video_path or 'youtu.be' in video_path:
-            video_id = extract_youtube_id(video_path)
-            if video_id:
-                html_template += f'''
-                <div class="video-container">
-                    <iframe 
-                        src="https://www.youtube.com/embed/{video_id}"
-                        title="YouTube video player"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-                '''
-        elif video_path.endswith(('.mp4', '.webm', '.ogg')):
-            html_template += f'<video controls src="{video_path}"></video>\n'
             
-    html_template += """
+            <article class="post">
+                <header class="entry-header">
+                    <h1 class="entry-title">{processed_title}</h1>
+                    <div class="entry-meta">
+                        <span class="posted-on">
+                            <time class="entry-date published">{datetime.now().strftime('%Y년 %m월 %d일')}</time>
+                        </span>
+                    </div>
+                </header>
+                <div class="entry-content">
+                    {content_html}
+                    {images}
+                </div>
+                <footer class="entry-footer">
+                    <nav class="navigation post-navigation">
+                        <div class="nav-links">
+                            {f'<div class="nav-previous"><a href="{prev_post["filename"]}">{prev_post["title"]}</a></div>' if prev_post else ''}
+                            {f'<div class="nav-next"><a href="{next_post["filename"]}">{next_post["title"]}</a></div>' if next_post else ''}
+                        </div>
+                    </nav>
+                </footer>
+            </article>
+            
             <!-- 하단 광고 -->
             <div class="ad-container">
                 <ins class="adsbygoogle"
                      style="display:block"
-                     
                      data-ad-client="ca-pub-9374368296307755"
                      data-ad-slot="8384240134"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 고정 광고 -->
+    <div class="ad-fixed">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:300px;height:250px"
+             data-ad-client="ca-pub-9374368296307755"
+             data-ad-slot="8384240134"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+    </div>
+    
+    <!-- 하단 네비게이션 바 추가 -->
+    <nav class="bottom-navigation" style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        z-index: 1000;
+    ">
+        <div class="container">
+            <div class="nav-links" style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 0 20px;
+            ">
+                {nav_html}
             </div>
         </div>
-
-        <script>
-            function getCookie(name) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${name}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-            }
-
-            function setCookie(name, value, days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
-            }
-
-            function showPopup() {
-                if (!getCookie('popupShown')) {
-                    document.getElementById('overlay').style.display = 'block';
-                    document.getElementById('adPopup').style.display = 'block';
-                    
-                    let timeLeft = 7;
-                    const timer = setInterval(() => {
-                        timeLeft--;
-                        document.getElementById('timer').textContent = timeLeft;
-                        document.getElementById('timerText').textContent = timeLeft;
-                        
-                        if (timeLeft <= 0) {
-                            clearInterval(timer);
-                            document.getElementById('closeBtn').disabled = false;
-                            document.getElementById('closeBtn').textContent = '닫기';
-                        }
-                    }, 1000);
-
-                    setCookie('popupShown', 'true', 1);
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                }
-            }
-
-            document.getElementById('closeBtn').onclick = function() {
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('adPopup').style.display = 'none';
-            };
-
-            window.addEventListener('load', showPopup);
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </body>
-    </html>
-    """
-
-    save_html_file(page_num, html_template, [post_data])
-
-def extract_youtube_id(url):
-    if not url:
-        return None
-    if 'youtu.be/' in url:
-        return url.split('youtu.be/')[-1].split('?')[0]
-    elif 'youtube.com/embed/' in url:
-        return url.split('embed/')[-1].split('?')[0]
-    elif 'watch?v=' in url:
-        return url.split('watch?v=')[-1].split('&')[0]
-    return None
-
-def update_index_file(total_pages):
-    """인덱스 파일 업데이트"""
-    index_template = """
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테스트프로 인덱스</title>
-    <style>
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background: #f0f2f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        .page-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .page-list a {
-            display: block;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            text-decoration: none;
-            color: #333;
-            text-align: center;
-        }
-        .page-list a:hover {
-            background: #e9ecef;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 20px;
-        }
-        .pagination button {
-            padding: 8px 12px;
-            border: none;
-            background: #f8f9fa;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .pagination button:hover {
-            background: #e9ecef;
-        }
-        .pagination button.active {
-            background: #007bff;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>테스트프로 페이지 목록</h1>
-        <div class="page-list" id="pageList">
-"""
+    </nav>
     
-    # 페이지 링크 생성
-    for i in range(1, total_pages + 1):
-        index_template += f'            <a href="output/20250307/{i}.html">페이지 {i}</a>\n'
+    <div style="height: 60px;"><!-- 하단 네비게이션 바 공간 확보 --></div>
     
-    index_template += """
-        </div>
-        <div class="pagination" id="pagination"></div>
-    </div>
-    <script>
-        const itemsPerPage = 1; // 한 페이지당 1개씩 표시
-        const pageList = document.getElementById('pageList');
-        const pagination = document.getElementById('pagination');
-        const links = pageList.getElementsByTagName('a');
-        
-        function showPage(pageNum) {
-            // 모든 링크 숨기기
-            for (let i = 0; i < links.length; i++) {
-                links[i].style.display = 'none';
-            }
-            
-            // 현재 페이지 링크만 표시
-            const current = pageNum - 1;
-            if (links[current]) {
-                links[current].style.display = 'block';
-            }
-            
-            updatePagination(pageNum);
-        }
-        
-        function updatePagination(currentPage) {
-            const totalPages = links.length;
-            let html = '';
-            
-            // 이전 버튼
-            if (currentPage > 1) {
-                html += `<button onclick="showPage(${currentPage - 1})">이전</button>`;
-            }
-            
-            // 현재 페이지
-            html += `<button class="active">${currentPage} / ${totalPages}</button>`;
-            
-            // 다음 버튼
-            if (currentPage < totalPages) {
-                html += `<button onclick="showPage(${currentPage + 1})">다음</button>`;
-            }
-            
-            pagination.innerHTML = html;
-        }
-        
-        // 초기 페이지 표시
-        showPage(1);
-    </script>
+    <!-- 원본 사이트 스크립트 -->
+    <script src='https://humorworld.net/wp-includes/js/jquery/jquery.min.js' id='jquery-core-js'></script>
+    <script src='https://humorworld.net/wp-content/themes/blogberg/assets/vendors/bootstrap/js/bootstrap.min.js' id='bootstrap-js'></script>
 </body>
-</html>
-"""
-    
-    with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(index_template)
-
-def download_media(url, folder):
-    """미디어 다운로드 함수 개선"""
-    try:
-        # URL 검증
-        if not url or 'data:' in url:
-            return None
-            
-        # 폴더 생성
-        os.makedirs(folder, exist_ok=True)
+</html>"""
         
-        # 파일명 생성 (URL의 마지막 부분 사용)
-        filename = os.path.join(folder, os.path.basename(url.split('?')[0]))
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(html_content)
         
-        # User-Agent 헤더 추가
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
-            'Referer': 'https://www.humorworld.net/'
-        }
-        
-        # 최대 3번 재시도
-        for attempt in range(3):
-            try:
-                response = requests.get(url, headers=headers, timeout=10)
-                response.raise_for_status()  # HTTP 에러 체크
-                
-                # 파일 저장
-                with open(filename, 'wb') as f:
-                    f.write(response.content)
-                
-                # 상대 경로 반환
-                return os.path.relpath(filename, start='output/20250307')
-                
-            except requests.exceptions.RequestException as e:
-                print(f"다운로드 실패 (시도 {attempt + 1}/3): {url}\n에러: {str(e)}")
-                if attempt == 2:  # 마지막 시도였다면
-                    return None
-                time.sleep(2)  # 재시도 전 대기
-                
+        logging.info(f"Successfully saved HTML file: {filename}")
+        return filename
     except Exception as e:
-        print(f"미디어 다운로드 중 에러 발생: {str(e)}")
+        logging.error(f"Error saving HTML file: {str(e)}")
         return None
 
-def infinite_scrape():
-    print("\n=== HumorWorld 전체 게시글 스크래핑 시작 ===")
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument('--window-size=1920,1080')
-    options.add_argument("--enable-unsafe-swiftshader")
-    options.add_argument("--disable-software-rasterizer")
-    options.add_argument(f"user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36")
+def is_duplicate_post(title, base_path):
+    """게시물 제목 중복 검사 - 처리된 제목 사용"""
+    processed_title = process_title(title)
+    safe_title = clean_filename(processed_title)
+    return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
+
+def scrape_category():
+    """게시물 스크래핑 함수"""
+    base_path, image_path = setup_folders()
+    posts_info = []  # 모든 게시물 정보를 저장할 리스트
+    post_count = 0
+    base_url = 'https://humorworld.net/category/humorstorage/'
     
     try:
-        # ChromeDriver 서비스 설정 수정
-        chrome_manager = ChromeDriverManager()
-        chrome_path = chrome_manager.install()
-        
-        # Chrome 서비스 설정
-        service = Service(executable_path=chrome_path)
-        
-        try:
-            driver = webdriver.Chrome(options=options)
-            print("Chrome WebDriver 초기화 성공!")
-        except Exception as e:
-            print(f"첫 번째 시도 실패, 다른 방법 시도 중... 에러: {str(e)}")
-            
-            try:
-                # 두 번째 시도: 직접 서비스 지정
-                driver = webdriver.Chrome(service=service, options=options)
-                print("두 번째 시도 성공!")
-            except Exception as e2:
-                print(f"두 번째 시도 실패, 마지막 방법 시도 중... 에러: {str(e2)}")
-                
-                try:
-                    # 세 번째 시도: 로컬 chromedriver 사용
-                    local_driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver.exe")
-                    if not os.path.exists(local_driver_path):
-                        # chromedriver.exe가 없으면 다운로드
-                        import shutil
-                        shutil.copy2(chrome_path, local_driver_path)
-                    
-                    service = Service(executable_path=local_driver_path)
-                    driver = webdriver.Chrome(service=service, options=options)
-                    print("세 번째 시도 성공!")
-                except Exception as e3:
-                    print(f"모든 시도 실패. 에러: {str(e3)}")
-                    print("크롬 브라우저가 설치되어 있는지 확인하세요.")
-                    print("수동으로 다음 명령어를 실행해보세요:")
-                    print("pip install --upgrade selenium webdriver-manager")
-                    return
-
-        driver.set_page_load_timeout(30)
-        max_retries = 3
-        retry_delay = 5
-        
-        base_url = "https://www.humorworld.net/?cat=1&paged={}"
+        scraper = get_scraper()
         page = 1
-        total_posts = 0
-        previous_titles = set()
-        output_dir = os.path.join('output', '20250307')
-        
-        if os.path.exists(os.path.join(output_dir, '1.html')):
-            with open(os.path.join(output_dir, '1.html'), 'r', encoding='utf-8') as f:
-                content = f.read()
-                previous_titles = set(title.strip() for title in content.split('<h2>')[1:])
         
         while True:
-            for retry in range(max_retries):
-                try:
-                    current_url = base_url.format(page)
-                    print(f"\n=== 페이지 {page} 스크래핑 중... (시도 {retry + 1}/{max_retries}) ===")
-                    driver.get(current_url)
-                    time.sleep(5)
-                    break
-                except Exception as e:
-                    if retry == max_retries - 1:
-                        raise e
-                    print(f"페이지 로드 실패, {retry_delay}초 후 재시도...")
-                    time.sleep(retry_delay)
+            url = f'{base_url}page/{page}/' if page > 1 else base_url
+            logging.info(f"Scraping page {page}: {url}")
             
-            # 게시글 목록에서 링크 추출
-            post_links = []
-            posts = driver.find_elements(By.CSS_SELECTOR, "article.post .entry-title a")
+            response = scraper.get(url)
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            if not posts:
-                print(f"\n더 이상 게시글이 없습니다. 총 {total_posts}개의 게시글을 스크래핑했습니다.")
+            articles = soup.select('article.format-standard')
+            if not articles:
+                logging.info("No more articles found")
                 break
-            
-            # 링크 수집
-            for post in posts:
+                
+            for article in articles:
                 try:
-                    link = post.get_attribute('href')
-                    title = post.text.strip()
-                    if title not in previous_titles:
-                        post_links.append((link, title))
-                except Exception as e:
-                    logging.error(f"링크 추출 중 오류: {str(e)}")
-                    continue
-            
-            # 각 게시글 상세 페이지 방문
-            for link, title in post_links:
-                try:
-                    print(f"\n게시글 스크래핑 중: {title}")
-                    driver.get(link)
-                    time.sleep(3)  # 페이지 로딩 대기
+                    title_elem = article.select_one('.entry-title a')
+                    if not title_elem:
+                        continue
                     
-                    # 게시물 데이터 구조
-                    post_data = {
+                    title = title_elem.get_text(strip=True)
+                    link = title_elem.get('href')
+                    
+                    # 중복 게시물 검사
+                    if is_duplicate_post(title, base_path):
+                        logging.info(f"Skipping duplicate post: {title}")
+                        continue
+                    
+                    # 게시물 상세 페이지 스크래핑
+                    article_response = scraper.get(link)
+                    article_soup = BeautifulSoup(article_response.text, 'html.parser')
+                    
+                    content = article_soup.select_one('.entry-content')
+                    if not content:
+                        logging.error(f"Content not found for: {title}")
+                        continue
+
+                    # 이미지 처리 - WebP 변환 추가
+                    images_html = ""
+                    for img in content.find_all('img'):
+                        if img.get('src'):
+                            img_name = clean_filename(os.path.basename(img['src']))
+                            webp_name = f"{os.path.splitext(img_name)[0]}.webp"
+                            img_path = os.path.join(image_path, webp_name)
+                            
+                            try:
+                                # 이미지 다운로드
+                                img_response = scraper.get(img['src'])
+                                img_data = Image.open(io.BytesIO(img_response.content))
+                                
+                                # RGBA 이미지를 RGB로 변환
+                                if img_data.mode in ('RGBA', 'LA'):
+                                    background = Image.new('RGB', img_data.size, (255, 255, 255))
+                                    background.paste(img_data, mask=img_data.split()[-1])
+                                    img_data = background
+                                
+                                # WebP로 저장 (품질 85%)
+                                img_data.save(img_path, 'WEBP', quality=85)
+                                images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy">\n'
+                                logging.info(f"Image saved as WebP: {webp_name}")
+                            except Exception as e:
+                                logging.error(f"Failed to process image: {str(e)}")
+
+                    # 현재 게시물 정보 저장 - 구조 수정
+                    current_post = {
                         'title': title,
-                        'content': '',
-                        'images': [],
-                        'videos': [],
-                        'link': link
+                        'content': content,
+                        'images': images_html,
+                        'filename': f'{clean_filename(process_title(title))}.html'  # filename 추가
                     }
                     
-                    # 내용 추출 (상세 페이지에서)
-                    content_elem = driver.find_element(By.CSS_SELECTOR, ".entry-content")
-                    post_data['content'] = content_elem.text.strip()
+                    # 이전/다음 게시물 정보 설정
+                    prev_post = posts_info[-1] if posts_info else None
                     
-                    # 이미지 처리
-                    images = content_elem.find_elements(By.CSS_SELECTOR, "img")
-                    for img in images:
-                        img_url = img.get_attribute('src')
-                        if img_url:
-                            if not urlparse(img_url).netloc:
-                                img_url = f"https://www.humorworld.net{img_url}"
-                            
-                            saved_path = download_media(img_url, os.path.join("downloaded_media", 'images'))
-                            if saved_path:
-                                post_data['images'].append(saved_path)
+                    # 게시물 저장
+                    saved_file = save_article(
+                        title,
+                        content,  # BeautifulSoup 객체 그대로 전달
+                        images_html,
+                        base_path,
+                        prev_post,
+                        None  # 다음 게시물은 아직 알 수 없음
+                    )
                     
-                    # 비디오 처리
-                    videos = content_elem.find_elements(By.CSS_SELECTOR, "iframe[src*='youtube.com'], iframe[src*='youtu.be'], video")
-                    for video in videos:
-                        video_url = video.get_attribute('src')
-                        if video_url:
-                            if 'youtube.com' in video_url or 'youtu.be' in video_url:
-                                post_data['videos'].append(video_url)
-                            elif video.tag_name == 'video':
-                                saved_path = download_media(video_url, os.path.join("downloaded_media", 'videos'))
-                                if saved_path:
-                                    post_data['videos'].append(saved_path)
+                    # 게시물 정보 저장
+                    if saved_file:
+                        posts_info.append(current_post)
+                        
+                        # 이전 게시물 업데이트
+                        if prev_post:
+                            save_article(
+                                prev_post['title'],
+                                prev_post['content'],
+                                prev_post['images'],
+                                base_path,
+                                posts_info[-3] if len(posts_info) > 2 else None,
+                                current_post
+                            )
                     
-                    # HTML 파일 저장
-                    save_to_html(post_data, page)
-                    total_posts += 1
-                    page += 1
+                    if saved_file:
+                        logging.info(f"Article saved: {title}")
+                        post_count += 1
                     
-                    print(f"제목: {post_data['title']}")
-                    print(f"내용: {post_data['content'][:200]}...")
+                    if post_count % 10 == 0:
+                        choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
+                        if choice.lower() != 'y':
+                            return
+                    
+                    time.sleep(random.uniform(2, 4))
                     
                 except Exception as e:
-                    logging.error(f"게시글 스크래핑 중 오류: {str(e)}")
+                    logging.error(f'Error processing article: {str(e)}')
                     continue
             
-            # 인덱스 파일 업데이트
-            update_index_file(page-1)
+            page += 1
+            time.sleep(random.uniform(3, 5))
             
-            # 5페이지마다 계속할지 확인
-            if page % 5 == 0:
-                try:
-                    choice = input(f"\n현재 {total_posts}개의 게시글을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
-                    if choice.lower() != 'y':
-                        print(f"\n스크래핑을 종료합니다. 총 {total_posts}개의 게시글을 스크래핑했습니다.")
-                        break
-                except KeyboardInterrupt:
-                    print("\n\n사용자가 중단했습니다. 지금까지의 결과를 저장합니다.")
-                    break
-                
     except Exception as e:
-        print(f"에러 발생: {str(e)}")
-    finally:
-        try:
-            driver.quit()
-        except:
-            pass
+        logging.error(f'Error occurred: {str(e)}')
 
-if __name__ == "__main__":
-    setup_logging()
-    setup_database()
-    infinite_scrape()
+if __name__ == '__main__':
+    print('Starting to scrape humorworld.net category...')
+    scrape_category()
+    print('Scraping completed!')
