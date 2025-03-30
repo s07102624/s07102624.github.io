@@ -91,15 +91,13 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         
         # 네비게이션 링크 설정 - 파일명 처리 수정
         nav_links = []
-        if prev_post and 'title' in prev_post:
-            prev_filename = clean_filename(process_title(prev_post['title'])) + '.html'
-            nav_links.append(f'<a href="./{prev_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
+        if prev_post and 'filename' in prev_post:
+            nav_links.append(f'<a href="./{prev_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
         
-        nav_links.append('<a href="https://kk.testpro.site/" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
+        nav_links.append('<a href="./humor.html" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
         
-        if next_post and 'title' in next_post:
-            next_filename = clean_filename(process_title(next_post['title'])) + '.html'
-            nav_links.append(f'<a href="./{next_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
+        if next_post and 'filename' in next_post:
+            nav_links.append(f'<a href="./{next_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
         
         nav_html = '\n'.join(nav_links)
 
@@ -117,12 +115,16 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    
+    <!-- 네이버 밴드 썸네일 비활성화 -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{processed_title}">
-    <meta property="og:description" content="테스트프로">
-    <meta name="twitter:card" content="none">
+    <meta property="og:title" content="no-title">
+    <meta property="og:description" content="">
     <meta property="og:image" content="">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="none">
     <link rel="image_src" href="">
+    
     <title>{processed_title}</title>
     
     <!-- 검색엔진 노출 제한 -->
@@ -241,9 +243,9 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
                 </div>
                 <footer class="entry-footer">
                     <nav class="navigation post-navigation">
-                        <div class="nav-links">
-                            {f'<div class="nav-previous"><a href="{prev_post["filename"]}">{prev_post["title"]}</a></div>' if prev_post else ''}
-                            {f'<div class="nav-next"><a href="{next_post["filename"]}">{next_post["title"]}</a></div>' if next_post else ''}
+                        <div class="nav-links" style="display: flex; justify-content: space-between; margin: 20px 0;">
+                            {f'<div class="nav-previous"><a href="./{prev_post["filename"]}">{prev_post["title"]}</a></div>' if prev_post else ''}
+                            {f'<div class="nav-next"><a href="./{next_post["filename"]}">{next_post["title"]}</a></div>' if next_post else ''}
                         </div>
                     </nav>
                 </footer>
@@ -319,6 +321,84 @@ def is_duplicate_post(title, base_path):
     safe_title = clean_filename(processed_title)
     return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
 
+def create_humor_page(posts_info, base_path, page_number=1):
+    """유머 페이지 생성"""
+    posts_per_page = 10
+    total_posts = len(posts_info)
+    total_pages = (total_posts + posts_per_page - 1) // posts_per_page
+    
+    # 현재 페이지의 게시물 계산
+    start_idx = (page_number - 1) * posts_per_page
+    end_idx = min(start_idx + posts_per_page, total_posts)
+    current_posts = posts_info[start_idx:end_idx]
+    
+    # 페이지네이션 HTML 생성
+    pagination_html = '<div class="pagination" style="margin-top: 20px; text-align: center;">'
+    for i in range(1, total_pages + 1):
+        if i == page_number:
+            pagination_html += f'<span style="margin: 0 5px; padding: 5px 10px; background-color: #f0f0f0; border-radius: 3px;">{i}</span>'
+        else:
+            pagination_html += f'<a href="humor_{i}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
+    pagination_html += '</div>'
+
+    # 게시물 목록 HTML 생성
+    posts_html = '<ul style="list-style: none; padding: 0;">'
+    for post in current_posts:
+        posts_html += f'''
+        <li style="margin: 15px 0; padding: 15px; background-color: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <a href="./{post['filename']}" style="text-decoration: none; color: #333; display: block;">
+                <h2 style="margin: 0; font-size: 18px;">{post['title']}</h2>
+            </a>
+        </li>'''
+    posts_html += '</ul>'
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유머 게시판 - 페이지 {page_number}</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }}
+        .container {{
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        h1 {{
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>유머 게시판</h1>
+        {posts_html}
+        {pagination_html}
+    </div>
+</body>
+</html>"""
+
+    filename = f'humor_{page_number}.html' if page_number > 1 else 'humor.html'
+    with open(os.path.join(base_path, filename), 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+def update_humor_pages(posts_info, base_path):
+    """모든 유머 페이지 업데이트"""
+    total_posts = len(posts_info)
+    total_pages = (total_posts + 9) // 10  # 10개씩 표시
+
+    for page in range(1, total_pages + 1):
+        create_humor_page(posts_info, base_path, page)
+
 def scrape_category():
     """게시물 스크래핑 함수"""
     base_path, image_path = setup_folders()
@@ -391,12 +471,13 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 정보 저장 - 구조 수정
+                    # 현재 게시물 정보 저장 - filename 먼저 설정
+                    safe_title = clean_filename(process_title(title))
                     current_post = {
                         'title': title,
                         'content': content,
                         'images': images_html,
-                        'filename': f'{clean_filename(process_title(title))}.html'  # filename 추가
+                        'filename': f'{safe_title}.html'
                     }
                     
                     # 이전/다음 게시물 정보 설정
@@ -416,7 +497,7 @@ def scrape_category():
                     if saved_file:
                         posts_info.append(current_post)
                         
-                        # 이전 게시물 업데이트
+                        # 이전 게시물 업데이트 - 현재 게시물을 다음 게시물로 전달
                         if prev_post:
                             save_article(
                                 prev_post['title'],
@@ -434,6 +515,7 @@ def scrape_category():
                     if post_count % 10 == 0:
                         choice = input(f"\n{post_count}개의 게시물을 스크래핑했습니다. 계속하시겠습니까? (y/n): ")
                         if choice.lower() != 'y':
+                            update_humor_pages(posts_info, base_path)
                             return
                     
                     time.sleep(random.uniform(2, 4))
@@ -444,6 +526,8 @@ def scrape_category():
             
             page += 1
             time.sleep(random.uniform(3, 5))
+        
+        update_humor_pages(posts_info, base_path)
             
     except Exception as e:
         logging.error(f'Error occurred: {str(e)}')
