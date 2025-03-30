@@ -45,10 +45,17 @@ def clean_filename(text):
     cleaned = re.sub(r'-+', '-', cleaned)  # 연속된 하이픈을 하나로
     return cleaned.strip('-')  # 앞뒤 하이픈 제거
 
-def process_title(title):
-    """제목에 랜덤 접두어와 접미어 추가"""
-    prefix = random.choice(CLICK_PREFIXES)
-    suffix = random.choice(INTEREST_SUFFIXES)
+def process_title(title, prefix_index=None, suffix_index=None):
+    """제목에 일관된 접두어와 접미어 추가"""
+    # seed를 사용하여 일관된 접두어/접미어 선택
+    if prefix_index is None:
+        # 제목을 기반으로 일관된 인덱스 생성
+        prefix_index = hash(title) % len(CLICK_PREFIXES)
+    if suffix_index is None:
+        suffix_index = hash(title + "suffix") % len(INTEREST_SUFFIXES)
+        
+    prefix = CLICK_PREFIXES[prefix_index]
+    suffix = INTEREST_SUFFIXES[suffix_index]
     return f"[{prefix}] {title} ({suffix})"
 
 def get_scraper():
@@ -94,7 +101,8 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         if prev_post and 'filename' in prev_post:
             nav_links.append(f'<a href="./{prev_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
         
-        nav_links.append('<a href="./humor.html" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
+        # 홈 링크를 humor_1.html로 변경
+        nav_links.append('<a href="./humor_1.html" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
         
         if next_post and 'filename' in next_post:
             nav_links.append(f'<a href="./{next_post["filename"]}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
@@ -332,25 +340,22 @@ def create_humor_page(posts_info, base_path, page_number=1):
     end_idx = min(start_idx + posts_per_page, total_posts)
     current_posts = posts_info[start_idx:end_idx]
     
-    # 페이지네이션 HTML 생성 (기존 코드 유지)
+    # 페이지네이션 HTML 수정
     pagination_html = '<div class="pagination" style="margin-top: 20px; text-align: center;">'
     for i in range(1, total_pages + 1):
         if i == page_number:
             pagination_html += f'<span style="margin: 0 5px; padding: 5px 10px; background-color: #f0f0f0; border-radius: 3px;">{i}</span>'
         else:
-            target_page = 'humor.html' if i == 1 else f'humor_{i}.html'
-            pagination_html += f'<a href="./{target_page}" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
+            # 모든 페이지를 humor_N.html 형식으로 변경
+            pagination_html += f'<a href="./humor_{i}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
     pagination_html += '</div>'
 
     # 게시물 목록 HTML 생성 수정
     posts_html = '<ul style="list-style: none; padding: 0;">'
     for post in current_posts:
-        # 파일명 생성에 clean_filename과 process_title 적용
-        processed_title = process_title(post['title'])
-        safe_filename = clean_filename(processed_title) + '.html'
         posts_html += f'''
         <li style="margin: 15px 0; padding: 15px; background-color: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <a href="./{safe_filename}" style="text-decoration: none; color: #333; display: block;">
+            <a href="./{post['filename']}" style="text-decoration: none; color: #333; display: block;">
                 <h2 style="margin: 0; font-size: 18px;">{post['title']}</h2>
             </a>
         </li>'''
@@ -391,8 +396,8 @@ def create_humor_page(posts_info, base_path, page_number=1):
 </body>
 </html>"""
 
-    # 파일명 생성 로직 수정 - 1페이지는 humor.html로
-    filename = 'humor.html' if page_number == 1 else f'humor_{page_number}.html'
+    # 파일명 수정 - 모든 페이지를 humor_N.html 형식으로 저장
+    filename = f'humor_{page_number}.html'
     with open(os.path.join(base_path, filename), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
@@ -406,6 +411,7 @@ def update_humor_pages(posts_info, base_path):
 
 def initialize_humor_page(base_path):
     """초기 유머 페이지 생성"""
+    # 초기 페이지를 humor_1.html로 생성
     html_content = """<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -449,7 +455,7 @@ def initialize_humor_page(base_path):
 </body>
 </html>"""
     
-    with open(os.path.join(base_path, 'humor.html'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(base_path, 'humor_1.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
 def scrape_category():
@@ -486,10 +492,27 @@ def scrape_category():
                     title = title_elem.get_text(strip=True)
                     link = title_elem.get('href')
                     
-                    # 중복 게시물 검사
-                    if is_duplicate_post(title, base_path):
+                    # 제목의 해시값을 사용하여 일관된 접두어/접미어 선택
+                    prefix_index = hash(title) % len(CLICK_PREFIXES)
+                    suffix_index = hash(title + "suffix") % len(INTEREST_SUFFIXES)
+                    processed_title = process_title(title, prefix_index, suffix_index)
+                    safe_filename = clean_filename(processed_title) + '.html'
+                    
+                    # 중복 게시물 검사 - processed_title 사용
+                    if os.path.exists(os.path.join(base_path, safe_filename)):
                         logging.info(f"Skipping duplicate post: {title}")
                         continue
+                    
+                    # 게시물 정보를 딕셔너리에 저장
+                    current_post = {
+                        'title': title,
+                        'processed_title': processed_title,
+                        'filename': safe_filename,
+                        'prefix_index': prefix_index,  # 접두어 인덱스 저장
+                        'suffix_index': suffix_index,  # 접미어 인덱스 저장
+                        'content': None,
+                        'images': None
+                    }
                     
                     # 게시물 상세 페이지 스크래핑
                     article_response = scraper.get(link)
@@ -526,27 +549,14 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 정보 수정
-                    processed_title = process_title(title)
-                    safe_filename = clean_filename(processed_title) + '.html'
-                    current_post = {
-                        'title': title,  # 원본 제목 저장
-                        'filename': safe_filename,
-                        'processed_title': processed_title  # 처리된 제목 추가
-                    }
-                    
-                    # 이전/다음 포스트 설정
-                    prev_post = posts_info[-1] if posts_info else None
-                    next_post = None
-                    
                     # 현재 게시물 저장
                     saved_file = save_article(
-                        title,
+                        current_post['title'],
                         content,
                         images_html,
                         base_path,
-                        prev_post,
-                        next_post
+                        posts_info[-1] if posts_info else None,
+                        None
                     )
                     
                     if saved_file:
@@ -554,17 +564,6 @@ def scrape_category():
                         # 10개마다 유머 페이지 업데이트
                         if len(posts_info) % 10 == 0:
                             update_humor_pages(posts_info, base_path)
-                    
-                    # 이전 게시물 업데이트 (다음 게시물 정보 포함)
-                    if prev_post:
-                        save_article(
-                            prev_post['title'],
-                            posts_info[-2]['content'] if len(posts_info) > 1 else None,
-                            posts_info[-2]['images'] if len(posts_info) > 1 else None,
-                            base_path,
-                            posts_info[-3] if len(posts_info) > 2 else None,
-                            current_post
-                        )
                     
                     time.sleep(random.uniform(2, 4))
                     
@@ -581,6 +580,19 @@ def scrape_category():
     except Exception as e:
         logging.error(f'Error occurred: {str(e)}')
     finally:
+        # humor.html을 humor_1.html로 리다이렉트하는 파일 생성
+        redirect_html = """<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="refresh" content="0;url=humor_1.html">
+</head>
+<body>
+    <script>window.location.href = 'humor_1.html';</script>
+</body>
+</html>"""
+        with open(os.path.join(base_path, 'humor.html'), 'w', encoding='utf-8') as f:
+            f.write(redirect_html)
+            
         # 최종 유머 페이지 업데이트
         update_humor_pages(posts_info, base_path)
 
