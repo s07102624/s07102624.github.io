@@ -332,21 +332,24 @@ def create_humor_page(posts_info, base_path, page_number=1):
     end_idx = min(start_idx + posts_per_page, total_posts)
     current_posts = posts_info[start_idx:end_idx]
     
-    # 페이지네이션 HTML 생성
+    # 페이지네이션 HTML 수정
     pagination_html = '<div class="pagination" style="margin-top: 20px; text-align: center;">'
     for i in range(1, total_pages + 1):
         if i == page_number:
             pagination_html += f'<span style="margin: 0 5px; padding: 5px 10px; background-color: #f0f0f0; border-radius: 3px;">{i}</span>'
         else:
-            pagination_html += f'<a href="humor_{i}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
+            # 1페이지는 humor.html로, 나머지는 humor_N.html로 링크
+            target_page = 'humor.html' if i == 1 else f'humor_{i}.html'
+            pagination_html += f'<a href="./{target_page}" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
     pagination_html += '</div>'
 
-    # 게시물 목록 HTML 생성
+    # 게시물 목록 HTML 수정
     posts_html = '<ul style="list-style: none; padding: 0;">'
     for post in current_posts:
+        safe_filename = clean_filename(post['filename'])
         posts_html += f'''
         <li style="margin: 15px 0; padding: 15px; background-color: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <a href="./{post['filename']}" style="text-decoration: none; color: #333; display: block;">
+            <a href="./{safe_filename}" style="text-decoration: none; color: #333; display: block;">
                 <h2 style="margin: 0; font-size: 18px;">{post['title']}</h2>
             </a>
         </li>'''
@@ -387,7 +390,8 @@ def create_humor_page(posts_info, base_path, page_number=1):
 </body>
 </html>"""
 
-    filename = f'humor_{page_number}.html' if page_number > 1 else 'humor.html'
+    # 파일명 생성 로직 수정 - 1페이지는 humor.html로
+    filename = 'humor.html' if page_number == 1 else f'humor_{page_number}.html'
     with open(os.path.join(base_path, filename), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
