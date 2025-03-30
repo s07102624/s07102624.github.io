@@ -20,8 +20,36 @@ except ImportError as e:
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# 클릭 유도 접두어와 흥미로운 주제 접미어 리스트 추가
+CLICK_PREFIXES = [
+    "충격", "경악", "화제", "논란", "실화", "대박", "궁금", "알고보니", "충격적", "결국",
+    "현실", "경악", "공감", "화제의", "완벽", "역대급", "필독", "최초", "극과극", "충격반전",
+    "실시간", "속보", "단독", "전격", "긴급", "초특급", "절대", "화제의", "놀라운", "충격적인",
+    "완전", "초강력", "강추", "필수", "대유행", "최강", "극한", "전설의", "상상초월", "신기한"
+]
+
+INTEREST_SUFFIXES = [
+    "비하인드", "꿀팁", "레전드", "사연", "현실", "반전", "근황", "비밀", "이야기", "심쿵",
+    "순간", "기적", "노하우", "핵심", "비결", "대반전", "진실", "TMI", "모음", "영상",
+    "현장", "총정리", "요약", "정보", "모음집", "기록", "사실", "모먼트", "포인트", "궁금증",
+    "꿀잼", "분석", "해설", "후기", "리뷰", "정리", "모음", "꿀팁", "레시피", "노하우"
+]
+
 def clean_filename(text):
-    return re.sub(r'[\\/*?:"<>|]', "", text)
+    """파일명으로 사용할 수 있게 문자열 정리"""
+    # 기본 파일명 정리
+    cleaned = re.sub(r'[\\/*?:"<>|]', "", text)
+    # URL에서 사용할 수 있도록 추가 처리
+    cleaned = cleaned.replace(' ', '-')  # 공백을 하이픈으로 변경
+    cleaned = re.sub(r'[^\w\-\.]', '', cleaned)  # 알파벳, 숫자, 하이픈, 점만 허용
+    cleaned = re.sub(r'-+', '-', cleaned)  # 연속된 하이픈을 하나로
+    return cleaned.strip('-')  # 앞뒤 하이픈 제거
+
+def process_title(title):
+    """제목에 랜덤 접두어와 접미어 추가"""
+    prefix = random.choice(CLICK_PREFIXES)
+    suffix = random.choice(INTEREST_SUFFIXES)
+    return f"[{prefix}] {title} ({suffix})"
 
 def get_scraper():
     """클라우드플레어 우회 스크래퍼 생성"""
@@ -56,19 +84,21 @@ def setup_folders():
 def save_article(title, content, images, base_path, prev_post=None, next_post=None):
     """HTML 파일로 게시물 저장"""
     try:
-        safe_title = clean_filename(title)
+        # 제목 처리
+        processed_title = process_title(title)
+        safe_title = clean_filename(processed_title)
         filename = os.path.join(base_path, f'{safe_title}.html')
         
         # 네비게이션 링크 설정 - 파일명 처리 수정
         nav_links = []
         if prev_post and 'title' in prev_post:
-            prev_filename = f"{clean_filename(prev_post['title'])}.html"
+            prev_filename = clean_filename(process_title(prev_post['title'])) + '.html'
             nav_links.append(f'<a href="./{prev_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전 글</a>')
         
         nav_links.append('<a href="https://kk.testpro.site/" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #f0f0f0; transition: background-color 0.3s;">홈</a>')
         
         if next_post and 'title' in next_post:
-            next_filename = f"{clean_filename(next_post['title'])}.html"
+            next_filename = clean_filename(process_title(next_post['title'])) + '.html'
             nav_links.append(f'<a href="./{next_filename}" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 글 ▶</a>')
         
         nav_html = '\n'.join(nav_links)
@@ -86,7 +116,23 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{title}</title>
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- 네이버 밴드 썸네일 비활성화 -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="no-title">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="none">
+    <link rel="image_src" href="">
+    
+    <title>{processed_title}</title>
+    
+    <!-- 검색엔진 노출 제한 -->
+    <meta name="googlebot" content="noindex,nofollow">
+    <meta name="googlebot-news" content="nosnippet">
+    <meta name="robots" content="noarchive">
     
     <!-- 원본 스타일시트 -->
     <link rel='stylesheet' id='wp-block-library-css' href='https://humorworld.net/wp-includes/css/dist/block-library/style.min.css' type='text/css' media='all' />
@@ -186,7 +232,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             
             <article class="post">
                 <header class="entry-header">
-                    <h1 class="entry-title">{title}</h1>
+                    <h1 class="entry-title">{processed_title}</h1>
                     <div class="entry-meta">
                         <span class="posted-on">
                             <time class="entry-date published">{datetime.now().strftime('%Y년 %m월 %d일')}</time>
@@ -272,35 +318,10 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         return None
 
 def is_duplicate_post(title, base_path):
-    """게시물 제목 중복 검사"""
-    safe_title = clean_filename(title)
+    """게시물 제목 중복 검사 - 처리된 제목 사용"""
+    processed_title = process_title(title)
+    safe_title = clean_filename(processed_title)
     return os.path.exists(os.path.join(base_path, f'{safe_title}.html'))
-
-def get_random_prefix():
-    """제목 앞에 추가할 랜덤 단어"""
-    prefixes = [
-        "충격!", "경악!", "화제!", "실화!", "놀라워!", "대박!", "궁금해!", "필독!", "속보!", "최초공개!",
-        "충격폭로!", "긴급!", "화제의!", "초강력!", "초특급!", "전격!", "초공개!", "단독!", "폭소!", "초귀한!",
-        "기적!", "기습!", "경이로운!", "초강추!", "극찬!", "화제의!", "신기한!", "엄청난!", "깜짝!", "대유행!",
-        "강추!", "필견!", "신박한!", "달달한!", "압도적!", "특급!", "대단한!", "황금!", "완벽한!", "신기록!"
-    ]
-    return random.choice(prefixes)
-
-def get_random_suffix():
-    """제목 뒤에 추가할 랜덤 단어"""
-    suffixes = [
-        "화제", "논란", "인증", "실화", "근황", "모음", "사연", "영상", "후기", "레전드",
-        "현장", "포착", "대참사", "대공개", "핫이슈", "총정리", "대격돌", "극과극", "반전", "진실",
-        "대폭로", "충격談", "속보", "현실", "대반전", "초유사태", "초토크", "대폭발", "실태", "대격변",
-        "대해부", "최초", "극한", "대결", "대반란", "대혼돈", "대진실", "초대박", "대작전", "대환장"
-    ]
-    return random.choice(suffixes)
-
-def modify_title(title):
-    """제목 수정"""
-    prefix = get_random_prefix()
-    suffix = get_random_suffix()
-    return f"{prefix} {title} ({suffix})"
 
 def scrape_category():
     """게시물 스크래핑 함수"""
@@ -334,12 +355,9 @@ def scrape_category():
                     title = title_elem.get_text(strip=True)
                     link = title_elem.get('href')
                     
-                    # 제목 수정
-                    modified_title = modify_title(title)
-                    
                     # 중복 게시물 검사
-                    if is_duplicate_post(modified_title, base_path):
-                        logging.info(f"Skipping duplicate post: {modified_title}")
+                    if is_duplicate_post(title, base_path):
+                        logging.info(f"Skipping duplicate post: {title}")
                         continue
                     
                     # 게시물 상세 페이지 스크래핑
@@ -348,7 +366,7 @@ def scrape_category():
                     
                     content = article_soup.select_one('.entry-content')
                     if not content:
-                        logging.error(f"Content not found for: {modified_title}")
+                        logging.error(f"Content not found for: {title}")
                         continue
 
                     # 이미지 처리 - WebP 변환 추가
@@ -372,17 +390,17 @@ def scrape_category():
                                 
                                 # WebP로 저장 (품질 85%)
                                 img_data.save(img_path, 'WEBP', quality=85)
-                                images_html += f'<img src="images/{webp_name}" alt="{modified_title}" loading="lazy">\n'
+                                images_html += f'<img src="images/{webp_name}" alt="{title}" loading="lazy">\n'
                                 logging.info(f"Image saved as WebP: {webp_name}")
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
                     # 현재 게시물 정보 저장 - 구조 수정
                     current_post = {
-                        'title': modified_title,
+                        'title': title,
                         'content': content,
                         'images': images_html,
-                        'filename': f'{clean_filename(modified_title)}.html'  # filename 추가
+                        'filename': f'{clean_filename(process_title(title))}.html'  # filename 추가
                     }
                     
                     # 이전/다음 게시물 정보 설정
@@ -390,7 +408,7 @@ def scrape_category():
                     
                     # 게시물 저장
                     saved_file = save_article(
-                        modified_title,
+                        title,
                         content,  # BeautifulSoup 객체 그대로 전달
                         images_html,
                         base_path,
@@ -414,7 +432,7 @@ def scrape_category():
                             )
                     
                     if saved_file:
-                        logging.info(f"Article saved: {modified_title}")
+                        logging.info(f"Article saved: {title}")
                         post_count += 1
                     
                     if post_count % 10 == 0:
