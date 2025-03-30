@@ -332,21 +332,22 @@ def create_humor_page(posts_info, base_path, page_number=1):
     end_idx = min(start_idx + posts_per_page, total_posts)
     current_posts = posts_info[start_idx:end_idx]
     
-    # 페이지네이션 HTML 수정
+    # 페이지네이션 HTML 생성 (기존 코드 유지)
     pagination_html = '<div class="pagination" style="margin-top: 20px; text-align: center;">'
     for i in range(1, total_pages + 1):
         if i == page_number:
             pagination_html += f'<span style="margin: 0 5px; padding: 5px 10px; background-color: #f0f0f0; border-radius: 3px;">{i}</span>'
         else:
-            # 1페이지는 humor.html로, 나머지는 humor_N.html로 링크
             target_page = 'humor.html' if i == 1 else f'humor_{i}.html'
             pagination_html += f'<a href="./{target_page}" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
     pagination_html += '</div>'
 
-    # 게시물 목록 HTML 수정
+    # 게시물 목록 HTML 생성 수정
     posts_html = '<ul style="list-style: none; padding: 0;">'
     for post in current_posts:
-        safe_filename = clean_filename(post['filename'])
+        # 파일명 생성에 clean_filename과 process_title 적용
+        processed_title = process_title(post['title'])
+        safe_filename = clean_filename(processed_title) + '.html'
         posts_html += f'''
         <li style="margin: 15px 0; padding: 15px; background-color: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <a href="./{safe_filename}" style="text-decoration: none; color: #333; display: block;">
@@ -525,11 +526,13 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 정보
-                    safe_title = clean_filename(process_title(title))
+                    # 현재 게시물 정보 수정
+                    processed_title = process_title(title)
+                    safe_filename = clean_filename(processed_title) + '.html'
                     current_post = {
-                        'title': title,
-                        'filename': f'{safe_title}.html'
+                        'title': title,  # 원본 제목 저장
+                        'filename': safe_filename,
+                        'processed_title': processed_title  # 처리된 제목 추가
                     }
                     
                     # 이전/다음 포스트 설정
