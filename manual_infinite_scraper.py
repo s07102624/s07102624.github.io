@@ -340,14 +340,36 @@ def create_humor_page(posts_info, base_path, page_number=1):
     end_idx = min(start_idx + posts_per_page, total_posts)
     current_posts = posts_info[start_idx:end_idx]
     
-    # 페이지네이션 HTML 수정
+    # 네비게이션 링크 추가
+    nav_links = []
+    if page_number > 1:
+        nav_links.append(f'<a href="./humor_{page_number-1}.html" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">◀ 이전</a>')
+    
+    nav_links.append(f'<span style="color: #333; padding: 8px 15px;">페이지 {page_number}</span>')
+    
+    if page_number < total_pages:
+        nav_links.append(f'<a href="./humor_{page_number+1}.html" style="color: #333; text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s;">다음 ▶</a>')
+    
+    nav_html = '\n'.join(nav_links)
+    
+    # 페이지네이션 HTML 수정 - 이전/다음 페이지 버튼 추가
     pagination_html = '<div class="pagination" style="margin-top: 20px; text-align: center;">'
+    
+    # 이전 페이지 링크
+    if page_number > 1:
+        pagination_html += f'<a href="./humor_{page_number-1}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">◀</a>'
+    
+    # 페이지 번호
     for i in range(1, total_pages + 1):
         if i == page_number:
             pagination_html += f'<span style="margin: 0 5px; padding: 5px 10px; background-color: #f0f0f0; border-radius: 3px;">{i}</span>'
         else:
-            # 모든 페이지를 humor_N.html 형식으로 변경
             pagination_html += f'<a href="./humor_{i}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">{i}</a>'
+    
+    # 다음 페이지 링크
+    if page_number < total_pages:
+        pagination_html += f'<a href="./humor_{page_number+1}.html" style="margin: 0 5px; padding: 5px 10px; text-decoration: none; color: #333;">▶</a>'
+    
     pagination_html += '</div>'
 
     # 게시물 목록 HTML 생성 수정
@@ -393,10 +415,36 @@ def create_humor_page(posts_info, base_path, page_number=1):
         {posts_html}
         {pagination_html}
     </div>
+    
+    <!-- 하단 네비게이션 바 추가 -->
+    <nav class="bottom-navigation" style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        z-index: 1000;
+    ">
+        <div class="container">
+            <div class="nav-links" style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 0 20px;
+            ">
+                {nav_html}
+            </div>
+        </div>
+    </nav>
+    
+    <div style="height: 60px;"><!-- 하단 네비게이션 바 공간 확보 --></div>
 </body>
 </html>"""
 
-    # 파일명 수정 - 모든 페이지를 humor_N.html 형식으로 저장
     filename = f'humor_{page_number}.html'
     with open(os.path.join(base_path, filename), 'w', encoding='utf-8') as f:
         f.write(html_content)
