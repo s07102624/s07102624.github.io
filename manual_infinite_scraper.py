@@ -602,55 +602,44 @@ def scrape_category():
                     prev_post = None
                     next_post = None
                     
+                    # 현재 게시물의 페이지 번호와 인덱스 계산
+                    current_page = (len(posts_info)) // 10 + 1
+                    current_index = (len(posts_info)) % 10
+                    
+                    # 첫 페이지 첫 글이 아닌 경우 이전 글 설정
                     if len(posts_info) > 0:
                         prev_post = posts_info[-1]
                     
                     # 다음 게시물 설정
-                    if len(posts_info) > 0:
-                        current_page = (len(posts_info) - 1) // 10 + 1
-                        current_index = (len(posts_info) - 1) % 10
-                        
-                        # 현재 페이지의 마지막 글이 아닌 경우
+                    if len(posts_info) > 1:
+                        # 페이지의 마지막 글이 아닌 경우
                         if current_index < 9:
-                            next_post = posts_info[-2] if len(posts_info) > 1 else None
-                        # 현재 페이지의 마지막 글인 경우, 다음 페이지의 첫 번째 글로 연결
-                        else:
-                            # 임시로 다음 페이지의 첫 번째 글 정보 생성
-                            next_page_first = {
-                                'title': title_elem.get_text(strip=True),
-                                'processed_title': processed_title,
-                                'filename': safe_filename,
-                                'page_number': current_page + 1
-                            }
-                            next_post = next_page_first
-
+                            next_post = posts_info[-2]
+                    
                     # 현재 게시물 저장
                     saved_file = save_article(
                         current_post['title'],
                         content,
                         images_html,
                         base_path,
-                        prev_post,
-                        next_post
+                        prev_post,  # 이전 게시물
+                        next_post   # 다음 게시물
                     )
                     
                     if saved_file:
+                        # 이전 게시물이 있는 경우 해당 게시물의 다음 글로 현재 게시물 설정
+                        if prev_post:
+                            save_article(
+                                prev_post['title'],
+                                content if 'content' in prev_post else None,
+                                prev_post.get('images', ''),
+                                base_path,
+                                posts_info[-2] if len(posts_info) > 1 else None,  # 이전 글의 이전 글
+                                current_post  # 현재 게시물을 다음 글로 설정
+                            )
+                        
                         posts_info.append(current_post)
-                        # 10개마다 유머 페이지 업데이트
-                        if len(posts_info) % 10 == 0:
-                            update_humor_pages(posts_info, base_path)
-                    
-                    # 이전 게시물 업데이트 (다음 게시물 정보 포함)
-                    if prev_post:
-                        save_article(
-                            prev_post['title'],
-                            content if 'content' in prev_post else None,
-                            prev_post.get('images', ''),
-                            base_path,
-                            posts_info[-2] if len(posts_info) > 1 else None,
-                            current_post
-                        )
-                    
+
                     time.sleep(random.uniform(2, 4))
                     
                 except Exception as e:
