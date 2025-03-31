@@ -508,10 +508,11 @@ def scrape_category():
                         'title': title,
                         'processed_title': processed_title,
                         'filename': safe_filename,
-                        'prefix_index': prefix_index,  # 접두어 인덱스 저장
-                        'suffix_index': suffix_index,  # 접미어 인덱스 저장
+                        'prefix_index': prefix_index,
+                        'suffix_index': suffix_index,
                         'content': None,
-                        'images': None
+                        'images': None,
+                        'page_number': (len(posts_info) // 10) + 1  # 페이지 번호 추가
                     }
                     
                     # 게시물 상세 페이지 스크래핑
@@ -549,15 +550,40 @@ def scrape_category():
                             except Exception as e:
                                 logging.error(f"Failed to process image: {str(e)}")
 
-                    # 현재 게시물 저장 - next_post 추가
-                    next_post = posts_info[-2] if len(posts_info) > 1 else None
+                    # 이전/다음 게시물 설정
+                    prev_post = None
+                    next_post = None
+                    
+                    if len(posts_info) > 0:
+                        prev_post = posts_info[-1]
+                    
+                    # 다음 게시물 설정
+                    if len(posts_info) > 0:
+                        current_page = (len(posts_info) - 1) // 10 + 1
+                        current_index = (len(posts_info) - 1) % 10
+                        
+                        # 현재 페이지의 마지막 글이 아닌 경우
+                        if current_index < 9:
+                            next_post = posts_info[-2] if len(posts_info) > 1 else None
+                        # 현재 페이지의 마지막 글인 경우, 다음 페이지의 첫 번째 글로 연결
+                        else:
+                            # 임시로 다음 페이지의 첫 번째 글 정보 생성
+                            next_page_first = {
+                                'title': title_elem.get_text(strip=True),
+                                'processed_title': processed_title,
+                                'filename': safe_filename,
+                                'page_number': current_page + 1
+                            }
+                            next_post = next_page_first
+
+                    # 현재 게시물 저장
                     saved_file = save_article(
                         current_post['title'],
                         content,
                         images_html,
                         base_path,
-                        posts_info[-1] if posts_info else None,
-                        next_post  # 다음 게시물 정보 추가
+                        prev_post,
+                        next_post
                     )
                     
                     if saved_file:
@@ -565,6 +591,17 @@ def scrape_category():
                         # 10개마다 유머 페이지 업데이트
                         if len(posts_info) % 10 == 0:
                             update_humor_pages(posts_info, base_path)
+                    
+                    # 이전 게시물 업데이트 (다음 게시물 정보 포함)
+                    if prev_post:
+                        save_article(
+                            prev_post['title'],
+                            content if 'content' in prev_post else None,
+                            prev_post.get('images', ''),
+                            base_path,
+                            posts_info[-2] if len(posts_info) > 1 else None,
+                            current_post
+                        )
                     
                     time.sleep(random.uniform(2, 4))
                     
