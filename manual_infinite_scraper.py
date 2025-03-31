@@ -158,9 +158,11 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
             min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }}
         
         /* 컨테이너 레이아웃 */
@@ -168,26 +170,28 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             width: 100%;
             max-width: 1200px;
             margin: 20px auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 30px;
+            padding: 0 15px;
+            box-sizing: border-box;
         }}
         
         /* 메인 콘텐츠 영역 */
         .content-area {{
-            width: 800px;
+            width: 100%;
+            max-width: 800px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 30px;
+            padding: 20px;
             margin: 0 auto;
+            box-sizing: border-box;
         }}
         
-        /* 사이드바 제거하고 메인 컨텐츠 중앙 정렬 */
-        .widget-area {{
-            display: none;
+        /* 이미지 반응형 처리 */
+        .entry-content img {{
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }}
         
         /* 광고 컨테이너 중앙 정렬 */
@@ -196,17 +200,36 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
             max-width: 728px;
             margin: 20px auto;
             text-align: center;
+            overflow: hidden;
         }}
         
         /* 반응형 디자인 */
         @media (max-width: 768px) {{
+            body {{
+                padding: 0;
+            }}
+            
             .container {{
                 padding: 10px;
+                margin: 10px auto;
             }}
             
             .content-area {{
-                width: 100%;
                 padding: 15px;
+                border-radius: 0;
+            }}
+            
+            .entry-title {{
+                font-size: 1.5em;
+                word-break: keep-all;
+            }}
+            
+            .bottom-navigation .container {{
+                padding: 0 10px;
+            }}
+            
+            .nav-links {{
+                font-size: 0.9em;
             }}
         }}
 
@@ -214,6 +237,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
         .bottom-navigation .container {{
             padding: 0;
             margin: 0 auto;
+            width: 100%;
         }}
         
         .nav-links {{
