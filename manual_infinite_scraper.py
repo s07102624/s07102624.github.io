@@ -126,7 +126,7 @@ def save_article(title, content, images, base_path, prev_post=None, next_post=No
     
     <!-- 네이버 밴드 썸네일 비활성화 -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="no-title">
+    <meta property="og:title" content="{processed_title}">
     <meta property="og:description" content="">
     <meta property="og:image" content="">
     <meta property="og:url" content="">
